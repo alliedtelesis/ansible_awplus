@@ -17,18 +17,18 @@ created
 
 from ansible.module_utils.network.common.cfg.base import ConfigBase
 from ansible.module_utils.network.common.utils import to_list
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.facts import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.facts import (
     Facts,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.utils.utils import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.utils import (
     get_interface_type,
     dict_to_set,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.utils.utils import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.utils import (
     remove_command_from_config_list,
     add_command_to_config_list,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.utils.utils import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.utils import (
     filter_dict_having_none_value,
     remove_duplicate_interface,
 )

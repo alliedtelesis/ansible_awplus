@@ -189,8 +189,8 @@ commands:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.lldp_global.lldp_global import Lldp_globalArgs
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.lldp_global.lldp_global import Lldp_global
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.lldp_global.lldp_global import Lldp_globalArgs
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.lldp_global.lldp_global import Lldp_global
 
 
 def main():

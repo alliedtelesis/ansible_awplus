@@ -14,41 +14,41 @@ calls the appropriate facts gathering function
 """
 
 
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.facts.facts import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.facts.facts import (
     FactsArgs,
 )
 from ansible.module_utils.network.common.facts.facts import FactsBase
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.interfaces.interfaces import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.interfaces.interfaces import (
     InterfacesFacts,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l2_interfaces.l2_interfaces import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.l2_interfaces.l2_interfaces import (
     L2_interfacesFacts,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.vlans.vlans import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.vlans.vlans import (
     VlansFacts,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lag_interfaces.lag_interfaces import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.lag_interfaces.lag_interfaces import (
     Lag_interfacesFacts,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.static_lag_interfaces.static_lag_interfaces import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.static_lag_interfaces.static_lag_interfaces import (
     Static_Lag_interfacesFacts,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lacp.lacp import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.lacp.lacp import (
     LacpFacts,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lacp_interfaces.lacp_interfaces import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.lacp_interfaces.lacp_interfaces import (
     Lacp_interfacesFacts,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lldp_global.lldp_global import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.lldp_global.lldp_global import (
     Lldp_globalFacts,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lldp_interfaces.lldp_interfaces import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.lldp_interfaces.lldp_interfaces import (
     Lldp_interfacesFacts,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l3_interfaces.l3_interfaces import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.l3_interfaces.l3_interfaces import (
     L3_interfacesFacts,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.legacy.base import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.legacy.base import (
     Default,
     Hardware,
     Interfaces,

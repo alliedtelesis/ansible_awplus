@@ -107,8 +107,8 @@ commands:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import get_config, awplus_argument_spec
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import load_config, run_commands
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import get_config, awplus_argument_spec
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import load_config, run_commands
 import re
 
 

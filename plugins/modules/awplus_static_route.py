@@ -96,8 +96,8 @@ commands:
         - ip route 192.168.2.0 255.255.255.0 10.0.0.1
 """
 
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import awplus_argument_spec
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import get_config, load_config
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import awplus_argument_spec
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import get_config, load_config
 from ansible.module_utils.network.common.utils import remove_default_spec, validate_ip_address
 from ansible.module_utils.basic import AnsibleModule
 from re import findall

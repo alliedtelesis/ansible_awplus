@@ -370,7 +370,7 @@ commands:
     sample: ['router ospf 100', 'area 1 stub']
 """
 
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.utils.complex_constructor import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.complex_constructor import (
     PRESENT,
     STATE,
     ABSENT,
@@ -378,7 +378,7 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplu
     construct_from_list,
     get_param,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
     get_config,
     load_config,
     awplus_argument_spec,

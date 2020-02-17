@@ -219,8 +219,8 @@ delta:
 """
 
 from ansible.module_utils.six import iteritems
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import awplus_argument_spec
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import load_config, get_config, get_connection
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import awplus_argument_spec
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import load_config, get_config, get_connection
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.connection import exec_command
 from ansible.module_utils.basic import AnsibleModule
 from functools import partial

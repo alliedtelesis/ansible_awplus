@@ -16,7 +16,7 @@ import re
 from copy import deepcopy
 
 from ansible.module_utils.network.common import utils
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.lldp_global.lldp_global import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.lldp_global.lldp_global import (
     Lldp_globalArgs,
 )
 

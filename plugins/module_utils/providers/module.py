@@ -8,7 +8,7 @@ __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import Connection
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.providers import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.providers import (
     providers,
 )
 from ansible.module_utils._text import to_text

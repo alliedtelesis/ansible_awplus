@@ -428,8 +428,8 @@ commands:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.l2_interfaces.l2_interfaces import L2_interfacesArgs
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.l2_interfaces.l2_interfaces import L2_interfaces
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.l2_interfaces.l2_interfaces import L2_interfacesArgs
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.l2_interfaces.l2_interfaces import L2_interfaces
 
 
 def main():

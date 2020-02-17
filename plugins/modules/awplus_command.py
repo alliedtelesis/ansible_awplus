@@ -117,8 +117,8 @@ import time
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.common.parsing import Conditional
 from ansible.module_utils.network.common.utils import transform_commands, to_lines
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import run_commands
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import awplus_argument_spec
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import run_commands
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import awplus_argument_spec
 from ansible.module_utils._text import to_text
 
 

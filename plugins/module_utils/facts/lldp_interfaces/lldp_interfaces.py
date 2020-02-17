@@ -16,10 +16,10 @@ import re
 from copy import deepcopy
 
 from ansible.module_utils.network.common import utils
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.lldp_interfaces.lldp_interfaces import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.lldp_interfaces.lldp_interfaces import (
     Lldp_interfacesArgs,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.utils.utils import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.utils import (
     get_interface_type,
     normalize_interface,
 )

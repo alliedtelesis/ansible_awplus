@@ -447,8 +447,8 @@ commands:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.lag_interfaces.lag_interfaces import Lag_interfacesArgs
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.lag_interfaces.lag_interfaces import Lag_interfaces
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.lag_interfaces.lag_interfaces import Lag_interfacesArgs
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.lag_interfaces.lag_interfaces import Lag_interfaces
 
 
 def main():

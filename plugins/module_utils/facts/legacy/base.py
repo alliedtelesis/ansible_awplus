@@ -19,11 +19,11 @@ import platform
 import re
 import sys
 
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
     run_commands,
     get_capabilities,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.utils.utils import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.utils import (
     normalize_interface,
 )
 from ansible.module_utils.six import iteritems

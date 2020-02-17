@@ -223,9 +223,9 @@ import json
 
 from ansible.module_utils._text import to_text
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.connection import ConnectionError
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import run_commands, get_config
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import get_defaults_flag, get_connection
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import awplus_argument_spec
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import run_commands, get_config
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import get_defaults_flag, get_connection
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import awplus_argument_spec
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.common.config import NetworkConfig, dumps
 

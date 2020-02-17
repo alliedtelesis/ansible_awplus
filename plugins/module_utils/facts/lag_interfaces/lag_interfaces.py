@@ -16,10 +16,10 @@ import re
 from copy import deepcopy
 
 from ansible.module_utils.network.common import utils
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.lag_interfaces.lag_interfaces import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.lag_interfaces.lag_interfaces import (
     Lag_interfacesArgs,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.utils.utils import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.utils import (
     get_interface_type,
     normalize_interface,
 )

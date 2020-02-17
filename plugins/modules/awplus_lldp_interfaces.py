@@ -264,8 +264,8 @@ commands:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.lldp_interfaces.lldp_interfaces import Lldp_interfacesArgs
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.lldp_interfaces.lldp_interfaces import Lldp_interfaces
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.lldp_interfaces.lldp_interfaces import Lldp_interfacesArgs
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.lldp_interfaces.lldp_interfaces import Lldp_interfaces
 
 
 def main():

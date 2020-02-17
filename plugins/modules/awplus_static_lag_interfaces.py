@@ -92,8 +92,8 @@ commands:
     sample: ['command 1', 'command 2', 'command 3']
 """
 
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.static_lag_interfaces.static_lag_interfaces import Static_Lag_interfaces
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.static_lag_interfaces.static_lag_interfaces import Static_Lag_interfacesArgs
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.static_lag_interfaces.static_lag_interfaces import Static_Lag_interfaces
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.static_lag_interfaces.static_lag_interfaces import Static_Lag_interfacesArgs
 from ansible.module_utils.basic import AnsibleModule
 
 

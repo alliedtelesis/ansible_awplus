@@ -15,7 +15,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 from ansible.module_utils.network.common.cfg.base import ConfigBase
 from ansible.module_utils.network.common.utils import to_list
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.facts import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.facts import (
     Facts,
 )
 from ansible.module_utils.network.ios.utils.utils import dict_to_set

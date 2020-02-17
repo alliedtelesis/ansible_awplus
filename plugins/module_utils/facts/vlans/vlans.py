@@ -17,7 +17,7 @@ from copy import deepcopy
 
 
 from ansible.module_utils.network.common import utils
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.vlans.vlans import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.vlans.vlans import (
     VlansArgs,
 )
 
