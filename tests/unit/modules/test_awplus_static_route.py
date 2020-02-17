@@ -16,12 +16,13 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # Make coding more python3-ish
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
-from units.compat.mock import patch
-from ansible.modules.network.awplus import awplus_static_route
-from units.modules.utils import set_module_args
+from ansible_collections.alliedtelesis.awplus.tests.unit.compat.mock import patch
+from ansible_collections.alliedtelesis.awplus.plugins.modules import awplus_static_route
+from ansible_collections.alliedtelesis.awplus.tests.unit.utils import set_module_args
 from .awplus_module import TestAwplusModule, load_fixture
 
 
@@ -33,11 +34,13 @@ class TestAwplusStaticRouteModule(TestAwplusModule):
         super(TestAwplusStaticRouteModule, self).setUp()
 
         self.mock_load_config = patch(
-            'ansible.modules.network.awplus.awplus_static_route.load_config')
+            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_static_route.load_config"
+        )
         self.load_config = self.mock_load_config.start()
 
         self.mock_get_config = patch(
-            'ansible.modules.network.awplus.awplus_static_route.get_config')
+            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_static_route.get_config"
+        )
         self.get_config = self.mock_get_config.start()
 
     def tearDown(self):
@@ -45,39 +48,52 @@ class TestAwplusStaticRouteModule(TestAwplusModule):
         self.mock_load_config.stop()
         self.mock_get_config.stop()
 
-    def load_fixtures(self, commands=None, transport='cli'):
-        self.get_config.return_value = load_fixture('awplus_static_route.cfg')
+    def load_fixtures(self, commands=None, transport="cli"):
+        self.get_config.return_value = load_fixture("awplus_static_route.cfg")
         self.load_config.return_value = None
 
     def test_awplus_static_route_present(self):
-        set_module_args(dict(prefix='192.168.20.64',
-                             mask=25, next_hop='192.0.2.3'))
-        self.execute_module(changed=True, commands=[
-                            'ip route 192.168.20.64/25 192.0.2.3'])
+        set_module_args(dict(prefix="192.168.20.64", mask=25, next_hop="192.0.2.3"))
+        self.execute_module(
+            changed=True, commands=["ip route 192.168.20.64/25 192.0.2.3"]
+        )
 
     def test_awplus_static_route_present_no_defaults(self):
-        set_module_args(dict(prefix='192.168.20.64', mask=24, next_hop='192.0.2.3',
-                             interface="vlan2", admin_distance=100))
-        self.execute_module(changed=True, commands=[
-                            'ip route 192.168.20.64/24 192.0.2.3 vlan2 100'])
+        set_module_args(
+            dict(
+                prefix="192.168.20.64",
+                mask=24,
+                next_hop="192.0.2.3",
+                interface="vlan2",
+                admin_distance=100,
+            )
+        )
+        self.execute_module(
+            changed=True, commands=["ip route 192.168.20.64/24 192.0.2.3 vlan2 100"]
+        )
 
     def test_awplus_static_route_present_vrf(self):
-        set_module_args(dict(prefix='192.168.20.64', mask=24,
-                             next_hop='192.0.2.3', vrf='test'))
-        self.execute_module(changed=True, sort=False, commands=[
-                            'ip route vrf test 192.168.20.64/24 192.0.2.3'])
+        set_module_args(
+            dict(prefix="192.168.20.64", mask=24, next_hop="192.0.2.3", vrf="test")
+        )
+        self.execute_module(
+            changed=True,
+            sort=False,
+            commands=["ip route vrf test 192.168.20.64/24 192.0.2.3"],
+        )
 
     def test_awplus_static_route_no_change(self):
-        set_module_args(dict(prefix='10.0.0.0', mask=8, next_hop='10.37.7.1'))
+        set_module_args(dict(prefix="10.0.0.0", mask=8, next_hop="10.37.7.1"))
         self.execute_module(changed=False, commands=[])
 
     def test_awplus_static_route_absent(self):
-        set_module_args(dict(prefix='10.0.0.0', mask=8,
-                             next_hop='10.37.7.1', state='absent'))
-        self.execute_module(changed=True, commands=[
-                            'no ip route 10.0.0.0/8 10.37.7.1'])
+        set_module_args(
+            dict(prefix="10.0.0.0", mask=8, next_hop="10.37.7.1", state="absent")
+        )
+        self.execute_module(changed=True, commands=["no ip route 10.0.0.0/8 10.37.7.1"])
 
     def test_awplus_static_route_absent_no_change(self):
-        set_module_args(dict(prefix='192.168.20.6', mask=24,
-                             next_hop='192.0.2.3', state='absent'))
+        set_module_args(
+            dict(prefix="192.168.20.6", mask=24, next_hop="192.0.2.3", state="absent")
+        )
         self.execute_module(changed=False, commands=[])

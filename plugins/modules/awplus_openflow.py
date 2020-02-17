@@ -92,8 +92,11 @@ notes:
 EXAMPLES = """
 commands:
     - name: Test openflow module
-    awplus_openflow:
-        address: 192.168.5.1
+      awplus_openflow:
+        controllers:
+          - protocol: tcp
+            address: 192.168.1.2
+            ssl_port: 10
         state: present
 """
 
@@ -107,8 +110,8 @@ commands:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import get_config, awplus_argument_spec
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import load_config, run_commands
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import get_config, awplus_argument_spec
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import load_config, run_commands
 import re
 
 

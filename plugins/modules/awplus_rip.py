@@ -65,8 +65,8 @@ commands:
     sample: ['router rip', 'no network 1.3.3.4', 'network 195.46.3.4',]
 """
 
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import awplus_argument_spec
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import get_config, load_config
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import awplus_argument_spec
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import get_config, load_config
 from ansible.module_utils.basic import AnsibleModule
 import re
 

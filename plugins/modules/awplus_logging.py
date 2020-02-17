@@ -112,7 +112,7 @@ commands:
 from copy import deepcopy
 import re
 
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import run_commands, awplus_argument_spec
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import run_commands, awplus_argument_spec
 from ansible.module_utils.network.common.utils import remove_default_spec, validate_ip_address
 from ansible.module_utils.basic import AnsibleModule
 

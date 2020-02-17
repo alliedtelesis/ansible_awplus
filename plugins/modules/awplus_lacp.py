@@ -126,8 +126,8 @@ commands:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.lacp.lacp import LacpArgs
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.lacp.lacp import Lacp
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.lacp.lacp import LacpArgs
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.lacp.lacp import Lacp
 
 
 def main():

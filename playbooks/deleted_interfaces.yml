@@ -1,0 +1,11 @@
+---
+- name: Test awplus_interface module
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  hosts: all
+  tasks:
+    - name: "Delete module attributes of given interfaces (Note: This won't delete the interface itself)"
+      awplus_interfaces:
+        config:
+        state: deleted

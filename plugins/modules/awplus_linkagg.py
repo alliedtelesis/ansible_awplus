@@ -101,8 +101,8 @@ from copy import deepcopy
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.common.utils import remove_default_spec
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import get_config, load_config
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import awplus_argument_spec
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import get_config, load_config
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import awplus_argument_spec
 
 
 def search_obj_in_list(group, lst):

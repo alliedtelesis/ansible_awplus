@@ -18,14 +18,15 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # Make coding more python3-ish
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import json
 
-from units.compat.mock import patch
-from ansible.modules.network.awplus import awplus_logging
-from units.modules.utils import set_module_args
+from ansible_collections.alliedtelesis.awplus.tests.unit.compat.mock import patch
+from ansible_collections.alliedtelesis.awplus.plugins.modules import awplus_logging
+from ansible_collections.alliedtelesis.awplus.tests.unit.utils import set_module_args
 from .awplus_module import TestAwplusModule, load_fixture
 
 
@@ -37,7 +38,8 @@ class TestAwplusLoggingModule(TestAwplusModule):
         super(TestAwplusLoggingModule, self).setUp()
 
         self.mock_run_commands = patch(
-            'ansible.modules.network.awplus.awplus_logging.run_commands')
+            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_logging.run_commands"
+        )
         self.run_commands = self.mock_run_commands.start()
 
     def tearDown(self):
@@ -50,38 +52,38 @@ class TestAwplusLoggingModule(TestAwplusModule):
             module, command = args
             output = list()
 
-            filename = str(command).replace(' ', '_')
+            filename = str(command).replace(" ", "_")
             output.append(load_fixture(filename))
             return output
 
         self.run_commands.side_effect = load_from_file
 
     def test_awplus_logging_buffer_size_changed_explicit(self):
-        set_module_args(dict(dest='buffered', size=100))
-        commands = ['log buffered size 100']
+        set_module_args(dict(dest="buffered", size=100))
+        commands = ["log buffered size 100"]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_logging_add_host(self):
-        set_module_args(dict(dest='host', name='192.168.1.1'))
-        commands = ['log host 192.168.1.1']
+        set_module_args(dict(dest="host", name="192.168.1.1"))
+        commands = ["log host 192.168.1.1"]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_logging_host_idempotent(self):
-        set_module_args(dict(dest='console', facility='news'))
+        set_module_args(dict(dest="console", facility="news"))
         commands = []
         self.execute_module(changed=False, commands=commands)
 
     def test_awplus_logging_delete_non_exist_host(self):
-        set_module_args(dict(dest='host', name='192.168.1.1', state='absent'))
+        set_module_args(dict(dest="host", name="192.168.1.1", state="absent"))
         commands = []
         self.execute_module(changed=False, commands=commands)
 
     def test_awplus_logging_delete_host(self):
-        set_module_args(dict(dest='host', name='2.3.4.5', state='absent'))
-        commands = ['no log host 2.3.4.5']
+        set_module_args(dict(dest="host", name="2.3.4.5", state="absent"))
+        commands = ["no log host 2.3.4.5"]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_logging_configure_disabled_monitor_destination(self):
-        set_module_args(dict(dest='monitor', state='absent'))
-        commands = ['no log monitor']
+        set_module_args(dict(dest="monitor", state="absent"))
+        commands = ["no log monitor"]
         self.execute_module(changed=True, commands=commands)

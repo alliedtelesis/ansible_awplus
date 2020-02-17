@@ -528,8 +528,8 @@ commands:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.l3_interfaces.l3_interfaces import L3_interfacesArgs
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.l3_interfaces.l3_interfaces import L3_interfaces
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.l3_interfaces.l3_interfaces import L3_interfacesArgs
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.l3_interfaces.l3_interfaces import L3_interfaces
 
 
 def main():

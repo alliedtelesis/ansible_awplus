@@ -162,9 +162,9 @@ ansible_net_neighbors:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.facts.facts import FactsArgs
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.facts import Facts
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import awplus_argument_spec
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.facts.facts import FactsArgs
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.facts import Facts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import awplus_argument_spec
 
 
 def main():

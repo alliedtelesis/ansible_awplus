@@ -8,8 +8,8 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.lacp_interfaces.lacp_interfaces import Lacp_interfacesArgs
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.lacp_interfaces.lacp_interfaces import Lacp_interfaces
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.lacp_interfaces.lacp_interfaces import Lacp_interfacesArgs
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.lacp_interfaces.lacp_interfaces import Lacp_interfaces
 
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',

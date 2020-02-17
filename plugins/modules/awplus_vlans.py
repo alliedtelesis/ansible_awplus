@@ -250,8 +250,8 @@ commands:
     sample: ['command 1', 'command 2', 'command 3']
 """
 
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.vlans.vlans import Vlans
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.vlans.vlans import VlansArgs
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.vlans.vlans import Vlans
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.vlans.vlans import VlansArgs
 from ansible.module_utils.basic import AnsibleModule
 
 

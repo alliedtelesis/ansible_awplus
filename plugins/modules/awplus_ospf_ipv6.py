@@ -63,13 +63,13 @@ commands:
     sample: ['router ipv6 ospf']
 """
 
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.utils.complex_constructor import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.complex_constructor import (
     PRESENT,
     STATE,
     ABSENT,
     get_commands,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.awplus import (
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
     get_config,
     load_config,
     awplus_argument_spec,

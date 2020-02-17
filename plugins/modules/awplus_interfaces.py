@@ -512,8 +512,8 @@ commands:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.interfaces.interfaces import InterfacesArgs
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.interfaces.interfaces import Interfaces
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.interfaces.interfaces import InterfacesArgs
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.interfaces.interfaces import Interfaces
 
 
 def main():
