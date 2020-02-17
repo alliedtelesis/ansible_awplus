@@ -92,8 +92,11 @@ notes:
 EXAMPLES = """
 commands:
     - name: Test openflow module
-    awplus_openflow:
-        address: 192.168.5.1
+      awplus_openflow:
+        controllers:
+          - protocol: tcp
+            address: 192.168.1.2
+            ssl_port: 10
         state: present
 """
 
