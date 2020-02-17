@@ -16,12 +16,13 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # Make coding more python3-ish
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
-from units.compat.mock import patch
-from ansible.modules.network.awplus import awplus_bgp
-from units.modules.utils import set_module_args
+from ansible_collections.alliedtelesis.awplus.tests.unit.compat.mock import patch
+from ansible_collections.alliedtelesis.awplus.plugins.modules import awplus_bgp
+from ansible_collections.alliedtelesis.awplus.tests.unit.utils import set_module_args
 from .awplus_module import TestAwplusModule, load_fixture
 
 
@@ -33,11 +34,13 @@ class TestAwplusBgpModule(TestAwplusModule):
         super(TestAwplusBgpModule, self).setUp()
 
         self.mock_load_config = patch(
-            'ansible.modules.network.awplus.awplus_bgp.load_config')
+            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_bgp.load_config"
+        )
         self.load_config = self.mock_load_config.start()
 
         self.mock_get_config = patch(
-            'ansible.modules.network.awplus.awplus_bgp.get_config')
+            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_bgp.get_config"
+        )
         self.get_config = self.mock_get_config.start()
 
     def tearDown(self):
@@ -45,63 +48,65 @@ class TestAwplusBgpModule(TestAwplusModule):
         self.mock_load_config.stop()
         self.mock_get_config.stop()
 
-    def load_fixtures(self, commands=None, device=''):
-        self.get_config.return_value = load_fixture('awplus_bgp_config.cfg')
+    def load_fixtures(self, commands=None, device=""):
+        self.get_config.return_value = load_fixture("awplus_bgp_config.cfg")
         self.load_config.return_value = []
 
     def test_awplus_bgp(self):
-        set_module_args(dict(asn=100, router_id='192.0.2.2'))
+        set_module_args(dict(asn=100, router_id="192.0.2.2"))
         result = self.execute_module(changed=True)
-        self.assertEqual(result['commands'], [
-                         'router bgp 100', 'bgp router-id 192.0.2.2'])
+        self.assertEqual(
+            result["commands"], ["router bgp 100", "bgp router-id 192.0.2.2"]
+        )
 
     def test_awplus_bgp_change_nothing(self):
-        set_module_args(dict(asn=100, router_id='192.0.2.1', state='present'))
+        set_module_args(dict(asn=100, router_id="192.0.2.1", state="present"))
         self.execute_module(changed=False)
 
     def test_awplus_bgp_wrong_asn(self):
-        set_module_args(dict(asn=10, router_id='192.168.1.1'))
+        set_module_args(dict(asn=10, router_id="192.168.1.1"))
         result = self.execute_module(failed=True)
-        self.assertEqual(result['msg'], 'Another BGP ASN already exists.')
+        self.assertEqual(result["msg"], "Another BGP ASN already exists.")
 
     def test_awplus_bgp_remove(self):
-        set_module_args(dict(asn=100, state='absent'))
-        self.execute_module(changed=True, commands=['no router bgp 100'])
+        set_module_args(dict(asn=100, state="absent"))
+        self.execute_module(changed=True, commands=["no router bgp 100"])
 
     def test_awplus_bgp_remove_vrf(self):
-        set_module_args(dict(asn=100, vrf='red', state='absent'))
-        self.execute_module(changed=True, commands=[
-                            'router bgp 100', 'no address-family ipv4 vrf red'])
+        set_module_args(dict(asn=100, vrf="red", state="absent"))
+        self.execute_module(
+            changed=True, commands=["router bgp 100", "no address-family ipv4 vrf red"]
+        )
 
     def test_awplus_bgp_remove_nonexistant_vrf(self):
-        set_module_args(dict(asn=100, vrf='foo', state='absent'))
+        set_module_args(dict(asn=100, vrf="foo", state="absent"))
         self.execute_module(changed=False)
 
     def test_awplus_bgp_remove_wrong_asn(self):
-        set_module_args(dict(asn=10, state='absent'))
+        set_module_args(dict(asn=10, state="absent"))
         self.execute_module(changed=False)
 
     def test_awplus_bgp_vrf(self):
-        set_module_args(dict(asn=100, vrf='test', router_id='192.0.2.1'))
+        set_module_args(dict(asn=100, vrf="test", router_id="192.0.2.1"))
         result = self.execute_module(failed=True)
-        self.assertEqual(result['msg'], "VRF test doesn't exist.")
+        self.assertEqual(result["msg"], "VRF test doesn't exist.")
 
     def test_awplus_bgp_global_param(self):
         set_module_args(dict(asn=100, confederation_id=16))
-        self.execute_module(changed=True, commands=[
-                            'router bgp 100', 'bgp confederation identifier 16'])
+        self.execute_module(
+            changed=True, commands=["router bgp 100", "bgp confederation identifier 16"]
+        )
 
     def test_awplus_bgp_global_param_outside_default(self):
-        set_module_args(dict(asn=100, vrf='run', enforce_first_as=True))
+        set_module_args(dict(asn=100, vrf="run", enforce_first_as=True))
         result = self.execute_module(failed=True)
         self.assertEqual(
-            result['msg'], 'Global params can be modified only under "default" VRF.')
+            result["msg"], 'Global params can be modified only under "default" VRF.'
+        )
 
     def test_awplus_bgp_default_value(self):
-        set_module_args(
-            dict(asn=100, graceful_restart_timers_restart='default'))
+        set_module_args(dict(asn=100, graceful_restart_timers_restart="default"))
         self.execute_module(
             changed=True,
-            commands=['router bgp 100',
-                      'bgp graceful-restart restart-time 120']
+            commands=["router bgp 100", "bgp graceful-restart restart-time 120"],
         )
