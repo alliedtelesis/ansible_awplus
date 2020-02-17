@@ -2,7 +2,7 @@
 - hosts: all
   connection: network_cli
   collections:
-    - alliedtelesis.banner
+    - alliedtelesis.awplus
   tasks:
     - name: configure motd banner
       awplus_banner:

@@ -2,7 +2,7 @@
 - hosts: all
   connection: network_cli
   collections:
-    - alliedtelesis.awplus_bgp
+    - alliedtelesis.awplus
   tasks:
     - name: Configure a simple ASN
       awplus_bgp:
