@@ -23,7 +23,7 @@ description:
     before returning or timing out if the condition is not met.
   - This module does not support running commands in configuration mode.
     Please use M(awplus_config) to configure AW+ devices.
-version_added: "2.10"
+version_added: "2.9"
 options:
   commands:
     description:

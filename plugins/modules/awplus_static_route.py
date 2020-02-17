@@ -14,7 +14,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = """
 ---
 module: awplus_static_route
-version_added: "2.10"
+version_added: "2.9"
 author:
     - Cheng Yi Kok (@cyk19)
     - Isaac Daly (@dalyIsaac)

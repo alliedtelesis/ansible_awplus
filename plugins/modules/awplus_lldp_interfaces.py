@@ -14,7 +14,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = """
 ---
 module: awplus_lldp_interfaces
-version_added: "2.10"
+version_added: "2.9"
 short_description: Manage link layer discovery protocol (LLDP) attributes of interfaces on AlliedWare Plus devices.
 description: This module manages link layer discovery protocol (LLDP) attributes of interfaces on AlliedWare Plus devices.
 author: Cheng Yi Kok (@cyk19)

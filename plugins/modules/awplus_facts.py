@@ -23,7 +23,7 @@ description:
     respective resource name.  The facts module will always collect a
     base set of facts from the device and can enable or disable
     collection of additional facts.
-version_added: "2.10"
+version_added: "2.9"
 options:
   gather_subset:
     description:

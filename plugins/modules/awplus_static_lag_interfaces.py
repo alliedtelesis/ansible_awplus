@@ -14,7 +14,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = """
 ---
 module: awplus_lag_interfaces
-version_added: "2.10"
+version_added: "2.9"
 short_description: Manage Static Link Aggregation on AlliedWare Plus devices.
 description: This module manages properties of Static Link Aggregation Group on AlliedWare Plus devices.
 author:

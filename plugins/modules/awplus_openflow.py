@@ -17,7 +17,7 @@ DOCUMENTATION = """
 ---
 module: awplus_openflow
 short_description: Manages core OpenFlow configuration on AlliedWare Plus device
-version_added: "2.10"
+version_added: "2.9"
 description:
     - Manages core OpenFlow configuration on AlliedWare Plus device
 author:

@@ -18,7 +18,7 @@ author: Cheng Yi Kok (@cyk19)
 short_description: Manage Layer-3 interface on AlliedWare Plus devices.
 description:
 - This module provides declarative management of Layer-3 interface on AlliedWare Plus devices
-version_added: "2.10"
+version_added: "2.9"
 options:
   config:
     description: A dictionary of Layer-3 interface options

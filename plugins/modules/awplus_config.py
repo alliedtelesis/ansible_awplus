@@ -21,7 +21,7 @@ description:
     for segmenting configuration into sections.  This module provides
     an implementation for working with IOS configuration sections in
     a deterministic way.
-version_added: "2.10"
+version_added: "2.9"
 options:
   lines:
     description:

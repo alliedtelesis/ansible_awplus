@@ -17,7 +17,7 @@ module: awplus_lag_interfaces
 author: Cheng Yi Kok (@cyk19)
 short_description: Manage Link Aggregation on AlliedWare Plus devices.
 description: This module manages properties of Link Aggregation Group on AlliedWare Plus devices.
-version_added: "2.10"
+version_added: "2.9"
 options:
   config:
     description: A list of link aggregation group configurations.

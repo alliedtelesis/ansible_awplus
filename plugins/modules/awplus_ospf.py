@@ -18,7 +18,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 ---
 module: awplus_ospf
-version_added: "2.10"
+version_added: "2.9"
 short_description: Manages OSPF configuration.
 description:
     - Manages OSPF configurations on AlliedWare Plus switches.

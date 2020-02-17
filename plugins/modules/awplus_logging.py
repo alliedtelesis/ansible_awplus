@@ -15,7 +15,7 @@ DOCUMENTATION = """
 ---
 module: awplus_logging
 author: Cheng Yi Kok (@cyk19)
-version_added: "2.10"
+version_added: "2.9"
 short_description: Manage logging on network devices
 description:
   - This module provides declarative management of logging

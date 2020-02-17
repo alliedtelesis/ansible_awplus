@@ -20,7 +20,7 @@ description:
         on awplus devices. It provides an option to configure host system
         parameters or remove those parameters from the device active
         configuration.
-version_added: "2.10"
+version_added: "2.9"
 options:
     hostname:
         description:

@@ -14,7 +14,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = """
 ---
 module: awplus_vlans
-version_added: "2.10"
+version_added: "2.9"
 short_description: Manage VLANs on AlliedWare Plus devices.
 description: This module provides declarative management of VLANs on AlliedWare Plus devices
 author:

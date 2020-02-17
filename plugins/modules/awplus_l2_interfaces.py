@@ -17,7 +17,7 @@ module: awplus_l2_interfaces
 author: Cheng Yi Kok (@cyk19)
 short_description: Manage Layer-2 interface on AlliedWare Plus devices
 description: This module provides declarative management of Layer-2 interface on AW+ devices
-version_added: "2.10"
+version_added: "2.9"
 options:
   config:
     description: A dictionary of Layer-2 interface options

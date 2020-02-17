@@ -17,7 +17,7 @@ module: awplus_interfaces
 author: Cheng Yi Kok (@cyk19)
 short_description: 'Manages attribute of AlliedWare Plus interfaces.'
 description: 'Manages attribute of AlliedWare Plus network interfaces'
-version_added: "2.10"
+version_added: "2.9"
 options:
   config:
     description: A dictionary of interface options

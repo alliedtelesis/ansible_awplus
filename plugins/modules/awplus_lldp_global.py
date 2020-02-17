@@ -17,7 +17,7 @@ module: awplus_lldp_global
 author: Cheng Yi Kok (@cyk19)
 short_description: Configure and manage Link Layer Discovery Protocol(LLDP) attributes on AlliedWare Plus devices
 description: This module configures and manages the Link Layer Discovery Protocol (LLDP) attributes on AlliedWare Plus platforms.
-version_added: "2.10"
+version_added: "2.9"
 options:
   config:
     description: A dictionary of LLDP options

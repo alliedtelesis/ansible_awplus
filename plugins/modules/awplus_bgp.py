@@ -20,7 +20,7 @@ author:
 short_description: Manages BGP configuration.
 description:
     - Manages BGP configurations on AlliedWare Plus switches.
-version_added: "2.10"
+version_added: "2.9"
 notes:
     - C(state=absent) removes the whole BGP ASN configuration when
       C(vrf=default) or the whole VRF instance within the BGP process when

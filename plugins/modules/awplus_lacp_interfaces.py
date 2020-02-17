@@ -25,7 +25,7 @@ short_description: Manage Link Aggregation Control Protocol (LACP) on
                     AlliedWare Plus devices interface.
 description: This module provides declarative management of LACP on AlliedWare
               Plus network devices lacp_interfaces.
-version_added: "2.10"
+version_added: "2.9"
 options:
   config:
     description: A dictionary of LACP lacp_interfaces option

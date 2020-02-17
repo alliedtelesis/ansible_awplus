@@ -20,7 +20,7 @@ description:
   - This will configure both login and motd banners on remote devices
     running AlliedWare Plus.  It allows playbooks to add or remote
     banner text from the active running configuration.
-version_added: "2.10"
+version_added: "2.9"
 options:
   banner:
     description:

@@ -17,7 +17,7 @@ module: awplus_lacp
 author: Cheng Yi Kok (@cyk19)
 short_description: Mange Global Link Aggregation Control Protocol (LACP) on AlliedWare Plus devices.
 description: This module provides declarative management of Global LACP on AlliedWare Plus network devices.
-version_added: "2.10"
+version_added: "2.9"
 options:
   config:
     description: The provided configurations
