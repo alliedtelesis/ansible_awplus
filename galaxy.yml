@@ -1,13 +1,18 @@
-authors: []
+authors:
+  [
+    "Cheng Yi Kok (@cyk19)",
+    "Isaac Daly (@dalyIsaac)",
+    "Jeremy Toth (@jtsource)",
+  ]
 dependencies: {}
-description: ""
-documentation: ""
-homepage: ""
-issues: ""
-license: []
+description: "Modules to support configuration of AlliedWare Plus devices."
+documentation: "https://github.com/alliedtelesis/ansible_awplus"
+homepage: "https://github.com/alliedtelesis/ansible_awplus"
+issues: "https://github.com/alliedtelesis/ansible_awplus/issues"
+license_file: LICENSE
 name: awplus
 namespace: alliedtelesis
 readme: README.md
-repository: ""
+repository: "https://github.com/alliedtelesis/ansible_awplus"
 tags: ["networking"]
 version: 1.0.0
