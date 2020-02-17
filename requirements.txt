@@ -1,0 +1,4 @@
+setuptools
+mock
+pytest
+pytest-xdist

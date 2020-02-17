@@ -1,0 +1,52 @@
+name: Build and Test
+
+on: [push, pull_request, pull_request_review]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build collection
+        run: ansible-galaxy collection build
+      - name: Update pip
+        run: python3 -m pip install --upgrade pip
+      - name: Install pyyaml
+        run: python3 -m pip install pyyaml
+      - name: Get collection version
+        run: python3 get_version.py
+      - name: Store collection version in bash
+        run: echo "::set-env name=COLLECTION_VERSION::$(cat version)"
+      - name: Install collection
+        run: ansible-galaxy collection install alliedtelesis-awplus-${COLLECTION_VERSION}.tar.gz
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/alliedtelesis/awplus
+      - name: Set awplus and ansible env vars
+        run: |
+          echo "::set-env name=AWPLUS::${GITHUB_WORKSPACE}/ansible_collections/alliedtelesis/awplus/"
+          echo "::set-env name=ANSIBLE_PATH::${GITHUB_WORKSPACE}/ansible"
+      - name: Install ansible-test
+        run: |
+          sudo apt update
+          sudo apt install build-essential libssl-dev libffi-dev python-dev
+          git clone https://github.com/ansible/ansible.git ${GITHUB_WORKSPACE}/ansible
+          pip install setuptools
+          pip install -r ${GITHUB_WORKSPACE}/ansible/requirements.txt
+          pip install -r ${GITHUB_WORKSPACE}/ansible/test/units/requirements.txt
+          pip install -r ${AWPLUS}/requirements.txt
+          python3 -m pip install --upgrade pip
+          python3 -m pip install setuptools
+          python3 -m pip install -r ${ANSIBLE_PATH}/requirements.txt
+          python3 -m pip install -r ${ANSIBLE_PATH}/test/units/requirements.txt
+          python3 -m pip install -r ${AWPLUS}/requirements.txt
+          source ${ANSIBLE_PATH}/hacking/env-setup
+      - name: Test unit tests
+        run: |
+          cd ${AWPLUS}
+          ${ANSIBLE_PATH}/bin/ansible-test units
