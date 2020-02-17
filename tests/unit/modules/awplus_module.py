@@ -16,15 +16,20 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # Make coding more python3-ish
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import os
 import json
 
-from units.modules.utils import AnsibleExitJson, AnsibleFailJson, ModuleTestCase
+from ansible_collections.alliedtelesis.awplus.tests.unit.utils import (
+    AnsibleExitJson,
+    AnsibleFailJson,
+    ModuleTestCase,
+)
 
-fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures')
+fixture_path = os.path.join(os.path.dirname(__file__), "fixtures")
 fixture_data = {}
 
 
@@ -47,21 +52,23 @@ def load_fixture(name):
 
 
 class TestAwplusModule(ModuleTestCase):
-    def execute_module(self, failed=False, changed=False, commands=None, sort=True, defaults=False):
+    def execute_module(
+        self, failed=False, changed=False, commands=None, sort=True, defaults=False
+    ):
         self.load_fixtures(commands)
 
         if failed:
             result = self.failed()
-            self.assertTrue(result['failed'], result)
+            self.assertTrue(result["failed"], result)
         else:
             result = self.changed(changed)
-            self.assertEqual(result['changed'], changed, result)
+            self.assertEqual(result["changed"], changed, result)
 
         if commands is not None:
             if sort:
-                self.assertEqual(sorted(commands), sorted(result['commands']))
+                self.assertEqual(sorted(commands), sorted(result["commands"]))
             else:
-                self.assertEqual(commands, result['commands'])
+                self.assertEqual(commands, result["commands"])
 
         return result
 
@@ -70,7 +77,7 @@ class TestAwplusModule(ModuleTestCase):
             self.module.main()
 
         result = exc.exception.args[0]
-        self.assertTrue(result['failed'], result)
+        self.assertTrue(result["failed"], result)
         return result
 
     def changed(self, changed=False):
@@ -78,7 +85,7 @@ class TestAwplusModule(ModuleTestCase):
             self.module.main()
 
         result = exc.exception.args[0]
-        self.assertEqual(result['changed'], changed, result)
+        self.assertEqual(result["changed"], changed, result)
         return result
 
     def load_fixtures(self, commands=None):
