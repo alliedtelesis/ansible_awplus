@@ -4,14 +4,7 @@
   collections:
     - alliedtelesis.awplus
   tasks:
-    - awplus_ospf_ipv6:
+    - name: Configure OSPF IPv6 router process id
+      awplus_ospf_ipv6:
         router:
           process_id: 101
-# ---
-# - hosts: all
-#     connection: network_cli
-#     tasks:
-#     - name: Configure OSPF IPv6 router process id
-#         awplus_ospf_ipv6:
-#         router:
-#             process_id: 100
