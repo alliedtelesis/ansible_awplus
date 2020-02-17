@@ -49,7 +49,7 @@ notes:
 EXAMPLES = """
 commands:
     - name: Configure OSPF IPv6 router process id
-        awplus_ospf_ipv6:
+        awplus_ipv6_ospf:
             router:
                 process_id: 100
 """
