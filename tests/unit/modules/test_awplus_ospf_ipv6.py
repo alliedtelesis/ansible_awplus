@@ -20,9 +20,9 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-from units.compat.mock import patch
-from ansible.modules.network.awplus import awplus_ospf_ipv6
-from units.modules.utils import set_module_args
+from ansible_collections.alliedtelesis.awplus.tests.unit.compat.mock import patch
+from ansible_collections.alliedtelesis.awplus.plugins.modules import awplus_ospf_ipv6
+from ansible_collections.alliedtelesis.awplus.tests.unit.utils import set_module_args
 from .awplus_module import TestAwplusModule, load_fixture
 
 
@@ -34,12 +34,12 @@ class TestAwplusOspfIPv6Module(TestAwplusModule):
         super(TestAwplusOspfIPv6Module, self).setUp()
 
         self.mock_load_config = patch(
-            "ansible.modules.network.awplus.awplus_ospf_ipv6.load_config"
+            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_ospf_ipv6.load_config"
         )
         self.load_config = self.mock_load_config.start()
 
         self.mock_get_config = patch(
-            "ansible.modules.network.awplus.awplus_ospf_ipv6.get_config"
+            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_ospf_ipv6.get_config"
         )
         self.get_config = self.mock_get_config.start()
 
@@ -49,8 +49,7 @@ class TestAwplusOspfIPv6Module(TestAwplusModule):
         self.mock_get_config.stop()
 
     def load_fixtures(self, commands=None, device=""):
-        self.get_config.return_value = load_fixture(
-            "awplus_ospf_ipv6_config.cfg")
+        self.get_config.return_value = load_fixture("awplus_ospf_ipv6_config.cfg")
         self.load_config.return_value = []
 
     def test_awplus_router_ospf(self):
