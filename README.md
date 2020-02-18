@@ -2,8 +2,9 @@
 
 ![Build and Test](https://github.com/alliedtelesis/ansible_awplus/workflows/Build%20and%20Test/badge.svg)
 
+- [Installation](#installation)
 - [Usage](#usage)
-- [Development](#development)
+- [Contributing](#contributing)
   - [Running unit tests](#running-unit-tests)
     - [Running a specific unit test](#running-a-specific-unit-test)
     - [Running all unit tests](#running-all-unit-tests)
@@ -12,12 +13,27 @@
     - [SSH](#ssh)
   - [Basic Ansible Usage](#basic-ansible-usage)
   - [Developing modules](#developing-modules)
+  - [Building and installing locally](#building-and-installing-locally)
+
+This is an [Ansible Collection](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html) of various library modules which can interact with AlliedWare Plus devices.
+
+## Installation
+
+Distribution is via [Ansible Galaxy](https://galaxy.ansible.com/). To install this collection, please use the following command:
+
+```bash
+ansible-galaxy collection install alliedtelesis.awplus
+```
 
 ## Usage
 
-TODO
+To use this collection, make sure to update your host inventory with `ansible_network_os=awplus`.
 
-## Development
+Documentation for each module can be found within [`plugins/modules`](https://github.com/alliedtelesis/ansible_awplus/tree/master/plugins/modules). Playbooks used for testing can be found in [`playbooks`](https://github.com/alliedtelesis/ansible_awplus/tree/master/playbooks).
+
+Commands interact with the AW+ CLI, and are thus closely related.
+
+## Contributing
 
 Create the `ansible_collections` directory structure and clone:
 
@@ -92,7 +108,7 @@ ansible-playbook playbooks/awplus_ipv6_ospf.yml -vvv
 
 ### Connecting to AlliedWare Plus devices
 
-Boot up your AW+ device. If you're an Allied Telesis developer and you don't have a device setup, search for `Find an AW+ device` in the internal wiki - it should be in a page called `Training - Linux PC`.
+Boot up your AW+ device. If you're an Allied Telesis developer and you don't have a device set up, search for `Find an AW+ device` in the internal wiki - it should be in a page called `Training - Linux PC`.
 
 Once the AW+ device is booted, ensure that the device is connected using port 1.
 
@@ -245,3 +261,30 @@ Definitely read the [getting started](https://docs.ansible.com/ansible/latest/de
 Additionally, read the [Developing collections](https://docs.ansible.com/ansible/latest/dev_guide/developing_collections.html#developing-collections) page.
 
 It's also a good idea to take a look at the existing modules (NOTE: `awplus_ospf` and `awplus_ipv6_ospf` differ in implementation from the others quite drastically).
+
+### Building and installing locally
+
+Remove any existing collections of the same version:
+
+```bash
+rm -r ~/.ansible/collections/ansible_collections/alliedtelesis/awplus
+```
+
+Remove the virtualenvs (make sure to install them again for unit testing):
+
+```bash
+rm -r venvs
+```
+
+Build the collection:
+
+```bash
+ansible-galaxy collection build
+```
+
+Install the collection:
+
+```bash
+ansible-galaxy collection install alliedtelesis-awplus-VERSION.tar.gz
+# For example, ansible-galaxy collection install alliedtelesis-awplus-1.0.0.tar.gz
+```
