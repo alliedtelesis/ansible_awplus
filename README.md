@@ -14,6 +14,11 @@
   - [Basic Ansible Usage](#basic-ansible-usage)
   - [Developing modules](#developing-modules)
   - [Building and installing locally](#building-and-installing-locally)
+  - [Linting and Formatting](#linting-and-formatting)
+    - [PEP 8 checks](#pep-8-checks)
+    - [yamllint](#yamllint)
+    - [ansible-lint](#ansible-lint)
+    - [Formatting](#formatting)
 
 This is an [Ansible Collection](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html) of various library modules which can interact with AlliedWare Plus devices.
 
@@ -289,4 +294,42 @@ Install the collection:
 ```bash
 ansible-galaxy collection install alliedtelesis-awplus-VERSION.tar.gz
 # For example, ansible-galaxy collection install alliedtelesis-awplus-1.0.0.tar.gz
+```
+
+### Linting and Formatting
+
+To use linting and formatting, please install the contents of [`dev-requirements.txt`](./dev-requirements.txt):
+
+The content score of this collection is affected by the yamllint and ansible-lint results.
+
+```bash
+python -m pip install -r dev-requirements.txt # In which virtualenv you're using.
+```
+
+#### PEP 8 checks
+
+```bash
+ansible-test sanity --test pep8 plugins/ tests/
+```
+
+For more, see https://docs.ansible.com/ansible/latest/dev_guide/testing_pep8.html.
+
+#### yamllint
+
+```bash
+yamllint -c yamllint.yaml .
+```
+
+#### ansible-lint
+
+```bash
+ansible-lint playbooks
+```
+
+#### Formatting
+
+Formatting is done using [Black](https://black.readthedocs.io/en/stable/). Either use if from the Python extension for Visual Studio Code, or from the commandline:
+
+```bash
+black .
 ```
