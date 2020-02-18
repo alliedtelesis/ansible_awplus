@@ -27,6 +27,7 @@ The arg spec for the awplus_interfaces module
 """
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
@@ -37,12 +38,20 @@ class InterfacesArgs(object):  # pylint: disable=R0903
     def __init__(self, **kwargs):
         pass
 
-    argument_spec = {'config': {'options': {'description': {'type': 'str'},
-                                            'enabled': {'default': True, 'type': 'bool'},
-                                            'mtu': {'type': 'int'},
-                                            'name': {'required': True, 'type': 'str'},
-                                            'speed': {'type': 'str'}},
-                                'type': 'list'},
-                     'state': {'choices': ['merged', 'replaced', 'overridden', 'deleted'],
-                               'default': 'merged',
-                               'type': 'str'}}  # pylint: disable=C0301
+    argument_spec = {
+        "config": {
+            "options": {
+                "description": {"type": "str"},
+                "enabled": {"default": True, "type": "bool"},
+                "mtu": {"type": "int"},
+                "name": {"required": True, "type": "str"},
+                "speed": {"type": "str"},
+            },
+            "type": "list",
+        },
+        "state": {
+            "choices": ["merged", "replaced", "overridden", "deleted"],
+            "default": "merged",
+            "type": "str",
+        },
+    }  # pylint: disable=C0301

@@ -21,7 +21,8 @@
 #   builder template.
 #
 #############################################
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 """
 The arg spec for the awplus_vlans module
@@ -35,10 +36,18 @@ class VlansArgs(object):  # pylint: disable=R0903
     def __init__(self, **kwargs):
         pass
 
-    argument_spec = {'config': {'options': {'name': {'type': 'str'},
-                                            'vlan_id': {'required': True, 'type': 'int'},
-                                            'state': {'type': 'str', 'choices': ['enable', 'disable']}},
-                                'type': 'list'},
-                     'state': {'choices': ['merged', 'replaced', 'overridden', 'deleted'],
-                               'default': 'merged',
-                               'type': 'str'}}
+    argument_spec = {
+        "config": {
+            "options": {
+                "name": {"type": "str"},
+                "vlan_id": {"required": True, "type": "int"},
+                "state": {"type": "str", "choices": ["enable", "disable"]},
+            },
+            "type": "list",
+        },
+        "state": {
+            "choices": ["merged", "replaced", "overridden", "deleted"],
+            "default": "merged",
+            "type": "str",
+        },
+    }

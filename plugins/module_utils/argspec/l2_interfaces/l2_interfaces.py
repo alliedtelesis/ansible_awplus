@@ -21,7 +21,8 @@
 #   builder template.
 #
 #############################################
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 """
 The arg spec for the awplus_l2_interfaces module
@@ -35,16 +36,25 @@ class L2_interfacesArgs(object):  # pylint: disable=R0903
     def __init__(self, **kwargs):
         pass
 
-    argument_spec = {'config': {'elements': 'dict',
-                                'options': {'name': {'type': 'str', 'required': True},
-                                            'access': {'type': 'dict',
-                                                       'options': {'vlan': {'type': 'int'}}
-                                                       },
-                                            'trunk': {'type': 'dict',
-                                                      'options': {'allowed_vlans': {'type': 'list'},
-                                                                  'native_vlan': {'type': 'int'}}
-                                                      }},
-                                'type': 'list'},
-                     'state': {'choices': ['merged', 'replaced', 'overridden', 'deleted'],
-                               'default': 'merged',
-                               'type': 'str'}}
+    argument_spec = {
+        "config": {
+            "elements": "dict",
+            "options": {
+                "name": {"type": "str", "required": True},
+                "access": {"type": "dict", "options": {"vlan": {"type": "int"}}},
+                "trunk": {
+                    "type": "dict",
+                    "options": {
+                        "allowed_vlans": {"type": "list"},
+                        "native_vlan": {"type": "int"},
+                    },
+                },
+            },
+            "type": "list",
+        },
+        "state": {
+            "choices": ["merged", "replaced", "overridden", "deleted"],
+            "default": "merged",
+            "type": "str",
+        },
+    }

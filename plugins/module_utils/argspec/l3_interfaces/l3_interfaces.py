@@ -21,7 +21,8 @@
 #   builder template.
 #
 #############################################
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 """
 The arg spec for the awplus_l3_interfaces module
@@ -35,19 +36,32 @@ class L3_interfacesArgs(object):  # pylint: disable=R0903
     def __init__(self, **kwargs):
         pass
 
-    argument_spec = {'config': {'elements': 'dict',
-                                'options': {'ipv4': {'elements': 'dict',
-                                                     'options': {'address': {'type': 'str'},
-                                                                 'dhcp_client': {'type': 'int'},
-                                                                 'dhcp_hostname': {'type': 'str'},
-                                                                 'secondary': {'type': 'bool'}},
-                                                     'type': 'list'},
-                                            'ipv6': {'elements': 'dict',
-                                                     'options': {'address': {'type': 'str'},
-                                                                 'dhcp': {'type': 'bool'}},
-                                                     'type': 'list'},
-                                            'name': {'required': True, 'type': 'str'}},
-                                'type': 'list'},
-                     'state': {'choices': ['merged', 'replaced', 'overridden', 'deleted'],
-                               'default': 'merged',
-                               'type': 'str'}}  # pylint: disable=C0301
+    argument_spec = {
+        "config": {
+            "elements": "dict",
+            "options": {
+                "ipv4": {
+                    "elements": "dict",
+                    "options": {
+                        "address": {"type": "str"},
+                        "dhcp_client": {"type": "int"},
+                        "dhcp_hostname": {"type": "str"},
+                        "secondary": {"type": "bool"},
+                    },
+                    "type": "list",
+                },
+                "ipv6": {
+                    "elements": "dict",
+                    "options": {"address": {"type": "str"}, "dhcp": {"type": "bool"}},
+                    "type": "list",
+                },
+                "name": {"required": True, "type": "str"},
+            },
+            "type": "list",
+        },
+        "state": {
+            "choices": ["merged", "replaced", "overridden", "deleted"],
+            "default": "merged",
+            "type": "str",
+        },
+    }  # pylint: disable=C0301

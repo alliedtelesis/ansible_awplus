@@ -9,6 +9,7 @@
 """
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import re
@@ -21,7 +22,7 @@ def remove_command_from_config_list(interface, cmd, commands):
     # To delete the passed config
     if interface not in commands:
         commands.insert(0, interface)
-    commands.append('no %s' % cmd)
+    commands.append("no %s" % cmd)
     return commands
 
 
@@ -67,11 +68,11 @@ def filter_dict_having_none_value(want, have):
     # Generate dict with have dict value which is None in want dict
     test_dict = dict()
     test_key_dict = dict()
-    name = want.get('name')
+    name = want.get("name")
     if name:
-        test_dict['name'] = name
+        test_dict["name"] = name
     diff_ip = False
-    want_ip = ''
+    want_ip = ""
     for k, v in iteritems(want):
         if isinstance(v, dict):
             for key, value in iteritems(v):
@@ -97,16 +98,16 @@ def filter_dict_having_none_value(want, have):
             # the already configured IP if want and have IP
             # is different else if it's same no need to delete
             for each in v:
-                if each.get('secondary'):
-                    want_ip = each.get('address').split('/')
-                    have_ip = have.get('ipv4')
-                    if len(want_ip) > 1 and have_ip and have_ip[0].get('secondary'):
-                        have_ip = have_ip[0]['address'].split(' ')[0]
+                if each.get("secondary"):
+                    want_ip = each.get("address").split("/")
+                    have_ip = have.get("ipv4")
+                    if len(want_ip) > 1 and have_ip and have_ip[0].get("secondary"):
+                        have_ip = have_ip[0]["address"].split(" ")[0]
                         if have_ip != want_ip[0]:
                             diff_ip = True
-                    if each.get('secondary') and diff_ip is True:
-                        test_key_dict.update({'secondary': True})
-                    test_dict.update({'ipv4': test_key_dict})
+                    if each.get("secondary") and diff_ip is True:
+                        test_key_dict.update({"secondary": True})
+                    test_dict.update({"ipv4": test_key_dict})
         if v is None:
             val = have.get(k)
             test_dict.update({k: val})
@@ -117,7 +118,7 @@ def remove_duplicate_interface(commands):
     # Remove duplicate interface from commands
     set_cmd = []
     for each in commands:
-        if 'interface' in each:
+        if "interface" in each:
             if each not in set_cmd:
                 set_cmd.append(each)
         else:
@@ -127,37 +128,51 @@ def remove_duplicate_interface(commands):
 
 def validate_ipv4(value, module):
     if value:
-        address = value.split('/')
+        address = value.split("/")
         if len(address) != 2:
             module.fail_json(
-                msg='address format is <ipv4 address>/<mask>, got invalid format {0}'.format(value))
+                msg="address format is <ipv4 address>/<mask>, got invalid format {0}".format(
+                    value
+                )
+            )
 
         if not is_masklen(address[1]):
             module.fail_json(
-                msg='invalid value for mask: {0}, mask should be in range 0-128'.format(address[1]))
+                msg="invalid value for mask: {0}, mask should be in range 0-128".format(
+                    address[1]
+                )
+            )
 
 
 def validate_ipv6(value, module):
     if value:
-        address = value.split('/')
+        address = value.split("/")
         if len(address) != 2:
-            ipv6_addr_config_option = ['autoconfig', 'dhcp', 'suffix']
+            ipv6_addr_config_option = ["autoconfig", "dhcp", "suffix"]
             if value not in ipv6_addr_config_option:
-                module.fail_json(msg='address format is <ipv6 address>/<mask>, got invalid format {0}'.format(value))
+                module.fail_json(
+                    msg="address format is <ipv6 address>/<mask>, got invalid format {0}".format(
+                        value
+                    )
+                )
         else:
             if not 0 <= int(address[1]) <= 128:
-                module.fail_json(msg='invalid value for mask: {0}, mask should be in range 0-128'.format(address[1]))
+                module.fail_json(
+                    msg="invalid value for mask: {0}, mask should be in range 0-128".format(
+                        address[1]
+                    )
+                )
 
 
 def validate_n_expand_ipv4(module, want):
     # Check if input IPV4 is valid IP and expand IPV4 with its subnet mask
-    ip_addr_want = want.get('address')
-    if len(ip_addr_want.split(' ')) > 1:
+    ip_addr_want = want.get("address")
+    if len(ip_addr_want.split(" ")) > 1:
         return ip_addr_want
     validate_ipv4(ip_addr_want, module)
-    ip = ip_addr_want.split('/')
+    ip = ip_addr_want.split("/")
     if len(ip) == 2:
-        ip_addr_want = '{0} {1}'.format(ip[0], to_netmask(ip[1]))
+        ip_addr_want = "{0} {1}".format(ip[0], to_netmask(ip[1]))
 
     return ip_addr_want
 
@@ -169,43 +184,43 @@ def normalize_interface(name):
         return
 
     def _get_number(name):
-        digits = ''
+        digits = ""
         for char in name:
-            if char.isdigit() or char in '/.-':
+            if char.isdigit() or char in "/.-":
                 digits += char
         return digits
 
-    if name.lower().startswith('gi'):
-        if_type = 'GigabitEthernet'
-    elif name.lower().startswith('te'):
-        if_type = 'TenGigabitEthernet'
-    elif name.lower().startswith('fa'):
-        if_type = 'FastEthernet'
-    elif name.lower().startswith('fo'):
-        if_type = 'FortyGigabitEthernet'
-    elif name.lower().startswith('long'):
-        if_type = 'LongReachEthernet'
-    elif name.lower().startswith('et'):
-        if_type = 'Ethernet'
-    elif name.lower().startswith('vl'):
-        if_type = 'vlan'
-    elif name.lower().startswith('lo'):
-        if_type = 'loopback'
-    elif name.lower().startswith('po'):
-        if_type = 'port'
-    elif name.lower().startswith('nv'):
-        if_type = 'nve'
-    elif name.lower().startswith('twe'):
-        if_type = 'TwentyFiveGigE'
-    elif name.lower().startswith('hu'):
-        if_type = 'HundredGigE'
+    if name.lower().startswith("gi"):
+        if_type = "GigabitEthernet"
+    elif name.lower().startswith("te"):
+        if_type = "TenGigabitEthernet"
+    elif name.lower().startswith("fa"):
+        if_type = "FastEthernet"
+    elif name.lower().startswith("fo"):
+        if_type = "FortyGigabitEthernet"
+    elif name.lower().startswith("long"):
+        if_type = "LongReachEthernet"
+    elif name.lower().startswith("et"):
+        if_type = "Ethernet"
+    elif name.lower().startswith("vl"):
+        if_type = "vlan"
+    elif name.lower().startswith("lo"):
+        if_type = "loopback"
+    elif name.lower().startswith("po"):
+        if_type = "port"
+    elif name.lower().startswith("nv"):
+        if_type = "nve"
+    elif name.lower().startswith("twe"):
+        if_type = "TwentyFiveGigE"
+    elif name.lower().startswith("hu"):
+        if_type = "HundredGigE"
     else:
-        if re.search(r'(\d+\.\d+\.\d+)', name):
-            if_type = 'port'
+        if re.search(r"(\d+\.\d+\.\d+)", name):
+            if_type = "port"
         else:
             if_type = None
 
-    number_list = name.split(' ')
+    number_list = name.split(" ")
     if len(number_list) == 2:
         number = number_list[-1].strip()
     else:
@@ -223,31 +238,31 @@ def get_interface_type(interface):
     """Gets the type of interface
     """
 
-    if interface.upper().startswith('GI'):
-        return 'GigabitEthernet'
-    elif interface.upper().startswith('TE'):
-        return 'TenGigabitEthernet'
-    elif interface.upper().startswith('FA'):
-        return 'FastEthernet'
-    elif interface.upper().startswith('FO'):
-        return 'FortyGigabitEthernet'
-    elif interface.upper().startswith('LON'):
-        return 'LongReachEthernet'
-    elif interface.upper().startswith('ET'):
-        return 'Ethernet'
-    elif interface.upper().startswith('VL'):
-        return 'vlan'
-    elif interface.upper().startswith('LO'):
-        return 'loopback'
-    elif interface.upper().startswith('PO'):
-        return 'port'
-    elif interface.upper().startswith('NV'):
-        return 'nve'
-    elif interface.upper().startswith('TWE'):
-        return 'TwentyFiveGigE'
-    elif interface.upper().startswith('HU'):
-        return 'HundredGigE'
+    if interface.upper().startswith("GI"):
+        return "GigabitEthernet"
+    elif interface.upper().startswith("TE"):
+        return "TenGigabitEthernet"
+    elif interface.upper().startswith("FA"):
+        return "FastEthernet"
+    elif interface.upper().startswith("FO"):
+        return "FortyGigabitEthernet"
+    elif interface.upper().startswith("LON"):
+        return "LongReachEthernet"
+    elif interface.upper().startswith("ET"):
+        return "Ethernet"
+    elif interface.upper().startswith("VL"):
+        return "vlan"
+    elif interface.upper().startswith("LO"):
+        return "loopback"
+    elif interface.upper().startswith("PO"):
+        return "port"
+    elif interface.upper().startswith("NV"):
+        return "nve"
+    elif interface.upper().startswith("TWE"):
+        return "TwentyFiveGigE"
+    elif interface.upper().startswith("HU"):
+        return "HundredGigE"
     else:
-        if re.search(r'(\d+\.\d+\.\d+)', interface):
-            return 'port'
-        return 'unknown'
+        if re.search(r"(\d+\.\d+\.\d+)", interface):
+            return "port"
+        return "unknown"

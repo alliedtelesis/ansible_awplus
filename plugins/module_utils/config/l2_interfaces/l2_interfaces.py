@@ -363,4 +363,3 @@ class L2_interfaces(ConfigBase):
                 )
 
         return commands
-

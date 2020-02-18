@@ -5,13 +5,14 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
 ANSIBLE_METADATA = {
-    'metadata_version': '1.1',
-    'status': ['preview'],
-    'supported_by': 'network',
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "network",
 }
 
 
@@ -388,315 +389,301 @@ from ansible.module_utils.basic import AnsibleModule
 
 def _append(cmd, state, val):
     if state == PRESENT and val is not None:
-        return cmd + ' {}'.format(val)
+        return cmd + " {}".format(val)
     return cmd
 
 
 NSSA_MAP = {
-    'default_information_originate': {
+    "default_information_originate": {
         PRESENT: [
-            'area',
-            'area.area_id',
-            'nssa default-information-originate',
-            '',
-            'metric',
-            'default_information_originate_metric',
-            'metric-type',
-            'default_information_originate_metric_type',
+            "area",
+            "area.area_id",
+            "nssa default-information-originate",
+            "",
+            "metric",
+            "default_information_originate_metric",
+            "metric-type",
+            "default_information_originate_metric_type",
         ],
-        ABSENT: [
-            'no area',
-            'area.area_id',
-            'nssa default-information-originate',
-        ],
+        ABSENT: ["no area", "area.area_id", "nssa default-information-originate"],
     },
-    'no_redistribution': {
-        PRESENT: ['area', 'area.area_id', 'nssa', 'no_redistribution'],
-        ABSENT: ['no area', 'area.area_id', 'nssa', 'no_redistribution'],
+    "no_redistribution": {
+        PRESENT: ["area", "area.area_id", "nssa", "no_redistribution"],
+        ABSENT: ["no area", "area.area_id", "nssa", "no_redistribution"],
     },
-    'no_summary': {
-        PRESENT: ['area', 'area.area_id', 'nssa', 'no_summary'],
-        ABSENT: ['no area', 'area.area_id', 'nssa', 'no_summary'],
+    "no_summary": {
+        PRESENT: ["area", "area.area_id", "nssa", "no_summary"],
+        ABSENT: ["no area", "area.area_id", "nssa", "no_summary"],
     },
-    'translator_role': {
+    "translator_role": {
         PRESENT: [
-            'area',
-            'area.area_id',
-            'nssa',
-            'translator_role',
-            '',
-            'translator_role_type',
+            "area",
+            "area.area_id",
+            "nssa",
+            "translator_role",
+            "",
+            "translator_role_type",
         ],
-        ABSENT: ['no area', 'area.area_id', 'nssa', 'translator_role'],
+        ABSENT: ["no area", "area.area_id", "nssa", "translator_role"],
     },
 }
 
 
 def area_nssa_map(module):
-    nssa = module.params['area']['nssa']
+    nssa = module.params["area"]["nssa"]
 
     map_key = None
-    if nssa.get('default_information_originate'):
-        map_key = 'default_information_originate'
-    elif nssa.get('no_redistribution'):
-        map_key = 'no_redistribution'
-    elif nssa.get('no_summary'):
-        map_key = 'no_summary'
-    elif nssa.get('translator_role'):
-        map_key = 'translator_role'
+    if nssa.get("default_information_originate"):
+        map_key = "default_information_originate"
+    elif nssa.get("no_redistribution"):
+        map_key = "no_redistribution"
+    elif nssa.get("no_summary"):
+        map_key = "no_summary"
+    elif nssa.get("translator_role"):
+        map_key = "translator_role"
 
     if map_key:
         return construct_from_list(NSSA_MAP[map_key], module, nssa)
-    return ''
+    return ""
 
 
 def area_range_map(module):
-    range_params = module.params['area']['range']
+    range_params = module.params["area"]["range"]
     state = range_params[STATE]
-    area_id = module.params['area']['area_id']
-    ip_addr = range_params['ip_addr']
-    advertise = range_params.get('advertise')
-    cmd = 'area {} range {}'.format(area_id, ip_addr)
-    if state == 'absent':
-        return 'no ' + cmd
+    area_id = module.params["area"]["area_id"]
+    ip_addr = range_params["ip_addr"]
+    advertise = range_params.get("advertise")
+    cmd = "area {} range {}".format(area_id, ip_addr)
+    if state == "absent":
+        return "no " + cmd
     if advertise:
-        cmd += ' advertise'
+        cmd += " advertise"
     elif advertise is False:
-        cmd += ' not-advertise'
+        cmd += " not-advertise"
     return cmd
 
 
 def _add_auth_msg_key(cmd, state, auth_key, msg_key, msg_key_id):
     if auth_key:
-        cmd += ' authentication-key'
-        if state == 'present':
-            cmd += ' {}'.format(auth_key)
+        cmd += " authentication-key"
+        if state == "present":
+            cmd += " {}".format(auth_key)
     elif msg_key and msg_key_id is not None and msg_key:
-        cmd += ' message-digest-key {}'.format(msg_key_id)
-        if state == 'present':
-            cmd += ' md5 {}'.format(msg_key)
+        cmd += " message-digest-key {}".format(msg_key_id)
+        if state == "present":
+            cmd += " md5 {}".format(msg_key)
     return cmd
 
 
 def area_virtual_link_map(module):
-    params = module.params['area']['virtual_link']
-    area_id = get_param('area.area_id', module, module.params)
-    ip_addr = params['ip_addr']
+    params = module.params["area"]["virtual_link"]
+    area_id = get_param("area.area_id", module, module.params)
+    ip_addr = params["ip_addr"]
 
-    cmd = 'area {} virtual-link {}'.format(area_id, ip_addr)
+    cmd = "area {} virtual-link {}".format(area_id, ip_addr)
 
-    auth_key = params.get('auth_key')
-    msg_key = params.get('msg_key_password')
-    msg_key_id = params.get('msg_key_id')
-    authentication_type = params.get('authentication_type')
-    authentication = params.get('authentication')
-    dead_interval = params.get('dead_interval')
-    dead_interval_value = params.get('dead_interval_value')
-    hello_interval = params.get('hello_interval')
-    hello_interval_value = params.get('hello_interval_value')
-    retransmit_interval = params.get('retransmit_interval')
-    transmit_delay = params.get('transmit_delay')
-    retransmit_interval_value = params.get('retransmit_interval_value')
-    transmit_delay = params.get('transmit_delay')
-    transmit_delay_value = params.get('transmit_delay_value')
+    auth_key = params.get("auth_key")
+    msg_key = params.get("msg_key_password")
+    msg_key_id = params.get("msg_key_id")
+    authentication_type = params.get("authentication_type")
+    authentication = params.get("authentication")
+    dead_interval = params.get("dead_interval")
+    dead_interval_value = params.get("dead_interval_value")
+    hello_interval = params.get("hello_interval")
+    hello_interval_value = params.get("hello_interval_value")
+    retransmit_interval = params.get("retransmit_interval")
+    transmit_delay = params.get("transmit_delay")
+    retransmit_interval_value = params.get("retransmit_interval_value")
+    transmit_delay = params.get("transmit_delay")
+    transmit_delay_value = params.get("transmit_delay_value")
 
     state = params[STATE]
 
-    if (
-        dead_interval
-        or hello_interval
-        or retransmit_interval
-        or transmit_delay
-    ):
+    if dead_interval or hello_interval or retransmit_interval or transmit_delay:
         if authentication:
-            cmd += ' authentication'
+            cmd += " authentication"
         if dead_interval:
-            cmd += ' dead-interval'
+            cmd += " dead-interval"
             cmd = _append(cmd, state, dead_interval_value)
         if hello_interval:
-            cmd += ' hello-interval'
+            cmd += " hello-interval"
             cmd = _append(cmd, state, hello_interval_value)
         if retransmit_interval:
-            cmd += ' retransmit-interval'
+            cmd += " retransmit-interval"
             cmd = _append(cmd, state, retransmit_interval_value)
         if transmit_delay:
-            cmd += ' transmit-delay'
+            cmd += " transmit-delay"
             cmd = _append(cmd, state, transmit_delay_value)
     elif authentication:
-        cmd += ' authentication'
-        if authentication_type and state == 'present':
-            cmd += ' {}'.format(authentication_type)
+        cmd += " authentication"
+        if authentication_type and state == "present":
+            cmd += " {}".format(authentication_type)
         cmd = _add_auth_msg_key(cmd, state, auth_key, msg_key, msg_key_id)
     elif auth_key or (msg_key and msg_key_id is not None and msg_key):
         cmd = _add_auth_msg_key(cmd, state, auth_key, msg_key, msg_key_id)
 
     if state == ABSENT:
-        cmd = 'no ' + cmd
+        cmd = "no " + cmd
 
     return cmd
 
 
 def router_ospf_map(module, commands):
-    params = module.params['router']
-    cmd = 'router ospf'
+    params = module.params["router"]
+    cmd = "router ospf"
     state = params[STATE]
 
-    process_id = params.get('process_id')
-    vrf_instance = params.get('vrf_instance')
+    process_id = params.get("process_id")
+    vrf_instance = params.get("vrf_instance")
 
     if process_id:
-        cmd += ' {}'.format(process_id)
+        cmd += " {}".format(process_id)
     if state == ABSENT and len(commands) == 0:
-        return 'no ' + cmd
+        return "no " + cmd
     elif vrf_instance:
-        cmd += ' {}'.format(vrf_instance)
+        cmd += " {}".format(vrf_instance)
     return cmd
 
 
 def passive_interface_map(module):
-    params = module.params['passive_interface']
-    cmd = 'passive-interface'
+    params = module.params["passive_interface"]
+    cmd = "passive-interface"
     state = params[STATE]
 
-    interface_name = params.get('name')
-    ip_addr = params.get('ip_addr')
+    interface_name = params.get("name")
+    ip_addr = params.get("ip_addr")
 
     if interface_name is not None:
-        cmd += ' {}'.format(interface_name)
+        cmd += " {}".format(interface_name)
     if ip_addr is not None:
-        cmd += ' {}'.format(ip_addr)
+        cmd += " {}".format(ip_addr)
 
     if state == ABSENT:
-        cmd = 'no ' + cmd
+        cmd = "no " + cmd
 
     return cmd
 
 
 def summary_address_map(module):
-    params = module.params['summary_address']
-    ip_addr = params['ip_addr']
-    not_advertise = params.get('not_advertise')
-    tag = params.get('tag')
+    params = module.params["summary_address"]
+    ip_addr = params["ip_addr"]
+    not_advertise = params.get("not_advertise")
+    tag = params.get("tag")
 
-    cmd = 'summary-address {}'.format(ip_addr)
+    cmd = "summary-address {}".format(ip_addr)
 
     if not_advertise is True:
-        cmd += ' not-advertise'
+        cmd += " not-advertise"
     elif tag is not None:
-        cmd += ' tag {}'.format(tag)
+        cmd += " tag {}".format(tag)
 
     state = params[STATE]
     if state == ABSENT:
-        cmd = 'no ' + cmd
+        cmd = "no " + cmd
 
     return cmd
 
 
 def redistribute_map(module):
-    params = module.params['redistribute']
+    params = module.params["redistribute"]
     state = params[STATE]
-    connected = params.get('connected')
-    static = params.get('static')
-    metric = params.get('metric')
-    metric_type = params.get('metric_type')
-    route_map_name = params.get('route_map_name')
-    tag = params.get('tag')
+    connected = params.get("connected")
+    static = params.get("static")
+    metric = params.get("metric")
+    metric_type = params.get("metric_type")
+    route_map_name = params.get("route_map_name")
+    tag = params.get("tag")
 
-    cmd = 'redistribute'
+    cmd = "redistribute"
 
     if connected:
-        cmd += ' connected'
+        cmd += " connected"
     elif static:
-        cmd += ' static'
+        cmd += " static"
 
     if not any([metric, metric_type, route_map_name, tag]):
         module.fail_json(
             {
-                'errors': [
-                    'One of metric, metric_type, route_map_name, tag must be '
-                    'present.'
+                "errors": [
+                    "One of metric, metric_type, route_map_name, tag must be "
+                    "present."
                 ]
             }
         )
     if metric:
-        cmd += ' metric'
+        cmd += " metric"
         if state == PRESENT:
-            cmd += ' {}'.format(metric)
+            cmd += " {}".format(metric)
     if metric_type:
-        cmd += ' metric-type'
+        cmd += " metric-type"
         if state == PRESENT:
-            cmd += ' {}'.format(metric_type)
+            cmd += " {}".format(metric_type)
     if route_map_name:
-        cmd += ' route-map'
+        cmd += " route-map"
         if state == PRESENT:
-            cmd += ' {}'.format(route_map_name)
+            cmd += " {}".format(route_map_name)
     if tag:
-        cmd += ' tag'
+        cmd += " tag"
         if state == PRESENT:
-            cmd += ' {}'.format(tag)
+            cmd += " {}".format(tag)
 
     if state == ABSENT:
-        return 'no ' + cmd
+        return "no " + cmd
     return cmd
 
 
 KEY_TO_COMMAND_MAP = {
-    'area': {
-        'default_cost': {
-            PRESENT: ['area', 'area.area_id', 'default-cost', 'cost_value'],
-            ABSENT: ['no area', 'area.area_id', 'default-cost'],
+    "area": {
+        "default_cost": {
+            PRESENT: ["area", "area.area_id", "default-cost", "cost_value"],
+            ABSENT: ["no area", "area.area_id", "default-cost"],
         },
-        'authentication': {
-            PRESENT: [
-                'area',
-                'area.area_id',
-                'authentication',
-                'message_digest',
-            ],
-            ABSENT: ['no area', 'area.area_id', 'authentication'],
+        "authentication": {
+            PRESENT: ["area", "area.area_id", "authentication", "message_digest"],
+            ABSENT: ["no area", "area.area_id", "authentication"],
         },
-        'filter_list': {
+        "filter_list": {
             PRESENT: [
-                'area',
-                'area.area_id',
-                'filter-list prefix',
-                'prefix_list',
-                '',
-                'direction',
+                "area",
+                "area.area_id",
+                "filter-list prefix",
+                "prefix_list",
+                "",
+                "direction",
             ],
             ABSENT: [
-                'no area',
-                'area.area_id',
-                'filter-list prefix',
-                'prefix_list',
-                '',
-                'direction',
+                "no area",
+                "area.area_id",
+                "filter-list prefix",
+                "prefix_list",
+                "",
+                "direction",
             ],
         },
-        'nssa': area_nssa_map,
-        'range': area_range_map,
-        'stub': {
-            PRESENT: ['area', 'area.area_id', 'stub', 'no_summary'],
-            ABSENT: ['no area', 'area.area_id', 'stub', 'no_summary'],
+        "nssa": area_nssa_map,
+        "range": area_range_map,
+        "stub": {
+            PRESENT: ["area", "area.area_id", "stub", "no_summary"],
+            ABSENT: ["no area", "area.area_id", "stub", "no_summary"],
         },
-        'virtual_link': area_virtual_link_map,
+        "virtual_link": area_virtual_link_map,
     },
-    'network_area': {
-        PRESENT: ['network', 'network_address', 'area', 'area_id'],
-        ABSENT: ['no network', 'network_address', 'area', 'area_id'],
+    "network_area": {
+        PRESENT: ["network", "network_address", "area", "area_id"],
+        ABSENT: ["no network", "network_address", "area", "area_id"],
     },
-    'ospf_router_id': {
-        PRESENT: ['ospf router-id', 'ip_addr'],
-        ABSENT: ['no ospf router-id'],
+    "ospf_router_id": {
+        PRESENT: ["ospf router-id", "ip_addr"],
+        ABSENT: ["no ospf router-id"],
     },
-    'passive_interface': passive_interface_map,
-    'redistribute': redistribute_map,
-    'summary_address': summary_address_map,
+    "passive_interface": passive_interface_map,
+    "redistribute": redistribute_map,
+    "summary_address": summary_address_map,
 }
 
 
 def get_existing_config(module):
-    config = (get_config(module, flags=[' router ospf']),)
+    config = (get_config(module, flags=[" router ospf"]),)
 
     existing_config = set()
     ospf = None
@@ -704,7 +691,7 @@ def get_existing_config(module):
         for line in item.splitlines():
             s = line.strip()
             existing_config.add(s)
-            if 'router ospf' in s:
+            if "router ospf" in s:
                 ospf = s
 
     return ospf, existing_config
@@ -712,154 +699,146 @@ def get_existing_config(module):
 
 def main():
     area_default_cost_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'cost_value': {'type': 'int'},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "cost_value": {"type": "int"},
     }
 
     area_authentication_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'message_digest': {'type': 'bool', 'default': False},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "message_digest": {"type": "bool", "default": False},
     }
 
     area_filter_list_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'prefix_list': {'type': 'str', 'required': True},
-        'direction': {'choices': ['in', 'out']},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "prefix_list": {"type": "str", "required": True},
+        "direction": {"choices": ["in", "out"]},
     }
 
     area_nssa_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'default_information_originate': {'type': 'bool', 'default': False},
-        'default_information_originate_metric_type': {
-            'type': 'int',
-            'choices': [1, 2],
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "default_information_originate": {"type": "bool", "default": False},
+        "default_information_originate_metric_type": {
+            "type": "int",
+            "choices": [1, 2],
         },
-        'default_information_originate_metric': {'type': 'int'},
-        'no_redistribution': {'type': 'bool', 'default': False},
-        'no_summary': {'type': 'bool', 'default': False},
-        'translator_role': {'type': 'bool', 'default': False},
-        'translator_role_type': {'choices': ['always', 'candidate', 'never']},
+        "default_information_originate_metric": {"type": "int"},
+        "no_redistribution": {"type": "bool", "default": False},
+        "no_summary": {"type": "bool", "default": False},
+        "translator_role": {"type": "bool", "default": False},
+        "translator_role_type": {"choices": ["always", "candidate", "never"]},
     }
 
     area_range_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'ip_addr': {'type': 'str', 'required': True},
-        'advertise': {'type': 'bool', 'default': None},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "ip_addr": {"type": "str", "required": True},
+        "advertise": {"type": "bool", "default": None},
     }
 
     area_stub_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'no_summary': {'type': 'bool', 'default': False},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "no_summary": {"type": "bool", "default": False},
     }
 
     area_virtual_link_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'ip_addr': {'type': 'str', 'required': True},
-        'auth_key': {'type': 'str'},
-        'msg_key_id': {'type': 'int'},
-        'msg_key_password': {'type': 'str'},
-        'authentication_type': {'choices': ['message-digest', 'null']},
-        'authentication': {'type': 'bool', 'default': False},
-        'dead_interval': {'type': 'bool', 'default': False},
-        'dead_interval_value': {'type': 'int'},
-        'hello_interval': {'type': 'bool', 'default': False},
-        'hello_interval_value': {'type': 'int'},
-        'retransmit_interval': {'type': 'bool', 'default': False},
-        'retransmit_interval_value': {'type': 'int'},
-        'transmit_delay': {'type': 'bool', 'default': False},
-        'transmit_delay_value': {'type': 'int'},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "ip_addr": {"type": "str", "required": True},
+        "auth_key": {"type": "str"},
+        "msg_key_id": {"type": "int"},
+        "msg_key_password": {"type": "str"},
+        "authentication_type": {"choices": ["message-digest", "null"]},
+        "authentication": {"type": "bool", "default": False},
+        "dead_interval": {"type": "bool", "default": False},
+        "dead_interval_value": {"type": "int"},
+        "hello_interval": {"type": "bool", "default": False},
+        "hello_interval_value": {"type": "int"},
+        "retransmit_interval": {"type": "bool", "default": False},
+        "retransmit_interval_value": {"type": "int"},
+        "transmit_delay": {"type": "bool", "default": False},
+        "transmit_delay_value": {"type": "int"},
     }
 
     area_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'area_id': {'type': 'str', 'required': True},
-        'default_cost': {'type': 'dict', 'options': area_default_cost_spec},
-        'authentication': {
-            'type': 'dict',
-            'options': area_authentication_spec,
-        },
-        'filter_list': {'type': 'dict', 'options': area_filter_list_spec},
-        'nssa': {'type': 'dict', 'options': area_nssa_spec},
-        'range': {'type': 'dict', 'options': area_range_spec},
-        'stub': {'type': 'dict', 'options': area_stub_spec},
-        'virtual_link': {'type': 'dict', 'options': area_virtual_link_spec},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "area_id": {"type": "str", "required": True},
+        "default_cost": {"type": "dict", "options": area_default_cost_spec},
+        "authentication": {"type": "dict", "options": area_authentication_spec},
+        "filter_list": {"type": "dict", "options": area_filter_list_spec},
+        "nssa": {"type": "dict", "options": area_nssa_spec},
+        "range": {"type": "dict", "options": area_range_spec},
+        "stub": {"type": "dict", "options": area_stub_spec},
+        "virtual_link": {"type": "dict", "options": area_virtual_link_spec},
     }
 
     router_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'process_id': {'type': 'int'},
-        'vrf_instance': {'type': 'str'},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "process_id": {"type": "int"},
+        "vrf_instance": {"type": "str"},
     }
 
     network_area_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'network_address': {'type': 'str', 'required': True},
-        'area_id': {'type': 'str', 'required': True},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "network_address": {"type": "str", "required": True},
+        "area_id": {"type": "str", "required": True},
     }
 
     ospf_router_id_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'ip_addr': {'type': 'str'},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "ip_addr": {"type": "str"},
     }
 
     passive_interface_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'name': {'type': 'str'},
-        'ip_addr': {'type': 'str'},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "name": {"type": "str"},
+        "ip_addr": {"type": "str"},
     }
 
     redistribute_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'connected': {'type': 'bool', 'default': False},
-        'static': {'type': 'bool', 'default': False},
-        'metric': {'type': 'int'},
-        'metric_type': {'choices': ['1', '2']},
-        'route_map_name': {'type': 'str'},
-        'tag': {'type': 'int'},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "connected": {"type": "bool", "default": False},
+        "static": {"type": "bool", "default": False},
+        "metric": {"type": "int"},
+        "metric_type": {"choices": ["1", "2"]},
+        "route_map_name": {"type": "str"},
+        "tag": {"type": "int"},
     }
 
     summary_address_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'ip_addr': {'type': 'str', 'required': True},
-        'not_advertise': {'type': 'bool', 'default': False},
-        'tag': {'type': 'int'},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "ip_addr": {"type": "str", "required": True},
+        "not_advertise": {"type": "bool", "default": False},
+        "tag": {"type": "int"},
     }
 
     argument_spec = {
-        'area': {'type': 'dict', 'options': area_spec},
-        'router': {'type': 'dict', 'options': router_spec, 'required': True},
-        'network_area': {'type': 'dict', 'options': network_area_spec},
-        'ospf_router_id': {'type': 'dict', 'options': ospf_router_id_spec},
-        'passive_interface': {
-            'type': 'dict',
-            'options': passive_interface_spec,
-        },
-        'redistribute': {'type': 'dict', 'options': redistribute_spec},
-        'summary_address': {'type': 'dict', 'options': summary_address_spec},
+        "area": {"type": "dict", "options": area_spec},
+        "router": {"type": "dict", "options": router_spec, "required": True},
+        "network_area": {"type": "dict", "options": network_area_spec},
+        "ospf_router_id": {"type": "dict", "options": ospf_router_id_spec},
+        "passive_interface": {"type": "dict", "options": passive_interface_spec},
+        "redistribute": {"type": "dict", "options": redistribute_spec},
+        "summary_address": {"type": "dict", "options": summary_address_spec},
     }
 
     argument_spec.update(awplus_argument_spec)
 
-    module = AnsibleModule(
-        argument_spec=argument_spec, supports_check_mode=True
-    )
+    module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
 
     warnings = []
-    result = {'changed': False, 'warnings': warnings}
+    result = {"changed": False, "warnings": warnings}
 
     ospf, existing_config = get_existing_config(module)
     commands = get_commands(
         module, KEY_TO_COMMAND_MAP, router_ospf_map, ospf, existing_config
     )
-    result['commands'] = commands
+    result["commands"] = commands
 
     if commands:
         if not module.check_mode:
             load_config(module, commands)
-        result['changed'] = True
+        result["changed"] = True
 
     module.exit_json(**result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

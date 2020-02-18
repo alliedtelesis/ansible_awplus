@@ -308,4 +308,3 @@ class TestAwplusConfigModule(TestAwplusModule):
         args = dict(replace="config")
         set_module_args(args)
         result = self.execute_module(failed=True)
-

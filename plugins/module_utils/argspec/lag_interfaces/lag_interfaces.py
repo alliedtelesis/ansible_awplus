@@ -21,7 +21,8 @@
 #   builder template.
 #
 #############################################
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 """
 The arg spec for the awplus_lag_interfaces module
@@ -35,15 +36,24 @@ class Lag_interfacesArgs(object):  # pylint: disable=R0903
     def __init__(self, **kwargs):
         pass
 
-    argument_spec = {'config': {'elements': 'dict',
-                                'options': {'members': {'options': {'member': {'type': 'str'},
-                                                                    'mode': {'choices': [
-                                                                        'active',
-                                                                        'passive'],
-                                    'type': 'str'}},
-                                    'type': 'list'},
-                                    'name': {'required': True, 'type': 'str'}},
-                                'type': 'list'},
-                     'state': {'choices': ['merged', 'replaced', 'overridden', 'deleted'],
-                               'default': 'merged',
-                               'type': 'str'}}  # pylint: disable=C0301
+    argument_spec = {
+        "config": {
+            "elements": "dict",
+            "options": {
+                "members": {
+                    "options": {
+                        "member": {"type": "str"},
+                        "mode": {"choices": ["active", "passive"], "type": "str"},
+                    },
+                    "type": "list",
+                },
+                "name": {"required": True, "type": "str"},
+            },
+            "type": "list",
+        },
+        "state": {
+            "choices": ["merged", "replaced", "overridden", "deleted"],
+            "default": "merged",
+            "type": "str",
+        },
+    }  # pylint: disable=C0301

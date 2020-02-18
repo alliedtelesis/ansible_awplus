@@ -5,11 +5,14 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'network'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "network",
+}
 
 DOCUMENTATION = """
 ---
@@ -121,66 +124,71 @@ commands:
 
 import re
 
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import get_config, load_config
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import awplus_argument_spec
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
+    get_config,
+    load_config,
+)
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
+    awplus_argument_spec,
+)
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.common.config import CustomNetworkConfig
 
 
 GLOBAL_PARAMS = [
-    'enforce_first_as',
-    'timer_bgp_hold',
-    'timer_bgp_keepalive',
-    'bestpath_always_compare_med',
-    'bestpath_compare_routerid',
-    'bestpath_med_confed',
-    'bestpath_med_missing_as_worst',
-    'cluster_id',
-    'confederation_id',
-    'confederation_peers',
-    'graceful_restart',
-    'graceful_restart_timers_restart',
-    'graceful_restart_timers_stalepath_time',
+    "enforce_first_as",
+    "timer_bgp_hold",
+    "timer_bgp_keepalive",
+    "bestpath_always_compare_med",
+    "bestpath_compare_routerid",
+    "bestpath_med_confed",
+    "bestpath_med_missing_as_worst",
+    "cluster_id",
+    "confederation_id",
+    "confederation_peers",
+    "graceful_restart",
+    "graceful_restart_timers_restart",
+    "graceful_restart_timers_stalepath_time",
 ]
 
 BOOL_PARAMS = [
-    'bestpath_always_compare_med',
-    'bestpath_compare_routerid',
-    'bestpath_med_confed',
-    'bestpath_med_missing_as_worst',
-    'enforce_first_as',
-    'graceful_restart',
+    "bestpath_always_compare_med",
+    "bestpath_compare_routerid",
+    "bestpath_med_confed",
+    "bestpath_med_missing_as_worst",
+    "enforce_first_as",
+    "graceful_restart",
 ]
 
 PARAM_TO_COMMAND_KEYMAP = {
-    'asn': 'router bgp',
-    'bestpath_always_compare_med': 'bgp always-compare-med',
-    'bestpath_compare_routerid': 'bgp bestpath compare-routerid',
-    'bestpath_med_confed': 'bgp bestpath med confed',
-    'bestpath_med_missing_as_worst': 'bgp bestpath med missing-as-worst',
-    'cluster_id': 'bgp cluster-id',
-    'confederation_id': ' bgp confederation identifier',
-    'confederation_peers': 'bgp confederation peers',
-    'enforce_first_as': 'bgp enforce-first-as',
-    'graceful_restart': 'bgp graceful-restart',
-    'graceful_restart_timers_restart': 'bgp graceful-restart restart-time',
-    'graceful_restart_timers_stalepath_time': 'bgp graceful-restart stalepath-time',
-    'router_id': 'bgp router-id',
-    'timer_bgp_hold': 'timers bgp',
-    'timer_bgp_keepalive': 'timers bgp',
-    'vrf': 'address-family ipv4 vrf'
+    "asn": "router bgp",
+    "bestpath_always_compare_med": "bgp always-compare-med",
+    "bestpath_compare_routerid": "bgp bestpath compare-routerid",
+    "bestpath_med_confed": "bgp bestpath med confed",
+    "bestpath_med_missing_as_worst": "bgp bestpath med missing-as-worst",
+    "cluster_id": "bgp cluster-id",
+    "confederation_id": " bgp confederation identifier",
+    "confederation_peers": "bgp confederation peers",
+    "enforce_first_as": "bgp enforce-first-as",
+    "graceful_restart": "bgp graceful-restart",
+    "graceful_restart_timers_restart": "bgp graceful-restart restart-time",
+    "graceful_restart_timers_stalepath_time": "bgp graceful-restart stalepath-time",
+    "router_id": "bgp router-id",
+    "timer_bgp_hold": "timers bgp",
+    "timer_bgp_keepalive": "timers bgp",
+    "vrf": "address-family ipv4 vrf",
 }
 
 PARAM_TO_DEFAULT_KEYMAP = {
-    'timer_bgp_keepalive': '60',
-    'timer_bgp_hold': '180',
-    'graceful_restart': True,
-    'graceful_restart_timers_restart': '120',
-    'graceful_restart_timers_stalepath_time': '300',
-    'enforce_first_as': True,
-    'router_id': '',
-    'cluster_id': '',
-    'confederation_id': '',
+    "timer_bgp_keepalive": "60",
+    "timer_bgp_hold": "180",
+    "graceful_restart": True,
+    "graceful_restart_timers_restart": "120",
+    "graceful_restart_timers_stalepath_time": "300",
+    "enforce_first_as": True,
+    "router_id": "",
+    "cluster_id": "",
+    "confederation_id": "",
 }
 
 
@@ -197,30 +205,30 @@ def apply_key_map(key_map, table):
 def state_absent(module, existing, candidate):
     commands = []
     parents = []
-    if module.params['vrf'] == 'default':
-        commands.append('no router bgp {0}'.format(module.params['asn']))
-    elif existing.get('vrf') == module.params['vrf']:
-        commands.append('no address-family ipv4 vrf {0}'.format(module.params['vrf']))
-        parents = ['router bgp {0}'.format(module.params['asn'])]
+    if module.params["vrf"] == "default":
+        commands.append("no router bgp {0}".format(module.params["asn"]))
+    elif existing.get("vrf") == module.params["vrf"]:
+        commands.append("no address-family ipv4 vrf {0}".format(module.params["vrf"]))
+        parents = ["router bgp {0}".format(module.params["asn"])]
 
     candidate.add(commands, parents=parents)
 
 
 def fix_commands(commands):
-    local_as_command = ''
-    confederation_id_command = ''
-    confederation_peers_command = ''
+    local_as_command = ""
+    confederation_id_command = ""
+    confederation_peers_command = ""
 
     for command in commands:
-        if 'local-as' in command:
+        if "local-as" in command:
             local_as_command = command
-        elif 'confederation identifier' in command:
+        elif "confederation identifier" in command:
             confederation_id_command = command
-        elif 'confederation peers' in command:
+        elif "confederation peers" in command:
             confederation_peers_command = command
 
     if local_as_command and confederation_id_command:
-        if 'no' in confederation_id_command:
+        if "no" in confederation_id_command:
             commands.pop(commands.index(local_as_command))
             commands.pop(commands.index(confederation_id_command))
             commands.append(confederation_id_command)
@@ -233,7 +241,7 @@ def fix_commands(commands):
 
     if confederation_peers_command and confederation_id_command:
         if local_as_command:
-            if 'no' in local_as_command:
+            if "no" in local_as_command:
                 commands.pop(commands.index(local_as_command))
                 commands.pop(commands.index(confederation_id_command))
                 commands.pop(commands.index(confederation_peers_command))
@@ -265,47 +273,47 @@ def state_present(module, existing, proposed, candidate):
         if value is True:
             commands.append(key)
         elif value is False:
-            commands.append('no {0}'.format(key))
-        elif value == 'default':
+            commands.append("no {0}".format(key))
+        elif value == "default":
             default_value = PARAM_TO_DEFAULT_KEYMAP.get(key)
             existing_value = existing_commands.get(key)
 
             if default_value:
-                commands.append('{0} {1}'.format(key, default_value))
+                commands.append("{0} {1}".format(key, default_value))
             elif existing_value:
-                if key == 'confederation peers':
-                    existing_value = ' '.join(existing_value)
-                commands.append('no {0} {1}'.format(key, existing_value))
+                if key == "confederation peers":
+                    existing_value = " ".join(existing_value)
+                commands.append("no {0} {1}".format(key, existing_value))
         elif not value:
             existing_value = existing_commands.get(key)
             if existing_value:
-                commands.append('no {0} {1}'.format(key, existing_value))
-        elif key == 'confederation peers':
-            commands.append('{0} {1}'.format(key, value))
-        elif key.startswith('timers bgp'):
-            command = 'timers bgp {0} {1}'.format(
-                proposed['timer_bgp_keepalive'],
-                proposed['timer_bgp_hold'])
+                commands.append("no {0} {1}".format(key, existing_value))
+        elif key == "confederation peers":
+            commands.append("{0} {1}".format(key, value))
+        elif key.startswith("timers bgp"):
+            command = "timers bgp {0} {1}".format(
+                proposed["timer_bgp_keepalive"], proposed["timer_bgp_hold"]
+            )
             if command not in commands:
                 commands.append(command)
         else:
-            if value.startswith('size'):
-                value = value.replace('_', ' ')
-            command = '{0} {1}'.format(key, value)
+            if value.startswith("size"):
+                value = value.replace("_", " ")
+            command = "{0} {1}".format(key, value)
             commands.append(command)
 
     parents = []
     if commands:
         commands = fix_commands(commands)
-        parents = ['router bgp {0}'.format(module.params['asn'])]
-        if module.params['vrf'] != 'default':
-            parents.append('address-family ipv4 vrf {0}'.format(module.params['vrf']))
+        parents = ["router bgp {0}".format(module.params["asn"])]
+        if module.params["vrf"] != "default":
+            parents.append("address-family ipv4 vrf {0}".format(module.params["vrf"]))
     elif proposed:
-        if module.params['vrf'] != 'default':
-            commands.append('address-family ipv4 vrf {0}'.format(module.params['vrf']))
-            parents = ['router bgp {0}'.format(module.params['asn'])]
+        if module.params["vrf"] != "default":
+            commands.append("address-family ipv4 vrf {0}".format(module.params["vrf"]))
+            parents = ["router bgp {0}".format(module.params["asn"])]
         else:
-            commands.append('router bgp {0}'.format(module.params['asn']))
+            commands.append("router bgp {0}".format(module.params["asn"]))
 
     candidate.add(commands, parents=parents)
 
@@ -313,32 +321,32 @@ def state_present(module, existing, proposed, candidate):
 def get_value(arg, config):
     command = PARAM_TO_COMMAND_KEYMAP.get(arg)
 
-    if arg == 'enforce_first_as':
-        no_command_re = re.compile(r'no\s+{0}\s*'.format(command), re.M)
+    if arg == "enforce_first_as":
+        no_command_re = re.compile(r"no\s+{0}\s*".format(command), re.M)
         value = True
 
         if no_command_re.search(config):
             value = False
 
     elif arg in BOOL_PARAMS:
-        has_command = re.search(r'^\s+{0}\s*$'.format(command), config, re.M)
+        has_command = re.search(r"^\s+{0}\s*$".format(command), config, re.M)
         value = False
 
         if has_command:
             value = True
     else:
-        command_val_re = re.compile(r'(?:{0}\s)(?P<value>.*)'.format(command), re.M)
-        value = ''
+        command_val_re = re.compile(r"(?:{0}\s)(?P<value>.*)".format(command), re.M)
+        value = ""
 
         has_command = command_val_re.search(config)
         if has_command:
-            found_value = has_command.group('value')
+            found_value = has_command.group("value")
 
-            if arg == 'confederation_peers':
+            if arg == "confederation_peers":
                 value = found_value.split()
-            elif arg == 'timer_bgp_keepalive':
+            elif arg == "timer_bgp_keepalive":
                 value = found_value.split()[0]
-            elif arg == 'timer_bgp_hold':
+            elif arg == "timer_bgp_hold":
                 split_values = found_value.split()
                 if len(split_values) == 2:
                     value = split_values[1]
@@ -350,18 +358,21 @@ def get_value(arg, config):
 
 def get_existing(module, args, warnings):
     existing = {}
-    netcfg = CustomNetworkConfig(indent=2, contents=get_config(module, flags=['bgp']))
+    netcfg = CustomNetworkConfig(indent=2, contents=get_config(module, flags=["bgp"]))
 
-    asn_re = re.compile(r'router bgp (?P<existing_asn>\d+)', re.S)
+    asn_re = re.compile(r"router bgp (?P<existing_asn>\d+)", re.S)
     asn_match = asn_re.match(str(netcfg))
 
     if asn_match:
-        existing_asn = asn_match.group('existing_asn')
+        existing_asn = asn_match.group("existing_asn")
 
-        bgp_parent = 'router bgp {0}'.format(existing_asn)
+        bgp_parent = "router bgp {0}".format(existing_asn)
 
-        if module.params['vrf'] != 'default':
-            parents = [bgp_parent, 'address-family ipv4 vrf {0}'.format(module.params['vrf'])]
+        if module.params["vrf"] != "default":
+            parents = [
+                bgp_parent,
+                "address-family ipv4 vrf {0}".format(module.params["vrf"]),
+            ]
         else:
             parents = [bgp_parent]
 
@@ -369,16 +380,21 @@ def get_existing(module, args, warnings):
 
         if config:
             for arg in args:
-                if arg != 'asn' and (module.params['vrf'] == 'default' or
-                                     arg not in GLOBAL_PARAMS):
+                if arg != "asn" and (
+                    module.params["vrf"] == "default" or arg not in GLOBAL_PARAMS
+                ):
                     existing[arg] = get_value(arg, config)
 
-            existing['asn'] = existing_asn
-            if module.params['vrf'] == 'default':
-                existing['vrf'] = 'default'
+            existing["asn"] = existing_asn
+            if module.params["vrf"] == "default":
+                existing["vrf"] = "default"
 
-    if not existing and module.params['vrf'] != 'default' and module.params['state'] == 'present':
-        msg = ("VRF {0} doesn't exist.".format(module.params['vrf']))
+    if (
+        not existing
+        and module.params["vrf"] != "default"
+        and module.params["state"] == "present"
+    ):
+        msg = "VRF {0} doesn't exist.".format(module.params["vrf"])
         module.fail_json(msg=msg)
         warnings.append(msg)
     return existing
@@ -386,89 +402,96 @@ def get_existing(module, args, warnings):
 
 def main():
     argument_spec = dict(
-        asn=dict(required=True, type='str'),
-        vrf=dict(required=False, type='str', default='default'),
-        bestpath_always_compare_med=dict(required=False, type='bool'),
-        bestpath_compare_routerid=dict(required=False, type='bool'),
-        bestpath_med_confed=dict(required=False, type='bool'),
-        bestpath_med_missing_as_worst=dict(required=False, type='bool'),
-        cluster_id=dict(required=False, type='str'),
-        confederation_id=dict(required=False, type='str'),
-        confederation_peers=dict(required=False, type='list'),
-        enforce_first_as=dict(required=False, type='bool'),
-        graceful_restart=dict(required=False, type='bool'),
-        graceful_restart_timers_restart=dict(required=False, type='str'),
-        graceful_restart_timers_stalepath_time=dict(required=False, type='str'),
-        local_as=dict(required=False, type='str'),
-        router_id=dict(required=False, type='str'),
-        timer_bgp_hold=dict(required=False, type='str'),
-        timer_bgp_keepalive=dict(required=False, type='str'),
-        state=dict(choices=['present', 'absent'], default='present', required=False),
+        asn=dict(required=True, type="str"),
+        vrf=dict(required=False, type="str", default="default"),
+        bestpath_always_compare_med=dict(required=False, type="bool"),
+        bestpath_compare_routerid=dict(required=False, type="bool"),
+        bestpath_med_confed=dict(required=False, type="bool"),
+        bestpath_med_missing_as_worst=dict(required=False, type="bool"),
+        cluster_id=dict(required=False, type="str"),
+        confederation_id=dict(required=False, type="str"),
+        confederation_peers=dict(required=False, type="list"),
+        enforce_first_as=dict(required=False, type="bool"),
+        graceful_restart=dict(required=False, type="bool"),
+        graceful_restart_timers_restart=dict(required=False, type="str"),
+        graceful_restart_timers_stalepath_time=dict(required=False, type="str"),
+        local_as=dict(required=False, type="str"),
+        router_id=dict(required=False, type="str"),
+        timer_bgp_hold=dict(required=False, type="str"),
+        timer_bgp_keepalive=dict(required=False, type="str"),
+        state=dict(choices=["present", "absent"], default="present", required=False),
     )
     argument_spec.update(awplus_argument_spec)
 
-    module = AnsibleModule(argument_spec=argument_spec,
-                           required_together=[['timer_bgp_hold', 'timer_bgp_keepalive']],
-                           supports_check_mode=True)
+    module = AnsibleModule(
+        argument_spec=argument_spec,
+        required_together=[["timer_bgp_hold", "timer_bgp_keepalive"]],
+        supports_check_mode=True,
+    )
 
     warnings = list()
     result = dict(changed=False, warnings=warnings)
 
-    state = module.params['state']
+    state = module.params["state"]
 
-    if module.params['vrf'] != 'default':
+    if module.params["vrf"] != "default":
         for param in GLOBAL_PARAMS:
             if module.params[param]:
-                module.fail_json(msg='Global params can be modified only under "default" VRF.',
-                                 vrf=module.params['vrf'],
-                                 global_param=param)
+                module.fail_json(
+                    msg='Global params can be modified only under "default" VRF.',
+                    vrf=module.params["vrf"],
+                    global_param=param,
+                )
 
     args = PARAM_TO_COMMAND_KEYMAP.keys()
     existing = get_existing(module, args, warnings)
 
-    if existing.get('asn') and state == 'present':
-        if existing.get('asn') != module.params['asn']:
-            module.fail_json(msg='Another BGP ASN already exists.',
-                             proposed_asn=module.params['asn'],
-                             existing_asn=existing.get('asn'))
+    if existing.get("asn") and state == "present":
+        if existing.get("asn") != module.params["asn"]:
+            module.fail_json(
+                msg="Another BGP ASN already exists.",
+                proposed_asn=module.params["asn"],
+                existing_asn=existing.get("asn"),
+            )
 
-    proposed_args = dict((k, v) for k, v in module.params.items()
-                         if v is not None and k in args)
+    proposed_args = dict(
+        (k, v) for k, v in module.params.items() if v is not None and k in args
+    )
     proposed = {}
     for key, value in proposed_args.items():
-        if key not in ['asn', 'vrf']:
-            if str(value).lower() == 'default':
-                value = PARAM_TO_DEFAULT_KEYMAP.get(key, 'default')
-            if key == 'confederation_peers':
-                if value[0] == 'default':
+        if key not in ["asn", "vrf"]:
+            if str(value).lower() == "default":
+                value = PARAM_TO_DEFAULT_KEYMAP.get(key, "default")
+            if key == "confederation_peers":
+                if value[0] == "default":
                     if existing.get(key):
-                        proposed[key] = 'default'
+                        proposed[key] = "default"
                 else:
                     v = set([int(i) for i in value])
                     ex = set([int(i) for i in existing.get(key)])
                     if v != ex:
-                        proposed[key] = ' '.join(str(s) for s in v)
+                        proposed[key] = " ".join(str(s) for s in v)
             else:
                 if existing.get(key) != value:
                     proposed[key] = value
 
     candidate = CustomNetworkConfig(indent=3)
-    if state == 'present':
+    if state == "present":
         state_present(module, existing, proposed, candidate)
-    elif existing.get('asn') == module.params['asn']:
+    elif existing.get("asn") == module.params["asn"]:
         state_absent(module, existing, candidate)
 
     if candidate:
         candidate = candidate.items_text()
         if not module.check_mode:
             load_config(module, candidate)
-        result['changed'] = True
-        result['commands'] = candidate
+        result["changed"] = True
+        result["commands"] = candidate
     else:
-        result['commands'] = []
+        result["commands"] = []
 
     module.exit_json(**result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

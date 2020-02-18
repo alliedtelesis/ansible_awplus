@@ -5,11 +5,14 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'network'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "network",
+}
 
 DOCUMENTATION = """
 ---
@@ -72,22 +75,27 @@ commands:
 import re
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import get_config, load_config
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import awplus_argument_spec
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
+    get_config,
+    load_config,
+)
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
+    awplus_argument_spec,
+)
 
 
 def map_obj_to_commands(updates, module):
     commands = list()
     want, have = updates
-    state = module.params['state']
+    state = module.params["state"]
 
-    if state == 'absent' and 'text' in have.keys() and have['text']:
-        commands.append('no banner %s' % module.params['banner'])
+    if state == "absent" and "text" in have.keys() and have["text"]:
+        commands.append("no banner %s" % module.params["banner"])
 
-    elif state == 'present':
-        if want['text'] and (want['text'] != have.get('text')):
-            banner_cmd = 'banner %s ' % module.params['banner']
-            banner_cmd += want['text']
+    elif state == "present":
+        if want["text"] and (want["text"] != have.get("text")):
+            banner_cmd = "banner %s " % module.params["banner"]
+            banner_cmd += want["text"]
             commands.append(banner_cmd)
 
     return commands
@@ -100,9 +108,9 @@ def map_config_to_obj(module):
     :param module:
     :return: banner config dict object.
     """
-    out = get_config(module, flags='| begin banner %s' % module.params['banner'])
+    out = get_config(module, flags="| begin banner %s" % module.params["banner"])
     if out:
-        regex = 'banner ' + module.params['banner'] + ' (.+)'
+        regex = "banner " + module.params["banner"] + " (.+)"
         match = re.search(regex, out, re.M)
         if match:
             output = match.group(1).strip()
@@ -110,19 +118,19 @@ def map_config_to_obj(module):
             output = None
     else:
         output = None
-    obj = {'banner': module.params['banner'], 'state': 'absent'}
+    obj = {"banner": module.params["banner"], "state": "absent"}
     if output:
-        obj['text'] = output
-        obj['state'] = 'present'
+        obj["text"] = output
+        obj["state"] = "present"
     return obj
 
 
 def map_params_to_obj(module):
-    text = module.params['text']
+    text = module.params["text"]
     return {
-        'banner': module.params['banner'],
-        'text': text,
-        'state': module.params['state']
+        "banner": module.params["banner"],
+        "text": text,
+        "state": module.params["state"],
     }
 
 
@@ -131,38 +139,38 @@ def main():
     main entry point for module execution
     """
     argument_spec = dict(
-        banner=dict(required=True, choices=['motd', 'exec']),
+        banner=dict(required=True, choices=["motd", "exec"]),
         text=dict(),
-        state=dict(default='present', choices=['present', 'absent'])
+        state=dict(default="present", choices=["present", "absent"]),
     )
 
     argument_spec.update(awplus_argument_spec)
 
-    required_if = [('state', 'present', ('text',))]
+    required_if = [("state", "present", ("text",))]
 
-    module = AnsibleModule(argument_spec=argument_spec,
-                           required_if=required_if,
-                           supports_check_mode=True)
+    module = AnsibleModule(
+        argument_spec=argument_spec, required_if=required_if, supports_check_mode=True
+    )
 
     warnings = list()
 
-    result = {'changed': False}
+    result = {"changed": False}
     if warnings:
-        result['warnings'] = warnings
+        result["warnings"] = warnings
     want = map_params_to_obj(module)
     have = map_config_to_obj(module)
 
     commands = map_obj_to_commands((want, have), module)
-    result['commands'] = commands
+    result["commands"] = commands
 
     if commands:
         if not module.check_mode:
             load_config(module, commands)
 
-        result['changed'] = True
+        result["changed"] = True
 
     module.exit_json(**result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

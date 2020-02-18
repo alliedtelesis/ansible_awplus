@@ -5,11 +5,14 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'network'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "network",
+}
 
 DOCUMENTATION = """
 ---
@@ -428,8 +431,12 @@ commands:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.l2_interfaces.l2_interfaces import L2_interfacesArgs
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.l2_interfaces.l2_interfaces import L2_interfaces
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.l2_interfaces.l2_interfaces import (
+    L2_interfacesArgs,
+)
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.l2_interfaces.l2_interfaces import (
+    L2_interfaces,
+)
 
 
 def main():
@@ -438,12 +445,13 @@ def main():
 
     :returns: the result form module invocation
     """
-    module = AnsibleModule(argument_spec=L2_interfacesArgs.argument_spec,
-                           supports_check_mode=True)
+    module = AnsibleModule(
+        argument_spec=L2_interfacesArgs.argument_spec, supports_check_mode=True
+    )
 
     result = L2_interfaces(module).execute_module()
     module.exit_json(**result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -21,7 +21,8 @@
 #   builder template.
 #
 #############################################
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 """
 The arg spec for the awplus_lldp_global module
@@ -35,11 +36,19 @@ class Lldp_globalArgs(object):  # pylint: disable=R0903
     def __init__(self, **kwargs):
         pass
 
-    argument_spec = {'config': {'options': {'enabled': {'type': 'bool'},
-                                            'holdtime': {'type': 'int'},
-                                            'reinit': {'type': 'int'},
-                                            'timer': {'type': 'int'}},
-                                'type': 'dict'},
-                     'state': {'choices': ['merged', 'replaced', 'deleted'],
-                               'default': 'merged',
-                               'type': 'str'}}  # pylint: disable=C0301
+    argument_spec = {
+        "config": {
+            "options": {
+                "enabled": {"type": "bool"},
+                "holdtime": {"type": "int"},
+                "reinit": {"type": "int"},
+                "timer": {"type": "int"},
+            },
+            "type": "dict",
+        },
+        "state": {
+            "choices": ["merged", "replaced", "deleted"],
+            "default": "merged",
+            "type": "str",
+        },
+    }  # pylint: disable=C0301
