@@ -235,4 +235,3 @@ class Lldp_global(ConfigBase):
             self._remove_command_from_config_list(cmd, commands)
 
         return commands
-

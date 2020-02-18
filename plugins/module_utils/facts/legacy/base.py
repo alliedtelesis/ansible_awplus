@@ -359,4 +359,3 @@ class Interfaces(FactsBase):
         match = re.search(r"Port id: (.+)$", data, re.M)
         if match:
             return match.group(1)
-

@@ -3,6 +3,7 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 #
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import json
@@ -33,17 +34,18 @@ def register_provider(network_os, module_name):
         finally:
             _provider_lock.release()
         return cls
+
     return wrapper
 
 
 def get(network_os, module_name, connection_type):
     network_os_providers = _registered_providers.get(network_os)
     if network_os_providers is None:
-        raise ValueError('unable to find a suitable provider for this module')
+        raise ValueError("unable to find a suitable provider for this module")
     if connection_type not in network_os_providers:
-        raise ValueError('provider does not support this connection type')
+        raise ValueError("provider does not support this connection type")
     elif module_name not in network_os_providers[connection_type]:
-        raise ValueError('could not find a suitable provider for this module')
+        raise ValueError("could not find a suitable provider for this module")
     return network_os_providers[connection_type][module_name]
 
 
@@ -58,14 +60,14 @@ class ProviderBase(object):
 
     @property
     def capabilities(self):
-        if not hasattr(self, '_capabilities'):
+        if not hasattr(self, "_capabilities"):
             resp = self.from_json(self.connection.get_capabilities())
-            setattr(self, '_capabilities', resp)
-        return getattr(self, '_capabilities')
+            setattr(self, "_capabilities", resp)
+        return getattr(self, "_capabilities")
 
     def get_value(self, path):
         params = self.params.copy()
-        for key in path.split('.'):
+        for key in path.split("."):
             params = params[key]
         return params
 
@@ -78,14 +80,14 @@ class ProviderBase(object):
 
 class CliProvider(ProviderBase):
 
-    supported_connections = ('network_cli',)
+    supported_connections = ("network_cli",)
 
     @property
     def capabilities(self):
-        if not hasattr(self, '_capabilities'):
+        if not hasattr(self, "_capabilities"):
             resp = self.from_json(self.connection.get_capabilities())
-            setattr(self, '_capabilities', resp)
-        return getattr(self, '_capabilities')
+            setattr(self, "_capabilities", resp)
+        return getattr(self, "_capabilities")
 
     def get_config_context(self, config, path, indent=1):
         if config is not None:
@@ -101,8 +103,8 @@ class CliProvider(ProviderBase):
 
     def cli(self, command):
         try:
-            if not hasattr(self, '_command_output'):
-                setattr(self, '_command_output', {})
+            if not hasattr(self, "_command_output"):
+                setattr(self, "_command_output", {})
             return self._command_output[command]
         except KeyError:
             out = self.connection.get(command)

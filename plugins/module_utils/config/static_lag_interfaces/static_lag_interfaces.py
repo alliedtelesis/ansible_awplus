@@ -341,4 +341,3 @@ class Static_Lag_interfaces(ConfigBase):
                     )
 
         return commands
-

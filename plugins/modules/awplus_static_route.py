@@ -5,11 +5,14 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'network'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "network",
+}
 
 DOCUMENTATION = """
 ---
@@ -96,9 +99,17 @@ commands:
         - ip route 192.168.2.0 255.255.255.0 10.0.0.1
 """
 
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import awplus_argument_spec
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import get_config, load_config
-from ansible.module_utils.network.common.utils import remove_default_spec, validate_ip_address
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
+    awplus_argument_spec,
+)
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
+    get_config,
+    load_config,
+)
+from ansible.module_utils.network.common.utils import (
+    remove_default_spec,
+    validate_ip_address,
+)
 from ansible.module_utils.basic import AnsibleModule
 from re import findall
 from copy import deepcopy
@@ -108,41 +119,45 @@ def map_obj_to_commands(want, have):
     commands = list()
 
     for w in want:
-        state = w['state']
-        del w['state']
+        state = w["state"]
+        del w["state"]
         # Try to match an existing config with the desired config
         for h in have:
             # To delete admin_distance param from have if not it want before comparing both fields
-            if not w.get('admin_distance') and h.get('admin_distance'):
-                del h['admin_distance']
+            if not w.get("admin_distance") and h.get("admin_distance"):
+                del h["admin_distance"]
             diff = list(set(w.items()) ^ set(h.items()))
             if not diff:
                 break
             # if route is present with name or name already starts with wanted name it will not change
-            elif len(diff) == 2 and diff[0][0] == diff[1][0] == 'name' and (not w['name'] or h['name'].startswith(w['name'])):
+            elif (
+                len(diff) == 2
+                and diff[0][0] == diff[1][0] == "name"
+                and (not w["name"] or h["name"].startswith(w["name"]))
+            ):
                 break
         # If no matches found, clear `h`
         else:
             h = None
 
-        command = 'ip route'
-        prefix = w['prefix']
-        mask = w['mask']
-        vrf = w.get('vrf')
-        prefix_mask = prefix + '/' + mask
+        command = "ip route"
+        prefix = w["prefix"]
+        mask = w["mask"]
+        vrf = w.get("vrf")
+        prefix_mask = prefix + "/" + mask
 
         if vrf:
-            command = ' '.join((command, 'vrf', vrf, prefix_mask))
+            command = " ".join((command, "vrf", vrf, prefix_mask))
         else:
-            command = ' '.join((command, prefix_mask))
+            command = " ".join((command, prefix_mask))
 
-        for key in ['next_hop', 'interface', 'admin_distance']:
+        for key in ["next_hop", "interface", "admin_distance"]:
             if w.get(key):
-                command = ' '.join((command, w.get(key)))
+                command = " ".join((command, w.get(key)))
 
-        if state == 'absent' and h:
-            commands.append('no %s' % command)
-        elif state == 'present' and not h:
+        if state == "absent" and h:
+            commands.append("no %s" % command)
+        elif state == "present" and not h:
             commands.append(command)
 
     return commands
@@ -151,7 +166,7 @@ def map_obj_to_commands(want, have):
 def map_config_to_obj(module):
     obj = []
     route = {}
-    out = get_config(module, flags='ip route')
+    out = get_config(module, flags="ip route")
 
     for line in out.splitlines():
         # Split by whitespace but do not split quotes, needed for name parameter
@@ -160,18 +175,18 @@ def map_config_to_obj(module):
         if len(splitted_line) <= 1:
             continue
 
-        if splitted_line[2] == 'vrf':
-            route = {'vrf': splitted_line[3]}
+        if splitted_line[2] == "vrf":
+            route = {"vrf": splitted_line[3]}
             del splitted_line[:4]  # Removes the words ip route vrf vrf_name
         else:
             route = {}
             del splitted_line[:2]  # Removes the words ip route
 
         prefix_mask = splitted_line[0]
-        prefix_mask_list = prefix_mask.split('/')
+        prefix_mask_list = prefix_mask.split("/")
         prefix = prefix_mask_list[0]
         mask = prefix_mask_list[1]
-        route.update({'prefix': prefix, 'mask': mask, 'admin_distance': '1'})
+        route.update({"prefix": prefix, "mask": mask, "admin_distance": "1"})
 
         for word in splitted_line[1:]:
             if validate_ip_address(word):
@@ -187,11 +202,10 @@ def map_config_to_obj(module):
 
 
 def map_params_to_obj(module, required_together=None):
-    keys = ['prefix', 'mask', 'state', 'next_hop',
-            'vrf', 'interface', 'admin_distance']
+    keys = ["prefix", "mask", "state", "next_hop", "vrf", "interface", "admin_distance"]
     obj = []
 
-    aggregate = module.params.get('aggregate')
+    aggregate = module.params.get("aggregate")
     if aggregate:
         for item in aggregate:
             route = item.copy()
@@ -217,56 +231,58 @@ def main():
     """ main entry point for module execution
     """
     element_spec = dict(
-        prefix=dict(type='str'),
-        mask=dict(type='str'),
-        next_hop=dict(type='str'),
-        vrf=dict(type='str'),
-        interface=dict(type='str'),
-        admin_distance=dict(type='str'),
-        state=dict(default='present', choices=['present', 'absent'])
+        prefix=dict(type="str"),
+        mask=dict(type="str"),
+        next_hop=dict(type="str"),
+        vrf=dict(type="str"),
+        interface=dict(type="str"),
+        admin_distance=dict(type="str"),
+        state=dict(default="present", choices=["present", "absent"]),
     )
 
     aggregate_spec = deepcopy(element_spec)
-    aggregate_spec['prefix'] = dict(required=True)
+    aggregate_spec["prefix"] = dict(required=True)
 
     # remove default in aggregate spec, to handle common arguments
     remove_default_spec(aggregate_spec)
 
     argument_spec = dict(
-        aggregate=dict(type='list', elements='dict', options=aggregate_spec),
+        aggregate=dict(type="list", elements="dict", options=aggregate_spec),
     )
 
     argument_spec.update(element_spec)
     argument_spec.update(awplus_argument_spec)
 
-    required_one_of = [['aggregate', 'prefix']]
-    required_together = [['prefix', 'mask']]
-    mutually_exclusive = [['aggregate', 'prefix']]
+    required_one_of = [["aggregate", "prefix"]]
+    required_together = [["prefix", "mask"]]
+    mutually_exclusive = [["aggregate", "prefix"]]
 
-    module = AnsibleModule(argument_spec=argument_spec,
-                           required_one_of=required_one_of,
-                           mutually_exclusive=mutually_exclusive,
-                           supports_check_mode=True)
+    module = AnsibleModule(
+        argument_spec=argument_spec,
+        required_one_of=required_one_of,
+        mutually_exclusive=mutually_exclusive,
+        supports_check_mode=True,
+    )
 
     warnings = list()
 
-    result = {'changed': False}
+    result = {"changed": False}
     if warnings:
-        result['warnings'] = warnings
+        result["warnings"] = warnings
     want = map_params_to_obj(module, required_together=required_together)
     have = map_config_to_obj(module)
 
     commands = map_obj_to_commands(want, have)
-    result['commands'] = commands
+    result["commands"] = commands
 
     if commands:
         if not module.check_mode:
             load_config(module, commands)
 
-        result['changed'] = True
+        result["changed"] = True
 
     module.exit_json(**result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

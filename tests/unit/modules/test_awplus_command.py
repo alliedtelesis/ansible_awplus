@@ -109,9 +109,7 @@ class TestAwplusCommandModule(TestAwplusModule):
 
     def test_awplus_command_configure_check_warning(self):
         commands = ["configure terminal"]
-        set_module_args(
-            {"commands": commands, "_ansible_check_mode": True,}
-        )
+        set_module_args({"commands": commands, "_ansible_check_mode": True})
         result = self.execute_module()
         self.assertEqual(
             result["warnings"],

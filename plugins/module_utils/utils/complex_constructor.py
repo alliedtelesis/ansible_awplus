@@ -89,9 +89,7 @@ def arrange_commands(first, diff):
     return commands
 
 
-def get_commands(
-    module, key_to_command_map, first_map, existing_first, existing
-):
+def get_commands(module, key_to_command_map, first_map, existing_first, existing):
     constructed_ospf, constructed = construct_commands(
         module, key_to_command_map, first_map
     )

@@ -207,4 +207,3 @@ class TestAwplusLldpGlobalModule(TestAwplusModule):
         set_module_args(dict(config=[dict(name="port1.0.2")], state="deleted"))
         commands = ["interface port1.0.2", "no lldp receive", "no lldp transmit"]
         self.execute_module(changed=True, commands=commands)
-

@@ -99,7 +99,7 @@ class TestAwplusOspfModule(TestAwplusModule):
 
     def test_awplus_ospf_area_default_cost_no_val(self):
         set_module_args(
-            {"router": {"process_id": 100}, "area": {"area_id": 1, "default_cost": {}},}
+            {"router": {"process_id": 100}, "area": {"area_id": 1, "default_cost": {}}}
         )
         self.execute_module(failed=True)
 
@@ -119,7 +119,7 @@ class TestAwplusOspfModule(TestAwplusModule):
         set_module_args(
             {
                 "router": {"process_id": 100},
-                "area": {"area_id": 1, "authentication": {"message_digest": True},},
+                "area": {"area_id": 1, "authentication": {"message_digest": True}},
             }
         )
         result = self.execute_module(changed=True)
@@ -143,7 +143,7 @@ class TestAwplusOspfModule(TestAwplusModule):
                 "router": {"process_id": 100},
                 "area": {
                     "area_id": 1,
-                    "authentication": {"message_digest": True, "state": "absent",},
+                    "authentication": {"message_digest": True, "state": "absent"},
                 },
             }
         )
@@ -249,14 +249,14 @@ class TestAwplusOspfModule(TestAwplusModule):
                 "router": {"process_id": 100},
                 "area": {
                     "area_id": 1,
-                    "nssa": {"state": "absent", "default_information_originate": True,},
+                    "nssa": {"state": "absent", "default_information_originate": True},
                 },
             }
         )
         result = self.execute_module(changed=True)
         self.assertEqual(
             result["commands"],
-            ["router ospf 100", "no area 1 nssa default-information-originate",],
+            ["router ospf 100", "no area 1 nssa default-information-originate"],
         )
 
     def test_awplus_ospf_area_nssa_no_redestribution(self):
@@ -442,7 +442,7 @@ class TestAwplusOspfModule(TestAwplusModule):
         set_module_args(
             {
                 "router": {"process_id": 100},
-                "area": {"area_id": 1, "virtual_link": {"ip_addr": "10.10.11.50"},},
+                "area": {"area_id": 1, "virtual_link": {"ip_addr": "10.10.11.50"}},
             }
         )
         result = self.execute_module(changed=True)
@@ -502,7 +502,7 @@ class TestAwplusOspfModule(TestAwplusModule):
                 "router": {"process_id": 100},
                 "area": {
                     "area_id": 1,
-                    "virtual_link": {"ip_addr": "10.10.11.50", "state": "absent",},
+                    "virtual_link": {"ip_addr": "10.10.11.50", "state": "absent"},
                 },
             }
         )
@@ -565,14 +565,14 @@ class TestAwplusOspfModule(TestAwplusModule):
                 "router": {"process_id": 100},
                 "area": {
                     "area_id": 1,
-                    "virtual_link": {"ip_addr": "10.10.11.50", "authentication": True,},
+                    "virtual_link": {"ip_addr": "10.10.11.50", "authentication": True},
                 },
             }
         )
         result = self.execute_module(changed=True)
         self.assertEqual(
             result["commands"],
-            ["router ospf 100", "area 1 virtual-link 10.10.11.50 authentication",],
+            ["router ospf 100", "area 1 virtual-link 10.10.11.50 authentication"],
         )
 
     def test_awplus_ospf_area_virtual_link_authentication_message_digest(self):
@@ -665,7 +665,7 @@ class TestAwplusOspfModule(TestAwplusModule):
         result = self.execute_module(changed=True)
         self.assertEqual(
             result["commands"],
-            ["router ospf 100", "no area 1 virtual-link 10.10.11.50 authentication",],
+            ["router ospf 100", "no area 1 virtual-link 10.10.11.50 authentication"],
         )
 
     def test_awplus_ospf_area_virtual_link_authentication_auth_no(self):
@@ -824,7 +824,7 @@ class TestAwplusOspfModule(TestAwplusModule):
 
     def test_awplus_ospf_router_id(self):
         set_module_args(
-            {"router": {"process_id": 100}, "ospf_router_id": {"ip_addr": "2.3.4.5"},}
+            {"router": {"process_id": 100}, "ospf_router_id": {"ip_addr": "2.3.4.5"}}
         )
         result = self.execute_module(changed=True)
         self.assertEqual(
@@ -833,7 +833,7 @@ class TestAwplusOspfModule(TestAwplusModule):
 
     def test_awplus_ospf_router_id_no(self):
         set_module_args(
-            {"router": {"process_id": 100}, "ospf_router_id": {"state": "absent"},}
+            {"router": {"process_id": 100}, "ospf_router_id": {"state": "absent"}}
         )
         result = self.execute_module(changed=True)
         self.assertEqual(result["commands"], ["router ospf 100", "no ospf router-id"])
@@ -852,7 +852,7 @@ class TestAwplusOspfModule(TestAwplusModule):
 
     def test_awplus_ospf_passive_interface_interface(self):
         set_module_args(
-            {"router": {"process_id": 100}, "passive_interface": {"name": "vlan1"},}
+            {"router": {"process_id": 100}, "passive_interface": {"name": "vlan1"}}
         )
         result = self.execute_module(changed=True)
         self.assertEqual(
@@ -904,7 +904,7 @@ class TestAwplusOspfModule(TestAwplusModule):
         set_module_args(
             {
                 "router": {"process_id": 100},
-                "passive_interface": {"ip_addr": "10.0.0.1", "state": "absent",},
+                "passive_interface": {"ip_addr": "10.0.0.1", "state": "absent"},
             }
         )
         result = self.execute_module(changed=True)
@@ -995,33 +995,33 @@ class TestAwplusOspfModule(TestAwplusModule):
         set_module_args(
             {
                 "router": {"process_id": 100},
-                "summary_address": {"ip_addr": "172.16.0.0/16", "not_advertise": True,},
+                "summary_address": {"ip_addr": "172.16.0.0/16", "not_advertise": True},
             }
         )
         result = self.execute_module(changed=True)
         self.assertEqual(
             result["commands"],
-            ["router ospf 100", "summary-address 172.16.0.0/16 not-advertise",],
+            ["router ospf 100", "summary-address 172.16.0.0/16 not-advertise"],
         )
 
     def test_awplus_ospf_summary_address_tag(self):
         set_module_args(
             {
                 "router": {"process_id": 100},
-                "summary_address": {"ip_addr": "172.16.0.0/16", "tag": 123456789,},
+                "summary_address": {"ip_addr": "172.16.0.0/16", "tag": 123456789},
             }
         )
         result = self.execute_module(changed=True)
         self.assertEqual(
             result["commands"],
-            ["router ospf 100", "summary-address 172.16.0.0/16 tag 123456789",],
+            ["router ospf 100", "summary-address 172.16.0.0/16 tag 123456789"],
         )
 
     def test_awplus_ospf_summary_address_no(self):
         set_module_args(
             {
                 "router": {"process_id": 100},
-                "summary_address": {"ip_addr": "172.16.0.0/16", "state": "absent",},
+                "summary_address": {"ip_addr": "172.16.0.0/16", "state": "absent"},
             }
         )
         result = self.execute_module(changed=True)
@@ -1043,7 +1043,7 @@ class TestAwplusOspfModule(TestAwplusModule):
         result = self.execute_module(changed=True)
         self.assertEqual(
             result["commands"],
-            ["router ospf 100", "no summary-address 172.16.0.0/16 not-advertise",],
+            ["router ospf 100", "no summary-address 172.16.0.0/16 not-advertise"],
         )
 
     def test_awplus_ospf_summary_address_tag_no(self):
@@ -1060,6 +1060,5 @@ class TestAwplusOspfModule(TestAwplusModule):
         result = self.execute_module(changed=True)
         self.assertEqual(
             result["commands"],
-            ["router ospf 100", "no summary-address 172.16.0.0/16 tag 123456789",],
+            ["router ospf 100", "no summary-address 172.16.0.0/16 tag 123456789"],
         )
-

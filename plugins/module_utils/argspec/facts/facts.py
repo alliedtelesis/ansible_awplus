@@ -9,6 +9,7 @@ The arg spec for the AW+ facts module.
 """
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
@@ -20,6 +21,6 @@ class FactsArgs(object):
         pass
 
     argument_spec = {
-        'gather_subset': dict(default=['!config'], type='list'),
-        'gather_network_resources': dict(type='list'),
+        "gather_subset": dict(default=["!config"], type="list"),
+        "gather_network_resources": dict(type="list"),
     }

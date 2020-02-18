@@ -5,13 +5,14 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
 ANSIBLE_METADATA = {
-    'metadata_version': '1.1',
-    'status': ['preview'],
-    'supported_by': 'network',
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "network",
 }
 
 
@@ -82,26 +83,26 @@ KEY_TO_COMMAND_MAP = {}
 
 def _append(cmd, state, val):
     if state == PRESENT and val is not None:
-        return cmd + ' {}'.format(val)
+        return cmd + " {}".format(val)
     return cmd
 
 
 def router_ospf_map(module, commands):
-    params = module.params['router']
-    cmd = 'router ipv6 ospf'
+    params = module.params["router"]
+    cmd = "router ipv6 ospf"
     state = params[STATE]
 
-    process_id = params.get('process_id')
+    process_id = params.get("process_id")
 
     if process_id:
-        cmd += ' {}'.format(process_id)
+        cmd += " {}".format(process_id)
     if state == ABSENT and len(commands) == 0:
-        return 'no ' + cmd
+        return "no " + cmd
     return cmd
 
 
 def get_existing_config(module):
-    config = (get_config(module, flags=[' router ipv6 ospf']),)
+    config = (get_config(module, flags=[" router ipv6 ospf"]),)
 
     existing_config = set()
     ospf = None
@@ -109,7 +110,7 @@ def get_existing_config(module):
         for line in item.splitlines():
             s = line.strip()
             existing_config.add(s)
-            if 'router ipv6 ospf' in s:
+            if "router ipv6 ospf" in s:
                 ospf = s
 
     return ospf, existing_config
@@ -117,37 +118,35 @@ def get_existing_config(module):
 
 def main():
     router_spec = {
-        'state': {'choices': [PRESENT, ABSENT], 'default': PRESENT},
-        'process_id': {'type': 'int'},
-        'vrf_instance': {'type': 'str'},
+        "state": {"choices": [PRESENT, ABSENT], "default": PRESENT},
+        "process_id": {"type": "int"},
+        "vrf_instance": {"type": "str"},
     }
 
     argument_spec = {
-        'router': {'type': 'dict', 'options': router_spec, 'required': True},
+        "router": {"type": "dict", "options": router_spec, "required": True},
     }
 
     argument_spec.update(awplus_argument_spec)
 
-    module = AnsibleModule(
-        argument_spec=argument_spec, supports_check_mode=True
-    )
+    module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
 
     warnings = []
-    result = {'changed': False, 'warnings': warnings}
+    result = {"changed": False, "warnings": warnings}
 
     ospf, existing_config = get_existing_config(module)
     commands = get_commands(
         module, KEY_TO_COMMAND_MAP, router_ospf_map, ospf, existing_config
     )
-    result['commands'] = commands
+    result["commands"] = commands
 
     if commands:
         if not module.check_mode:
             load_config(module, commands)
-        result['changed'] = True
+        result["changed"] = True
 
     module.exit_json(**result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

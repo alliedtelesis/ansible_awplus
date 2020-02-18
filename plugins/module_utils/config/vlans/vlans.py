@@ -267,4 +267,3 @@ class Vlans(ConfigBase):
                 commands.append("vlan database")
                 commands.append("vlan {0} state {1}".format(vlan_id, want.get("state")))
         return commands
-

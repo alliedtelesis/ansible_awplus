@@ -65,7 +65,8 @@ class TestAwplusStaticLagInterfacesModule(TestAwplusModule):
         self.edit_config = self.mock_edit_config.start()
 
         self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.static_lag_interfaces.static_lag_interfaces.Static_Lag_interfacesFacts.get_device_data"
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils."
+            "facts.static_lag_interfaces.static_lag_interfaces.Static_Lag_interfacesFacts.get_device_data"
         )
         self.execute_show_command = self.mock_execute_show_command.start()
 
@@ -226,4 +227,3 @@ class TestAwplusStaticLagInterfacesModule(TestAwplusModule):
             "no static-channel-group",
         ]
         self.execute_module(changed=True, commands=commands)
-

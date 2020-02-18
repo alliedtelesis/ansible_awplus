@@ -5,11 +5,14 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'network'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "network",
+}
 
 DOCUMENTATION = """
 ---
@@ -162,9 +165,15 @@ ansible_net_neighbors:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.facts.facts import FactsArgs
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.facts import Facts
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import awplus_argument_spec
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.facts.facts import (
+    FactsArgs,
+)
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.facts import (
+    Facts,
+)
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
+    awplus_argument_spec,
+)
 
 
 def main():
@@ -176,10 +185,11 @@ def main():
     argument_spec = FactsArgs.argument_spec
     argument_spec.update(awplus_argument_spec)
 
-    module = AnsibleModule(argument_spec=argument_spec,
-                           supports_check_mode=True)
-    warnings = ['default value for `gather_subset` '
-                'will be changed to `min` from `!config` v2.11 onwards']
+    module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
+    warnings = [
+        "default value for `gather_subset` "
+        "will be changed to `min` from `!config` v2.11 onwards"
+    ]
 
     result = Facts(module).get_facts()
 
@@ -189,5 +199,5 @@ def main():
     module.exit_json(ansible_facts=ansible_facts, warnings=warnings)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

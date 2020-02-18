@@ -5,11 +5,14 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'network'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "network",
+}
 
 DOCUMENTATION = """
 ---
@@ -189,8 +192,12 @@ commands:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.lldp_global.lldp_global import Lldp_globalArgs
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.lldp_global.lldp_global import Lldp_global
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.lldp_global.lldp_global import (
+    Lldp_globalArgs,
+)
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.config.lldp_global.lldp_global import (
+    Lldp_global,
+)
 
 
 def main():
@@ -199,12 +206,13 @@ def main():
 
     :returns: the result form module invocation
     """
-    module = AnsibleModule(argument_spec=Lldp_globalArgs.argument_spec,
-                           supports_check_mode=True)
+    module = AnsibleModule(
+        argument_spec=Lldp_globalArgs.argument_spec, supports_check_mode=True
+    )
 
     result = Lldp_global(module).execute_module()
     module.exit_json(**result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

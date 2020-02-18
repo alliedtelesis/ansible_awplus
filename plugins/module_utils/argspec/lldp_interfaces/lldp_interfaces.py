@@ -21,7 +21,8 @@
 #   builder template.
 #
 #############################################
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 """
 The arg spec for the awplus_lldp_interfaces module
@@ -35,31 +36,47 @@ class Lldp_interfacesArgs(object):  # pylint: disable=R0903
     def __init__(self, **kwargs):
         pass
 
-    argument_spec = {'config': {'elements': 'dict',
-                                'options': {'name': {'required': True, 'type': 'str'},
-                                            'receive': {'type': 'bool'},
-                                            'transmit': {'type': 'bool'},
-                                            'med_tlv_select': {'options': {'capabilities': {'type': 'bool'},
-                                                                           'inventory_management': {'type': 'bool'},
-                                                                           'location': {'type': 'bool'},
-                                                                           'network_policy': {'type': 'bool'},
-                                                                           'power_management': {'type': 'bool'}},
-                                                               'type': 'dict'},
-                                            'tlv_select': {'options': {'link_aggregation': {'type': 'bool'},
-                                                                       'mac_phy_config': {'type': 'bool'},
-                                                                       'management_address': {'type': 'bool'},
-                                                                       'max_frame_size': {'type': 'bool'},
-                                                                       'port_and_protocol_vlans': {'type': 'bool'},
-                                                                       'port_description': {'type': 'bool'},
-                                                                       'port_vlan': {'type': 'bool'},
-                                                                       'power_management': {'type': 'bool'},
-                                                                       'protocol_ids': {'type': 'bool'},
-                                                                       'system_capabilities': {'type': 'bool'},
-                                                                       'system_description': {'type': 'bool'},
-                                                                       'system_name': {'type': 'bool'},
-                                                                       'vlan_names': {'type': 'bool'}},
-                                                           'type': 'dict'}},
-                                'type': 'list'},
-                     'state': {'choices': ['merged', 'replaced', 'overridden', 'deleted'],
-                               'default': 'merged',
-                               'type': 'str'}}  # pylint: disable=C0301
+    argument_spec = {
+        "config": {
+            "elements": "dict",
+            "options": {
+                "name": {"required": True, "type": "str"},
+                "receive": {"type": "bool"},
+                "transmit": {"type": "bool"},
+                "med_tlv_select": {
+                    "options": {
+                        "capabilities": {"type": "bool"},
+                        "inventory_management": {"type": "bool"},
+                        "location": {"type": "bool"},
+                        "network_policy": {"type": "bool"},
+                        "power_management": {"type": "bool"},
+                    },
+                    "type": "dict",
+                },
+                "tlv_select": {
+                    "options": {
+                        "link_aggregation": {"type": "bool"},
+                        "mac_phy_config": {"type": "bool"},
+                        "management_address": {"type": "bool"},
+                        "max_frame_size": {"type": "bool"},
+                        "port_and_protocol_vlans": {"type": "bool"},
+                        "port_description": {"type": "bool"},
+                        "port_vlan": {"type": "bool"},
+                        "power_management": {"type": "bool"},
+                        "protocol_ids": {"type": "bool"},
+                        "system_capabilities": {"type": "bool"},
+                        "system_description": {"type": "bool"},
+                        "system_name": {"type": "bool"},
+                        "vlan_names": {"type": "bool"},
+                    },
+                    "type": "dict",
+                },
+            },
+            "type": "list",
+        },
+        "state": {
+            "choices": ["merged", "replaced", "overridden", "deleted"],
+            "default": "merged",
+            "type": "str",
+        },
+    }  # pylint: disable=C0301

@@ -401,4 +401,3 @@ class L3_interfaces(ConfigBase):
                     interface, "ipv6 address {0}".format(each.get("address")), commands
                 )
         return commands
-

@@ -338,4 +338,3 @@ class Lag_interfaces(ConfigBase):
                     )
 
         return commands
-

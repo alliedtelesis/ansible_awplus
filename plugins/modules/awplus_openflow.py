@@ -5,12 +5,15 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'network'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "network",
+}
 
 
 DOCUMENTATION = """
@@ -110,8 +113,14 @@ commands:
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import get_config, awplus_argument_spec
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import load_config, run_commands
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
+    get_config,
+    awplus_argument_spec,
+)
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
+    load_config,
+    run_commands,
+)
 import re
 
 
@@ -121,87 +130,96 @@ def map_obj_to_commands(want, have, module):
     have = have[0]
     want = want[0]
 
-    controllers_have = have['controllers']
-    ports_have = have['ports']
-    native_vlan_have = have['native_vlan']
-    fail_mode_have = have['fail_mode']
+    controllers_have = have["controllers"]
+    ports_have = have["ports"]
+    native_vlan_have = have["native_vlan"]
+    fail_mode_have = have["fail_mode"]
 
     remove_all_config = True
     for value in want.values():
-        if value is not None and value != 'absent':
+        if value is not None and value != "absent":
             remove_all_config = False
             break
 
     if remove_all_config:
         for controller in controllers_have:
-            commands.append(
-                'no openflow controller {0}'.format(controller['name']))
+            commands.append("no openflow controller {0}".format(controller["name"]))
         for port in ports_have:
-            commands.append('interface {0}'.format(port['name']))
-            commands.append('no openflow')
+            commands.append("interface {0}".format(port["name"]))
+            commands.append("no openflow")
         if native_vlan_have:
-            commands.append('no openflow native vlan')
+            commands.append("no openflow native vlan")
         if fail_mode_have:
-            commands.append('no openflow failmode')
+            commands.append("no openflow failmode")
     else:
 
-        controllers = want['controllers']
-        ports = want['ports']
-        native_vlan = want['native_vlan']
-        fail_mode = want['fail_mode']
-        state = want['state']
+        controllers = want["controllers"]
+        ports = want["ports"]
+        native_vlan = want["native_vlan"]
+        fail_mode = want["fail_mode"]
+        state = want["state"]
 
-        if state == 'absent':
-            if fail_mode and fail_mode == 'standalone' and fail_mode == fail_mode_have:
-                commands.append('no openflow failmode')
+        if state == "absent":
+            if fail_mode and fail_mode == "standalone" and fail_mode == fail_mode_have:
+                commands.append("no openflow failmode")
             if native_vlan and native_vlan != 1 and native_vlan == native_vlan_have:
-                commands.append('no openflow native vlan')
+                commands.append("no openflow native vlan")
             if controllers:
                 for controller_w in controllers:
                     for controller_h in controllers_have:
-                        if controller_w.get('name') == controller_h.get('name'):
+                        if controller_w.get("name") == controller_h.get("name"):
                             commands.append(
-                                'no openflow controller {0}'.format(controller_w['name']))
+                                "no openflow controller {0}".format(
+                                    controller_w["name"]
+                                )
+                            )
             if ports:
                 for port_w in ports:
                     for port_h in ports_have:
-                        if port_w.get('name') == port_h.get('name'):
-                            commands.append(
-                                'interface {0}'.format(port_w['name']))
-                            commands.append('no openflow')
-        elif state == 'present':
+                        if port_w.get("name") == port_h.get("name"):
+                            commands.append("interface {0}".format(port_w["name"]))
+                            commands.append("no openflow")
+        elif state == "present":
             if native_vlan and native_vlan != native_vlan_have:
-                commands.append('openflow native vlan {0}'.format(native_vlan))
+                commands.append("openflow native vlan {0}".format(native_vlan))
 
             if fail_mode and fail_mode != fail_mode_have:
-                if fail_mode == 'secure':
-                    commands.append(
-                        'openflow failmode secure non-rule-expired')
+                if fail_mode == "secure":
+                    commands.append("openflow failmode secure non-rule-expired")
                 else:
-                    commands.append('openflow failmode standalone')
+                    commands.append("openflow failmode standalone")
 
             if controllers:
                 for controller_w in controllers:
                     new_controller = True
-                    cmd = 'openflow controller '
+                    cmd = "openflow controller "
                     for controller_h in controllers_have:
 
-                        if ((controller_w['address'] == controller_h['address'] and controller_w['ssl_port'] == controller_h['ssl_port'])
-                                or controller_w['name'] == controller_h['name']):
+                        if (
+                            controller_w["address"] == controller_h["address"]
+                            and controller_w["ssl_port"] == controller_h["ssl_port"]
+                        ) or controller_w["name"] == controller_h["name"]:
                             new_controller = False
                             module.fail_json(
-                                msg='Controller already exists, please use a different address/ssl port')
+                                msg="Controller already exists, please use a different address/ssl port"
+                            )
 
                     if new_controller:
-                        if controller_w['name']:
-                            cmd += controller['name'] + ' '
-                            postfix = '{0} {1} {2}'.format(
-                                controller_w['protocol'], controller_w['address'], controller_w['ssl_port'])
+                        if controller_w["name"]:
+                            cmd += controller["name"] + " "
+                            postfix = "{0} {1} {2}".format(
+                                controller_w["protocol"],
+                                controller_w["address"],
+                                controller_w["ssl_port"],
+                            )
                             cmd += postfix
                             commands.append(cmd)
                         else:
-                            postfix = '{0} {1} {2}'.format(
-                                controller_w['protocol'], controller_w['address'], controller_w['ssl_port'])
+                            postfix = "{0} {1} {2}".format(
+                                controller_w["protocol"],
+                                controller_w["address"],
+                                controller_w["ssl_port"],
+                            )
                             cmd += postfix
                             commands.append(cmd)
 
@@ -210,30 +228,29 @@ def map_obj_to_commands(want, have, module):
                     new_port = True
                     for port_h in ports_have:
 
-                        if port_w['name'] == port_h['name']:
+                        if port_w["name"] == port_h["name"]:
                             new_port = False
-                            if port_w['openflow'] != port_h['openflow']:
-                                commands.append(
-                                    'interface {0}'.format(port_w['name']))
-                                if port_w.get('openflow'):
-                                    commands.append('openflow')
+                            if port_w["openflow"] != port_h["openflow"]:
+                                commands.append("interface {0}".format(port_w["name"]))
+                                if port_w.get("openflow"):
+                                    commands.append("openflow")
                                 else:
-                                    commands.append('no openflow')
+                                    commands.append("no openflow")
 
                     if new_port:
-                        if not port_w['name'].startswith('po'):
-                            module.fail_json(msg='Invalid port name')
-                        commands.append('interface {0}'.format(port_w['name']))
-                        if port_w.get('openflow'):
-                            commands.append('openflow')
+                        if not port_w["name"].startswith("po"):
+                            module.fail_json(msg="Invalid port name")
+                        commands.append("interface {0}".format(port_w["name"]))
+                        if port_w.get("openflow"):
+                            commands.append("openflow")
                         else:
-                            commands.append('no openflow')
+                            commands.append("no openflow")
 
     return commands
 
 
 def get_openflow_config(module):
-    return run_commands(module, 'show openflow config')
+    return run_commands(module, "show openflow config")
 
 
 def parse_name(line):
@@ -246,8 +263,8 @@ def parse_ports(line):
     port = dict()
     match = re.search(r'Port "(port\S+)"', line)
     if match:
-        port['name'] = match.group(1)
-        port['openflow'] = True
+        port["name"] = match.group(1)
+        port["openflow"] = True
         return port
 
 
@@ -258,15 +275,15 @@ def parse_native_vlan(line):
 
 
 def parse_fail_mode(line):
-    match = re.match(r'fail_mode: (\w+)', line)
+    match = re.match(r"fail_mode: (\w+)", line)
     if match:
         return match.group(1)
 
 
 def map_config_to_obj(module):
     obj_dict = dict()
-    obj_dict['ports'] = []
-    obj_dict['controllers'] = []
+    obj_dict["ports"] = []
+    obj_dict["controllers"] = []
     obj = []
 
     config = get_openflow_config(module)
@@ -277,23 +294,23 @@ def map_config_to_obj(module):
         oc = re.match(r'Controller "(tcp|ssl):(\S+):(\d+)"', lines[i])
         if oc:
             oc_dict = dict()
-            oc_dict['protocol'] = oc.group(1)
-            oc_dict['address'] = oc.group(2)
-            oc_dict['ssl_port'] = oc.group(3)
-            oc_dict['name'] = parse_name(lines[i + 1].strip())
-            obj_dict['controllers'].append(oc_dict)
+            oc_dict["protocol"] = oc.group(1)
+            oc_dict["address"] = oc.group(2)
+            oc_dict["ssl_port"] = oc.group(3)
+            oc_dict["name"] = parse_name(lines[i + 1].strip())
+            obj_dict["controllers"].append(oc_dict)
 
         port = parse_ports(lines[i])
         if port:
-            obj_dict['ports'].append(port)
+            obj_dict["ports"].append(port)
 
         native_vlan = parse_native_vlan(lines[i])
         if native_vlan:
-            obj_dict['native_vlan'] = native_vlan
+            obj_dict["native_vlan"] = native_vlan
 
         fail_mode = parse_fail_mode(lines[i])
         if fail_mode:
-            obj_dict['fail_mode'] = fail_mode
+            obj_dict["fail_mode"] = fail_mode
 
     obj.append(obj_dict)
     return obj
@@ -302,13 +319,15 @@ def map_config_to_obj(module):
 def map_params_to_obj(module):
     obj = []
 
-    obj.append({
-        'native_vlan': module.params['native_vlan'],
-        'fail_mode': module.params['fail_mode'],
-        'state': module.params['state'],
-        'ports': module.params['ports'],
-        'controllers': module.params['controllers']
-    })
+    obj.append(
+        {
+            "native_vlan": module.params["native_vlan"],
+            "fail_mode": module.params["fail_mode"],
+            "state": module.params["state"],
+            "ports": module.params["ports"],
+            "controllers": module.params["controllers"],
+        }
+    )
     return obj
 
 
@@ -316,47 +335,43 @@ def main():
     """ main entry point for module execution
     """
     controller_spec = dict(
-        name=dict(type='str'),
-        protocol=dict(type='str', choices=['ssl', 'tcp'], required=True),
-        address=dict(type='str', required=True),
-        ssl_port=dict(type='int', required=True)
+        name=dict(type="str"),
+        protocol=dict(type="str", choices=["ssl", "tcp"], required=True),
+        address=dict(type="str", required=True),
+        ssl_port=dict(type="int", required=True),
     )
 
     port_spec = dict(
-        name=dict(type='str', required=True),
-        openflow=dict(type='bool', default=True)
+        name=dict(type="str", required=True), openflow=dict(type="bool", default=True)
     )
     argument_spec = dict(
-        controllers=dict(type='list', elements='dict',
-                         options=controller_spec),
-        native_vlan=dict(type='int'),
-        fail_mode=dict(type='str', choices=['secure', 'standalone']),
-        ports=dict(type='list', elements='dict', options=port_spec),
-        state=dict(type='str', default='present',
-                   choices=['present', 'absent'])
+        controllers=dict(type="list", elements="dict", options=controller_spec),
+        native_vlan=dict(type="int"),
+        fail_mode=dict(type="str", choices=["secure", "standalone"]),
+        ports=dict(type="list", elements="dict", options=port_spec),
+        state=dict(type="str", default="present", choices=["present", "absent"]),
     )
 
     argument_spec.update(awplus_argument_spec)
 
-    module = AnsibleModule(argument_spec=argument_spec,
-                           supports_check_mode=True)
+    module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
 
     warnings = list()
-    result = {'changed': False, 'warnings': warnings}
+    result = {"changed": False, "warnings": warnings}
 
     want = map_params_to_obj(module)
     have = map_config_to_obj(module)
 
     commands = map_obj_to_commands(want, have, module)
-    result['commands'] = commands
+    result["commands"] = commands
 
     if commands:
         if not module.check_mode:
             load_config(module, commands)
-        result['changed'] = True
+        result["changed"] = True
 
     module.exit_json(**result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
