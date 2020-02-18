@@ -25,7 +25,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [2.x, 3.x]
+        python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -44,7 +44,7 @@ jobs:
       - name: Install ansible-test
         run: |
           sudo apt update
-          sudo apt install build-essential libssl-dev libffi-dev python-dev
+          sudo apt-get install build-essential libssl-dev libffi-dev python-dev
           git clone https://github.com/ansible/ansible.git ${GITHUB_WORKSPACE}/ansible
           pip install --upgrade pip
           pip install setuptools
@@ -55,4 +55,4 @@ jobs:
       - name: Test unit tests
         run: |
           cd ${AWPLUS}
-          ${ANSIBLE_PATH}/bin/ansible-test units
+          ${ANSIBLE_PATH}/bin/ansible-test units --python ${{ matrix.python-version }}
