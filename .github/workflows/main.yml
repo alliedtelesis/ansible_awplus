@@ -22,29 +22,35 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [2.x, 3.x]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           path: ansible_collections/alliedtelesis/awplus
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Set awplus and ansible env vars
         run: |
           echo "::set-env name=AWPLUS::${GITHUB_WORKSPACE}/ansible_collections/alliedtelesis/awplus/"
           echo "::set-env name=ANSIBLE_PATH::${GITHUB_WORKSPACE}/ansible"
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
       - name: Install ansible-test
         run: |
           sudo apt update
           sudo apt install build-essential libssl-dev libffi-dev python-dev
           git clone https://github.com/ansible/ansible.git ${GITHUB_WORKSPACE}/ansible
+          pip install --upgrade pip
           pip install setuptools
           pip install -r ${GITHUB_WORKSPACE}/ansible/requirements.txt
           pip install -r ${GITHUB_WORKSPACE}/ansible/test/units/requirements.txt
           pip install -r ${AWPLUS}/requirements.txt
-          python3 -m pip install --upgrade pip
-          python3 -m pip install setuptools
-          python3 -m pip install -r ${ANSIBLE_PATH}/requirements.txt
-          python3 -m pip install -r ${ANSIBLE_PATH}/test/units/requirements.txt
-          python3 -m pip install -r ${AWPLUS}/requirements.txt
           source ${ANSIBLE_PATH}/hacking/env-setup
       - name: Test unit tests
         run: |
