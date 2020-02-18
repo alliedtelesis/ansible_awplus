@@ -2,3 +2,5 @@ setuptools
 mock
 pytest
 pytest-xdist
+ansible 
+paramiko

@@ -110,6 +110,7 @@ dmypy.json
 
 *tar.gz
 venv
+venvs
 tests/output
 .env
 .vscode
