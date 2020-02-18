@@ -328,7 +328,7 @@ ansible-lint playbooks
 
 #### Formatting
 
-Formatting is done using [Black](https://black.readthedocs.io/en/stable/). Either use if from the Python extension for Visual Studio Code, or from the commandline:
+Formatting is done using [Black](https://black.readthedocs.io/en/stable/). Either use it from the Python extension for Visual Studio Code, or from the commandline:
 
 ```bash
 black .
