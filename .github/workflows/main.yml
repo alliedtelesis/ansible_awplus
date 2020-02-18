@@ -48,9 +48,10 @@ jobs:
           git clone https://github.com/ansible/ansible.git ${GITHUB_WORKSPACE}/ansible
           pip install --upgrade pip
           pip install setuptools
-          pip install -r ${GITHUB_WORKSPACE}/ansible/requirements.txt
-          pip install -r ${GITHUB_WORKSPACE}/ansible/test/units/requirements.txt
-          pip install -r ${AWPLUS}/requirements.txt
+          pip install -r ${ANSIBLE_PATH}/requirements.txt
+          pip install -r ${ANSIBLE_PATH}/test/units/requirements.txt
+          pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/units.txt
+          pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/network-integration.txt
           source ${ANSIBLE_PATH}/hacking/env-setup
       - name: Test unit tests
         run: |
