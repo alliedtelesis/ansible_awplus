@@ -1,3 +1,4 @@
+---
 name: Build and Test
 
 on: [push, pull_request, pull_request_review]
@@ -57,3 +58,41 @@ jobs:
         run: |
           cd ${AWPLUS}
           ${ANSIBLE_PATH}/bin/ansible-test units --python ${{ matrix.python-version }}
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      # A large chunk of the following is duplicated, since GitHub Actions doesn't
+      # yet support YAML anchors.
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/alliedtelesis/awplus
+      - name: Set awplus and ansible env vars
+        run: |
+          echo "::set-env name=AWPLUS::${GITHUB_WORKSPACE}/ansible_collections/alliedtelesis/awplus/"
+          echo "::set-env name=ANSIBLE_PATH::${GITHUB_WORKSPACE}/ansible"
+      - name: Install ansible-test
+        run: |
+          sudo apt update
+          sudo apt-get install build-essential libssl-dev libffi-dev python-dev
+          git clone https://github.com/ansible/ansible.git ${GITHUB_WORKSPACE}/ansible
+          python3 -m pip install --upgrade pip
+          python3 -m pip install setuptools
+          python3 -m pip install -r ${AWPLUS_PATH}/dev-requirements.txt
+          python3 -m pip install -r ${ANSIBLE_PATH}/requirements.txt
+          python3 -m pip install -r ${ANSIBLE_PATH}/test/units/requirements.txt
+          python3 -m pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/units.txt
+          python3 -m pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/network-integration.txt
+          source ${ANSIBLE_PATH}/hacking/env-setup
+      - name: Check PEP 8
+        run: |
+          cd ${AWPLUS}
+          ${ANSIBLE_PATH}/bin/ansible-test sanity --test pep8 plugins/ tests/
+          - name: Lint Ansible Playbooks
+          uses: ansible/ansible-lint-action@master
+          with:
+            targets: |
+              playbooks
+        - name: yamllint
+          uses: actionshub/yamllint@master

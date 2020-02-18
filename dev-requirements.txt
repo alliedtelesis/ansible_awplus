@@ -1,0 +1,4 @@
+ansible-lint
+black
+yamllint
+pycodestyle

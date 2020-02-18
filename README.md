@@ -68,15 +68,17 @@ mkdir venvs
 
 python -m virtualenv venvs/virtualenv-2.7 --python=python
 source venvs/virtualenv-2.7/bin/activate
-python -m pip install -r requirements.txt
 python -m pip install -r ~/Repos/ansible/requirements.txt
 python -m pip install -r ~/Repos/ansible/test/units/requirements.txt
+python -m pip install -r ~/Repos/ansible/test/lib/ansible_test/_data/requirements/units.
+python -m pip install -r ~/Repos/ansible/test/lib/ansible_test/_data/requirements/
 
 python3 -m virtualenv venvs/virtualenv-3.6 --python=python3.6
 source venvs/virtualenv-3.6/bin/activate
-python3 -m pip install -r requirements.txt
 python3 -m pip install -r ~/Repos/ansible/requirements.txt
 python3 -m pip install -r ~/Repos/ansible/test/units/requirements.txt
+python3 -m pip install -r ~/Repos/ansible/test/lib/ansible_test/_data/requirements/units.txt
+python3 -m pip install -r ~/Repos/ansible/test/lib/ansible_test/_data/requirements/network-integration.txt
 ```
 
 ### Running unit tests
