@@ -17,7 +17,7 @@ calls the appropriate facts gathering function
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.facts.facts import (
     FactsArgs,
 )
-from ansible.module_utils.network.common.facts.facts import FactsBase
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.facts.facts import FactsBase
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.interfaces.interfaces import (
     InterfacesFacts,
 )

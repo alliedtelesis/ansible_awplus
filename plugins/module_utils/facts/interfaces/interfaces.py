@@ -17,7 +17,7 @@ import re
 from copy import deepcopy
 
 
-from ansible.module_utils.network.common import utils
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.utils import (
     get_interface_type,
     normalize_interface,

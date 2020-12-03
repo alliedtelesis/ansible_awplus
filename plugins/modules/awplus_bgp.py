@@ -132,7 +132,7 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import
     awplus_argument_spec,
 )
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.network.common.config import CustomNetworkConfig
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.config import CustomNetworkConfig
 
 
 GLOBAL_PARAMS = [

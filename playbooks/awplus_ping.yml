@@ -1,6 +1,6 @@
 ---
 - hosts: all
-  connection: network_cli
+  connection: ansible.netcommon.network_cli
   collections:
     - alliedtelesis.awplus
   tasks:
@@ -24,8 +24,8 @@
     #     dest: 192.168.5.89
     #     state: present
 
-    - name: Test reachability to 192.168.1.1 setting count and source
+    - name: Test reachability to 10.33.24.15 setting count and source
       awplus_ping:
-        dest: 192.168.1.1
-        source: vlan2
+        dest: 10.33.24.15
+        source: vlan99
         count: 20

@@ -106,7 +106,7 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import
     get_config,
     load_config,
 )
-from ansible.module_utils.network.common.utils import (
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
     remove_default_spec,
     validate_ip_address,
 )

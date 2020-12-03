@@ -103,7 +103,7 @@ import re
 from copy import deepcopy
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.network.common.utils import remove_default_spec
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import remove_default_spec
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
     get_config,
     load_config,

@@ -16,7 +16,7 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = """
 ---
-module: awplus_system
+module: awplus_rip
 version_added: "2.9"
 author:
     - Jeremy Toth (@jtsource)

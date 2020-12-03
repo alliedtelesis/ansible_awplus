@@ -15,7 +15,7 @@ __metaclass__ = type
 import re
 from copy import deepcopy
 
-from ansible.module_utils.network.common import utils
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.argspec.static_lag_interfaces.static_lag_interfaces import (
     Static_Lag_interfacesArgs,
 )

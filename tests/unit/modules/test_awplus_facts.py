@@ -36,7 +36,7 @@ class TestAwplusFactsModule(TestAwplusModule):
         self.run_commands = self.mock_run_commands.start()
 
         self.mock_get_resource_connection = patch(
-            "ansible.module_utils.network.common.facts.facts.get_resource_connection"
+            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.facts.facts.get_resource_connection"
         )
         self.get_resource_connection = self.mock_get_resource_connection.start()
 

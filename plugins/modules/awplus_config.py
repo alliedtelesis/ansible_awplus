@@ -22,7 +22,7 @@ short_description: Manage AlliedWare Plus configuration sections
 description:
   - AlliedWare Plus configurations use a simple block indent file syntax
     for segmenting configuration into sections.  This module provides
-    an implementation for working with IOS configuration sections in
+    an implementation for working with AlliedWare Plus configuration sections in
     a deterministic way.
 version_added: "2.9"
 options:
@@ -85,7 +85,7 @@ options:
   multiline_delimiter:
     description:
       - This argument is used when pushing a multiline configuration
-        element to the IOS device.  It specifies the character to use
+        element to the AlliedWare Plus device.  It specifies the character to use
         as the delimiting character.  This only applies to the
         configuration action.
     default: "@"
@@ -240,7 +240,7 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import
     awplus_argument_spec,
 )
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.network.common.config import NetworkConfig, dumps
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.config import NetworkConfig, dumps
 
 
 def check_args(module, warnings):
