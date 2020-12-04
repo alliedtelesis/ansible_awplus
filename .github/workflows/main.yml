@@ -17,7 +17,7 @@ jobs:
       - name: Get collection version
         run: python3 get_version.py
       - name: Store collection version in bash
-        run: echo "::set-env name=COLLECTION_VERSION::$(cat version)"
+        run: echo "COLLECTION_VERSION=$(cat version)" >> $GITHUB_ENV
       - name: Install collection
         run: ansible-galaxy collection install alliedtelesis-awplus-${COLLECTION_VERSION}.tar.gz
 
@@ -33,13 +33,13 @@ jobs:
         with:
           path: ansible_collections/alliedtelesis/awplus
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set awplus and ansible env vars
         run: |
-          echo "::set-env name=AWPLUS_PATH::${GITHUB_WORKSPACE}/ansible_collections/alliedtelesis/awplus/"
-          echo "::set-env name=ANSIBLE_PATH::${GITHUB_WORKSPACE}/ansible"
+          echo "AWPLUS_PATH=${GITHUB_WORKSPACE}/ansible_collections/alliedtelesis/awplus/" >> $GITHUB_ENV
+          echo "ANSIBLE_PATH=${GITHUB_WORKSPACE}/ansible" >> $GITHUB_ENV
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
       - name: Install ansible-test
@@ -70,8 +70,8 @@ jobs:
           path: ansible_collections/alliedtelesis/awplus
       - name: Set awplus and ansible env vars
         run: |
-          echo "::set-env name=AWPLUS_PATH::${GITHUB_WORKSPACE}/ansible_collections/alliedtelesis/awplus/"
-          echo "::set-env name=ANSIBLE_PATH::${GITHUB_WORKSPACE}/ansible"
+          echo "AWPLUS_PATH=${GITHUB_WORKSPACE}/ansible_collections/alliedtelesis/awplus/" >> $GITHUB_ENV
+          echo "ANSIBLE_PATH=${GITHUB_WORKSPACE}/ansible" >> $GITHUB_ENV
       - name: Install ansible-test
         run: |
           sudo apt-get install build-essential libssl-dev libffi-dev python-dev
