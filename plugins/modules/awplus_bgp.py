@@ -73,7 +73,7 @@ options:
         description:
             - Enable/Disable enforces the neighbor autonomous system to be
               the first AS number listed in the AS path attribute for eBGP.
-              On NX-OS, this property is only supported in the
+              On AlliedWare Plus, this property is only supported in the
               global BGP context.
         type: bool
     graceful_restart:
