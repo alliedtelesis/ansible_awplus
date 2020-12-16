@@ -8,63 +8,54 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {
-    "metadata_version": "1.1",
-    "status": ["preview"],
-    "supported_by": "network",
-}
-
 DOCUMENTATION = """
 ---
 module: awplus_l2_interfaces
 author: Cheng Yi Kok (@cyk19)
 short_description: Manage Layer-2 interface on AlliedWare Plus devices
-description: This module provides declarative management of Layer-2 interface on AW+ devices
+description: This module provides declarative management of Layer-2 interface on AlliedWare Plus devices
 version_added: "2.9"
 options:
   config:
-    description: A dictionary of Layer-2 interface options
+    description: A dictionary of Layer-2 interface options.
     type: list
     elements: dict
     suboptions:
       name:
         description:
-          - Full name of the interface
+          - Full name of the interface, for example, port1.0.2.
         type: str
         required: True
       access:
         description:
-        - Switchport mode access command to configure the interfaces as a layer 2 access
+          - Switchport mode access command to configure the interfaces as a layer 2 access.
         type: dict
         suboptions:
           vlan:
             description:
-              - Configure given VLAN in access port. It's used as the access VLAN ID
+              - Configure given VLAN in access port. It's used as the access VLAN ID.
             type: int
       trunk:
         description:
-        - Switchport mode trunk command to configure the interface as a Layer 2 trunk.
+          - Switchport mode trunk command to configure the interface as a Layer 2 trunk.
         type: dict
         suboptions:
           allowed_vlans:
             description:
               - List of allowed VLANs in a given trunk port. These are the only VLANs that will be
-                configured on the trunk.
-            type: list
+                configured on the trunk. Accepted values are range A-B, list A,B,C or combination
+                of both A-B,C without spaces.
+            type: str
           native_vlan:
             description:
               - Native VLAN to be configured in trunk port. It's used as the trunk native VLAN ID.
             type: int
-state:
-  choices:
-    - merged
-    - replaced
-    - overridden
-    - deleted
-  default: merged
-  description:
-    - The state of the configuration after module completion
-  type: str
+  state:
+    description:
+      - The state of the configuration after module completion
+    choices: ['merged', 'replaced', 'overridden', 'deleted']
+    default: merged
+    type: str
 """
 
 EXAMPLES = """
@@ -100,7 +91,7 @@ EXAMPLES = """
 # !
 
 - name: Merge provided configuration with device configuration
-  awplus_l2_interfaces:
+  alliedtelesis.awplus.awplus_l2_interfaces:
     config:
       - name: port1.0.4
         access:
@@ -173,7 +164,7 @@ EXAMPLES = """
 # !
 
 - name: Merge provided configuration with device
-  awplus_l2_interfaces:
+  alliedtelesis.awplus.awplus_l2_interfaces:
     config:
       - name: port1.0.3
         trunk:
@@ -241,7 +232,7 @@ EXAMPLES = """
 # !
 
   - name: Override device configuration of all l2 interfaces with provided configuration
-    awplus_l2_interfaces:
+    alliedtelesis.awplus.awplus_l2_interfaces:
       config:
         - name: port1.0.2
           access:
@@ -309,7 +300,7 @@ EXAMPLES = """
 # !
 
     - name: Delete AlliedWare Plus L2 interfaces as in given arguments
-      awplus_l2_interfaces:
+      alliedtelesis.awplus.awplus_l2_interfaces:
         config:
           - name: port1.0.3
         state: deleted
@@ -336,7 +327,7 @@ EXAMPLES = """
 #  switchport
 #  switchport mode trunk
 #  switchport trunk allowed vlan none
-#  switchport trunk native vlan 1
+#  switchport trunk native vlan none
 # !
 # interface port1.0.4
 #  switchport
@@ -379,7 +370,7 @@ EXAMPLES = """
 # !
 
 - name: Delete all L2 interfaces as in given arguments
-  awplus_l2_interfaces:
+  alliedtelesis.awplus.awplus_l2_interfaces:
     state: deleted
 
 # After state:
@@ -402,7 +393,7 @@ EXAMPLES = """
 #  switchport
 #  switchport mode trunk
 #  switchport trunk allowed vlan none
-#  switchport trunk native vlan 1
+#  switchport trunk native vlan none
 # !
 # interface port1.0.4
 #  switchport
@@ -427,7 +418,9 @@ commands:
   description: The set of commands pushed to the remote device.
   returned: always
   type: list
-  sample: ['command 1', 'command 2', 'command 3']
+  sample: ["interface port1.0.2",
+          "no switchport trunk native vlan",
+          "switchport trunk allowed vlan none"]
 """
 
 from ansible.module_utils.basic import AnsibleModule

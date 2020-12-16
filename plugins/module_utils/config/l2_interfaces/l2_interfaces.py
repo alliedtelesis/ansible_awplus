@@ -13,6 +13,7 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+import re
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base import ConfigBase
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import to_list
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.facts import (
@@ -141,6 +142,18 @@ class L2_interfaces(ConfigBase):
             commands = self._state_replaced(want, have, self._module)
         return commands
 
+    def is_in_ports(self, want, have):
+        if "-" in have:
+            have_ports = re.search(r"(port1.0.)(\d+)(-1.0.)(\d+)", have)
+            if have_ports:
+                min_ = int(have_ports.group(2))
+                max_ = int(have_ports.group(4))
+                want_port = re.search(r"(port1.0.)(\d+)", want)
+                return min_ <= int(want_port.group(2)) <= max_
+        elif want == have:
+            return True
+        return False
+
     def _state_replaced(self, want, have, module):
         """ The command generator when state is replaced
         :param want: the desired configuration as a dictionary
@@ -154,7 +167,7 @@ class L2_interfaces(ConfigBase):
 
         for interface in want:
             for each in have:
-                if each["name"] == interface["name"]:
+                if self.is_in_ports(interface["name"], each["name"]):
                     break
             else:
                 continue
@@ -176,7 +189,7 @@ class L2_interfaces(ConfigBase):
         commands = []
         for each in have:
             for interface in want:
-                if each["name"] == interface["name"]:
+                if self.is_in_ports(interface["name"], each["name"]):
                     break
             else:
                 # We didn't find a matching desired state, which means we can
@@ -204,7 +217,7 @@ class L2_interfaces(ConfigBase):
 
         for interface in want:
             for each in have:
-                if each["name"] == interface["name"]:
+                if self.is_in_ports(interface["name"], each["name"]):
                     break
             else:
                 continue
@@ -224,7 +237,7 @@ class L2_interfaces(ConfigBase):
         if want:
             for interface in want:
                 for each in have:
-                    if each["name"] == interface["name"]:
+                    if self.is_in_ports(interface["name"], each["name"]):
                         break
                 else:
                     continue
