@@ -327,7 +327,7 @@ EXAMPLES = """
 #  switchport
 #  switchport mode trunk
 #  switchport trunk allowed vlan none
-#  switchport trunk native vlan none
+#  switchport trunk native vlan 1
 # !
 # interface port1.0.4
 #  switchport
@@ -393,7 +393,7 @@ EXAMPLES = """
 #  switchport
 #  switchport mode trunk
 #  switchport trunk allowed vlan none
-#  switchport trunk native vlan none
+#  switchport trunk native vlan 1
 # !
 # interface port1.0.4
 #  switchport
