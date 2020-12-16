@@ -93,7 +93,7 @@ class L2_interfacesFacts(object):
         if get_interface_type(intf) == "unknown":
             return {}
 
-        if intf.upper()[:2] in ("HU", "FO", "TW", "TE", "GI", "FA", "ET", "PO"):
+        if intf.upper()[:2] in ("PO"):
             # populate the facts from the configuration
             config["name"] = normalize_interface(intf)
 
@@ -112,6 +112,10 @@ class L2_interfacesFacts(object):
             allowed_vlan = utils.parse_conf_arg(conf, "allowed vlan")
             if allowed_vlan:
                 trunk["allowed_vlans"] = allowed_vlan.split(",")
+                first_vlan = trunk["allowed_vlans"][0]
+                if "add" in first_vlan:
+                    first_vlan = first_vlan.replace("add ", "")
+                    trunk["allowed_vlans"][0] = first_vlan
             config["trunk"] = trunk
 
         return utils.remove_empties(config)

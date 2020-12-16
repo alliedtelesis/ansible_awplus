@@ -84,7 +84,9 @@ class L2_interfaces(ConfigBase):
         commands.extend(self.set_config(existing_l2_interfaces_facts))
         if commands:
             if not self._module.check_mode:
-                self._connection.edit_config(commands)
+                warning = self._connection.edit_config(commands).get("response")
+                if warning[-1] != "":
+                    warnings = warning[-1]
             changed_l2_interfaces_facts = self.get_l2_interfaces_facts()
             if existing_l2_interfaces_facts != changed_l2_interfaces_facts:
                 result["changed"] = True
@@ -310,8 +312,9 @@ class L2_interfaces(ConfigBase):
                 add_command_to_config_list(interface, cmd, commands)
 
             if want_trunk:
-                cmd = "switchport mode trunk"
-                self._add_command_to_config_list(interface, cmd, commands)
+                if have.get("trunk") is None:
+                    cmd = "switchport mode trunk"
+                    self._add_command_to_config_list(interface, cmd, commands)
                 if diff.get("trunk"):
                     diff = dict(diff.get("trunk"))
                 allowed_vlans = diff.get("allowed_vlans")
