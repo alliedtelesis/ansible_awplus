@@ -190,30 +190,24 @@ def normalize_interface(name):
                 digits += char
         return digits
 
-    if name.lower().startswith("gi"):
-        if_type = "GigabitEthernet"
-    elif name.lower().startswith("te"):
-        if_type = "TenGigabitEthernet"
-    elif name.lower().startswith("fa"):
-        if_type = "FastEthernet"
-    elif name.lower().startswith("fo"):
-        if_type = "FortyGigabitEthernet"
-    elif name.lower().startswith("long"):
-        if_type = "LongReachEthernet"
-    elif name.lower().startswith("et"):
-        if_type = "Ethernet"
+    if name.lower().startswith("et"):
+        if_type = "eth"
     elif name.lower().startswith("vl"):
         if_type = "vlan"
     elif name.lower().startswith("lo"):
-        if_type = "loopback"
-    elif name.lower().startswith("po"):
+        if_type = "lo"
+    elif name.lower().startswith("por"):
         if_type = "port"
-    elif name.lower().startswith("nv"):
-        if_type = "nve"
-    elif name.lower().startswith("twe"):
-        if_type = "TwentyFiveGigE"
-    elif name.lower().startswith("hu"):
-        if_type = "HundredGigE"
+    elif name.lower().startswith("po"):
+        if_type = "po"
+    elif name.lower().startswith("sa"):
+        if_type = "sa"
+    elif name.lower().startswith("br"):
+        if_type = "br"
+    elif name.lower().startswith("of"):
+        if_type = "of"
+    elif name.lower().startswith("tu"):
+        if_type = "tunnel"
     else:
         if re.search(r"(\d+\.\d+\.\d+)", name):
             if_type = "port"
@@ -238,30 +232,24 @@ def get_interface_type(interface):
     """Gets the type of interface
     """
 
-    if interface.upper().startswith("GI"):
-        return "GigabitEthernet"
-    elif interface.upper().startswith("TE"):
-        return "TenGigabitEthernet"
-    elif interface.upper().startswith("FA"):
-        return "FastEthernet"
-    elif interface.upper().startswith("FO"):
-        return "FortyGigabitEthernet"
-    elif interface.upper().startswith("LON"):
-        return "LongReachEthernet"
-    elif interface.upper().startswith("ET"):
-        return "Ethernet"
+    if interface.upper().startswith("ET"):
+        return "ethernet"
     elif interface.upper().startswith("VL"):
         return "vlan"
     elif interface.upper().startswith("LO"):
         return "loopback"
-    elif interface.upper().startswith("PO"):
+    elif interface.upper().startswith("POR"):
         return "port"
-    elif interface.upper().startswith("NV"):
-        return "nve"
-    elif interface.upper().startswith("TWE"):
-        return "TwentyFiveGigE"
-    elif interface.upper().startswith("HU"):
-        return "HundredGigE"
+    elif interface.upper().startswith("PO"):
+        return "dynamic aggregator"
+    elif interface.upper().startswith("SA"):
+        return "static aggregator"
+    elif interface.upper().startswith("BR"):
+        return "bridge"
+    elif interface.upper().startswith("OF"):
+        return "openflow"
+    elif interface.upper().startswith("TU"):
+        return "tunnel"
     else:
         if re.search(r"(\d+\.\d+\.\d+)", interface):
             return "port"
