@@ -8,27 +8,21 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {
-    "metadata_version": "1.1",
-    "status": ["preview"],
-    "supported_by": "network",
-}
-
 DOCUMENTATION = """
 ---
-module: awplus_interfaces
+module: alliedtelesis.awplus.awplus_interfaces
 author: Cheng Yi Kok (@cyk19)
-short_description: 'Manages attribute of AlliedWare Plus interfaces.'
-description: 'Manages attribute of AlliedWare Plus network interfaces'
+short_description: Manages attribute of AlliedWare Plus interfaces
+description: Manages attribute of AlliedWare Plus network interfaces.
 version_added: "2.9"
 options:
   config:
-    description: A dictionary of interface options
+    description: A dictionary of interface options.
     type: list
     suboptions:
       name:
         description:
-        - Full name of interface, e.g. GigabitEthernet0/2, loopback999.
+        - Full name of interface, e.g. port1.0.3, vlan2.
         type: str
         required: True
       description:
@@ -43,457 +37,412 @@ options:
         default: True
       speed:
         description:
-        - Interface link speed. Applicable for Ethernet interfaces only.
+        - Interface link speed. Applicable for switchport interfaces only.
         type: str
       mtu:
         description:
-        - MTU for a specific interface. Applicable for Ethernet interfaces only.
-        - Refer to vendor documentation for valid values.
+        - MTU size for a specific interface. Applicable for VLAN interfaces only.
+        - Refer to documentation for valid values.
         type: int
       duplex:
         description:
-        - Interface link status. Applicable for Ethernet interfaces only, either in half duplex,
+        - Interface link status. Applicable for switchport interfaces only, either in half duplex,
           full duplex or in automatic state which negotiates the duplex automatically.
         type: str
         choices: ['full', 'half', 'auto']
   state:
-    choices:
-    - merged
-    - replaced
-    - overridden
-    - deleted
-    default: merged
     description:
-    - The state of the configuration after module completion
+    - The state of the configuration after module completion.
+    choices: ['merged', 'replaced', 'overridden', 'deleted']
+    default: merged
     type: str
 """
 
 EXAMPLES = """
 # Using merged
 
-Before state:
-------------------
-interface port1.0.1
- switchport
- switchport mode access
-!
-interface port1.0.2
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.3
- speed 1000
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.4
- duplex full
- switchport
- switchport mode access
-!
-interface vlan1
- ip address 192.168.5.2/24
- ipv6 enable
- ipv6 address dhcp
- ip dhcp-client vendor-identifying-class
- ip dhcp-client request vendor-identifying-specific
-!
+# Before state:
+# ------------------
+# interface port1.0.1
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.2
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.3
+#  speed 1000
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.4
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface vlan1
+#  ip address 192.168.5.2/24
+#  ipv6 enable
+#  ipv6 address dhcp
+#  ip dhcp-client vendor-identifying-class
+#  ip dhcp-client request vendor-identifying-specific
+# !
 
-    - name: Test awplus_interface module
-    connection: network_cli
-    hosts: all
-    tasks:
-      - name: Merge provided configuration with device configuration
-        awplus_interfaces:
-          config:
-            - name: port1.0.2
-              description: Merged by Ansible Network
-              duplex: full
+- name: Merge provided configuration with device configuration
+  alliedtelesis.awplus.awplus_interfaces:
+    config:
+      - name: port1.0.2
+        description: Merged by Ansible Network
+        duplex: full
 
-              # vlan1 does not have duplex configuration option
-            - name: vlan1
-              description: Merged by Ansible Network
-              mtu: 1500 # in the range <68-1582> ; Changed mtu config doesn't show in CLI
-          state: merged
+        # vlan1 does not have duplex configuration option
+      - name: vlan1
+        description: Merged by Ansible Network
+        mtu: 234 # in the range <68-1582>
+    state: merged
 
-After state:
----------------------
-interface port1.0.1
- switchport
- switchport mode access
-!
-interface port1.0.2
- description Merged by Ansible Network
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.3
- speed 1000
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.4
- duplex full
- switchport
- switchport mode access
-!
-interface vlan1
- description Merged by Ansible Network
- ip address 192.168.5.2/24
- ipv6 enable
- ipv6 address dhcp
- ip dhcp-client vendor-identifying-class
- ip dhcp-client request vendor-identifying-specific
-!
+# After state:
+# ---------------------
+# interface port1.0.1
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.2
+#  description Merged by Ansible Network
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.3
+#  speed 1000
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.4
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface vlan1
+#  description Merged by Ansible Network
+#  mtu 234
+#  ip address 192.168.5.2/24
+#  ipv6 enable
+#  ipv6 address dhcp
+#  ip dhcp-client vendor-identifying-class
+#  ip dhcp-client request vendor-identifying-specific
+# !
 
-Using replaced:
+# Using replaced:
 
-Before state:
----------------------
-interface port1.0.1
- switchport
- switchport mode access
-!
-interface port1.0.2
- description Merged by Ansible Network
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.3
- speed 1000
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.4
- duplex full
- switchport
- switchport mode access
-!
-interface vlan1
- description Merged by Ansible Network
- ip address 192.168.5.2/24
- ipv6 enable
- ipv6 address dhcp
- ip dhcp-client vendor-identifying-class
- ip dhcp-client request vendor-identifying-specific
-!
+# Before state:
+# ---------------------
+# interface port1.0.1
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.2
+#  description Merged by Ansible Network
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.3
+#  speed 1000
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.4
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface vlan1
+#  description Merged by Ansible Network
+#  ip address 192.168.5.2/24
+#  ipv6 enable
+#  ipv6 address dhcp
+#  ip dhcp-client vendor-identifying-class
+#  ip dhcp-client request vendor-identifying-specific
+# !
 
-  - name: Test awplus_interface module
-    connection: network_cli
-    hosts: all
-    tasks:
-      - name: Replace device configuration with provided configuration
-        awplus_interfaces:
-          config:
-            - name: port1.0.3
-              description: Replaced by Ansible Network
-              duplex: full
-              # Available options for speed:
-              # 10, 100, 1000, 10000, 100000, (mbps)
-              # 2500, 40000, 5000, auto (mbps)
-              speed: 1000
-              enabled: False
+- name: Replace device configuration with provided configuration
+  alliedtelesis.awplus.awplus_interfaces:
+    config:
+      - name: port1.0.3
+        description: Replaced by Ansible Network
+        duplex: full
+        # Available options for speed:
+        # 10, 100, 1000, 10000, 100000, (mbps)
+        # 2500, 40000, 5000, auto (mbps)
+        speed: 1000
+        enabled: False
 
-              # vlan1 does not have duplex configuration option
-            - name: vlan1
-              description: Replaced by Ansible Network
-              mtu: 900 # in the range <68-1582>
-              enabled: True
-          state: replaced
+        # vlan1 does not have duplex configuration option
+      - name: vlan1
+        description: Replaced by Ansible Network
+        mtu: 900 # in the range <68-1582>
+        enabled: True
+    state: replaced
 
-After state:
----------------------
-interface port1.0.1
- switchport
- switchport mode access
-!
-interface port1.0.2
- description Merged by Ansible Network
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.3
- description Replaced by Ansible Network
- speed 1000
- duplex full
- shutdown
- switchport
- switchport mode access
-!
-interface port1.0.4
- duplex full
- switchport
- switchport mode access
-!
-interface vlan1
- description Replaced by Ansible Network
- ip address 192.168.5.2/24
- ipv6 enable
- ipv6 address dhcp
- ip dhcp-client vendor-identifying-class
- ip dhcp-client request vendor-identifying-specific
-!
+# After state:
+# ---------------------
+# interface port1.0.1
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.2
+#  description Merged by Ansible Network
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.3
+#  description Replaced by Ansible Network
+#  speed 1000
+#  duplex full
+#  shutdown
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.4
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface vlan1
+#  description Replaced by Ansible Network
+#  ip address 192.168.5.2/24
+#  ipv6 enable
+#  ipv6 address dhcp
+#  ip dhcp-client vendor-identifying-class
+#  ip dhcp-client request vendor-identifying-specific
+# !
 
-Using overridden
+# Using overridden
 
-Before state:
-------------------------
-interface port1.0.1
- switchport
- switchport mode access
-!
-interface port1.0.2
- description Merged by Ansible Network
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.3
- description Replaced by Ansible Network
- speed 1000
- duplex full
- shutdown
- switchport
- switchport mode access
-!
-interface port1.0.4
- duplex full
- switchport
- switchport mode access
-!
-interface vlan1
- description Replaced by Ansible Network
- ip address 192.168.5.2/24
- ipv6 enable
- ipv6 address dhcp
- ip dhcp-client vendor-identifying-class
- ip dhcp-client request vendor-identifying-specific
-!
+# Before state:
+# ------------------------
+# interface port1.0.1
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.2
+#  description Merged by Ansible Network
+#  duplex full
+#  switchport
+#  switchport mode trunk
+#  switchport trunk allowed vlan add 5-6,13
+#  switchport trunk native vlan none
+# !
+# interface port1.0.3
+#  description Replaced by Ansible Network
+#  speed 1000
+#  duplex full
+#  shutdown
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.4-1.0.28
+#  switchport
+#  switchport mode access
+# !
+# # interface vlan1
+#  ip helper-address 172.26.3.8
+# !
+# interface vlan2
+#  ip address dhcp client-id vlan2 hostname test.com
+# !
+# interface vlan5
+#  description Replaced by Ansible Network
+#  mtu 900
+# !
+# interface vlan13
+#  ip address 13.13.13.13/24
 
----
-  - name: Test awplus_interface module
-    connection: network_cli
-    hosts: all
-    tasks:
-      - name: Override device configuration of all interfaces with provided configuration
-        awplus_interfaces:
-          config:
-            - name: port1.0.4
-              description: Override by Ansible Network
-              duplex: full
-              # Available options for speed:
-              # 10, 100, 1000, 10000, 100000, (mbps)
-              # 2500, 40000, 5000, auto (mbps)
-              speed: 2500
-              enabled: True
+- name: Override device configuration of all interfaces with provided configuration
+  alliedtelesis.awplus.awplus_interfaces:
+    config:
+      - name: port1.0.2
+        description: Overridden by Ansible Network
+        duplex: full
+        speed: 2500
+        enabled: True
 
-              # vlan1 does not have duplex configuration option
-            - name: vlan1
-              description: Override by Ansible Network
-              mtu: 900 # in the range <68-1582>
-              enabled: True
-          state: replaced
+      - name: vlan2
+        description: Overridden by Ansible Network
+        mtu: 920
+        enabled: True
+    state: overriden
 
-After state:
--------------------------
-interface port1.0.1
- switchport
- switchport mode access
-!
-interface port1.0.2
- description Merged by Ansible Network
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.3
- description Replaced by Ansible Network
- speed 1000
- duplex full
- shutdown
- switchport
- switchport mode access
-!
-interface port1.0.4
- description Override by Ansible Network
- duplex full
- switchport
- switchport mode access
-!
-interface vlan1
- description Override by Ansible Network
- ip address 192.168.5.2/24
- ipv6 enable
- ipv6 address dhcp
- ip dhcp-client vendor-identifying-class
- ip dhcp-client request vendor-identifying-specific
-!
+# After state:
+# -------------------------
+# interface port1.0.1
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.2
+#  description Overridden by Ansible Network
+#  duplex full
+#  switchport
+#  switchport mode trunk
+#  switchport trunk allowed vlan add 5-6,13
+#  switchport trunk native vlan none
+# !
+# interface port1.0.3-1.0.28
+#  switchport
+#  switchport mode access
+# !
+# interface vlan1
+#  ip helper-address 172.26.3.8
+# !
+# interface vlan2
+#  description Overridden by Ansible Network
+#  mtu 920
+#  ip address dhcp client-id vlan2 hostname test.com
+# !
+# interface vlan13
+#  ip address 13.13.13.13/24
+# !
 
-Using Deleted
+# Using Deleted
 
-Before state:
----------------------
-interface port1.0.1
- switchport
- switchport mode access
-!
-interface port1.0.2
- description Merged by Ansible Network
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.3
- description Replaced by Ansible Network
- speed 1000
- duplex full
- shutdown
- switchport
- switchport mode access
-!
-interface port1.0.4
- description Override by Ansible Network
- duplex full
- switchport
- switchport mode access
-!
-interface vlan1
- description Override by Ansible Network
- ip address 192.168.5.2/24
- ipv6 enable
- ipv6 address dhcp
- ip dhcp-client vendor-identifying-class
- ip dhcp-client request vendor-identifying-specific
-!
+# Before state:
+# ---------------------
+# interface port1.0.1
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.2
+#  description Merged by Ansible Network
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.3
+#  description Replaced by Ansible Network
+#  speed 1000
+#  duplex full
+#  shutdown
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.4
+#  description Override by Ansible Network
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface vlan1
+#  description Override by Ansible Network
+#  ip address 192.168.5.2/24
+#  ipv6 enable
+#  ipv6 address dhcp
+#  ip dhcp-client vendor-identifying-class
+#  ip dhcp-client request vendor-identifying-specific
+# !
 
-  - name: Test awplus_interface module
-    connection: network_cli
-    hosts: all
-    tasks:
-      - name: "Delete module attributes of given interfaces (Note: This won't delete the interface itself)"
-        awplus_interfaces:
-          config:
-            - name: port1.0.2
-          state: deleted
+- name: Delete module attributes of given interfaces (Note: This won't delete the interface itself)
+  alliedtelesis.awplus.awplus_interfaces:
+    config:
+      - name: port1.0.2
+    state: deleted
 
-After state:
----------------------------
-interface port1.0.1
- switchport
- switchport mode access
-!
-interface port1.0.2
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.3
- description Replaced by Ansible Network
- speed 1000
- duplex full
- shutdown
- switchport
- switchport mode access
-!
-interface port1.0.4
- description Override by Ansible Network
- duplex full
- switchport
- switchport mode access
-!
-interface vlan1
- description Override by Ansible Network
- ip address 192.168.5.2/24
- ipv6 enable
- ipv6 address dhcp
- ip dhcp-client vendor-identifying-class
- ip dhcp-client request vendor-identifying-specific
-!
+# After state:
+# ---------------------------
+# interface port1.0.1
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.2
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.3
+#  description Replaced by Ansible Network
+#  speed 1000
+#  duplex full
+#  shutdown
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.4
+#  description Override by Ansible Network
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface vlan1
+#  description Override by Ansible Network
+#  ip address 192.168.5.2/24
+#  ipv6 enable
+#  ipv6 address dhcp
+#  ip dhcp-client vendor-identifying-class
+#  ip dhcp-client request vendor-identifying-specific
+# !
 
-Using Deleted without any config passed
-NOTE: This will delete all of configured resource module attributes from each configured interface
+# Using Deleted without any config passed
+# NOTE: This will delete all of configured resource module attributes from each configured interface
 
-Before state:
------------------------
-interface port1.0.1
- switchport
- switchport mode access
-!
-interface port1.0.2
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.3
- description Replaced by Ansible Network
- speed 1000
- duplex full
- shutdown
- switchport
- switchport mode access
-!
-interface port1.0.4
- description Override by Ansible Network
- duplex full
- switchport
- switchport mode access
-!
-interface vlan1
- description Override by Ansible Network
- ip address 192.168.5.2/24
- ipv6 enable
- ipv6 address dhcp
- ip dhcp-client vendor-identifying-class
- ip dhcp-client request vendor-identifying-specific
-!
+# Before state:
+# -----------------------
+# interface port1.0.1
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.2
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.3
+#  description Replaced by Ansible Network
+#  speed 1000
+#  duplex full
+#  shutdown
+#  switchport
+#  switchport mode access
+# !
+# interface port1.0.4
+#  description Override by Ansible Network
+#  duplex full
+#  switchport
+#  switchport mode access
+# !
+# interface vlan1
+#  description Override by Ansible Network
+#  ip address 192.168.5.2/24
+#  ipv6 enable
+#  ipv6 address dhcp
+#  ip dhcp-client vendor-identifying-class
+#  ip dhcp-client request vendor-identifying-specific
+# !
 
-  - name: Test awplus_interface module
-    connection: network_cli
-    hosts: all
-    tasks:
-      - name: "Delete module attributes of given interfaces (Note: This won't delete the interface itself)"
-        awplus_interfaces:source hacking/env-setup
-          config:
-          state: deleted
+- name: "Delete module attributes of given interfaces (Note: This won't delete the interface itself)"
+  alliedtelesis.awplus.awplus_interfaces:
+    config:
+    state: deleted
 
-After state:
----------------------------
-interface port1.0.1
- switchport
- switchport mode access
-!
-interface port1.0.2
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.3
- speed 1000
- duplex full
- switchport
- switchport mode access
-!
-interface port1.0.4
- duplex full
- switchport
- switchport mode access
-!
-interface vlan1
- ip address 192.168.5.2/24
- ipv6 enable
- ipv6 address dhcp
- ip dhcp-client vendor-identifying-class
- ip dhcp-client request vendor-identifying-specific
-!
-
+# After state:
+# ---------------------------
+# interface port1.0.1-1.0.4
+#  switchport
+#  switchport mode access
+# !
+# interface vlan1
+#  ip address 192.168.5.2/24
+#  ipv6 enable
+#  ipv6 address dhcp
+#  ip dhcp-client vendor-identifying-class
+#  ip dhcp-client request vendor-identifying-specific
+# !
 """
+
 RETURN = """
 before:
   description: The configuration prior to the model invocation.
@@ -511,7 +460,11 @@ commands:
   description: The set of commands pushed to the remote device.
   returned: always
   type: list
-  sample: ['command 1', 'command 2', 'command 3']
+  sample: ["interface port1.0.10",
+          "no duplex"
+          "interface port1.0.11",
+          "description Merged by Ansible",
+          "speed 10"]
 """
 
 from ansible.module_utils.basic import AnsibleModule

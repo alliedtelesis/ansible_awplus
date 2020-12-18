@@ -44,7 +44,7 @@ class TestAwplusInterfacesModule(TestAwplusModule):
         )
 
         self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.interfaces.interfaces.InterfacesFacts.get_device_data"
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.interfaces.interfaces.InterfacesFacts.get_running_interface"
         )
         self.execute_show_command = self.mock_execute_show_command.start()
 

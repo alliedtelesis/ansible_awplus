@@ -152,8 +152,6 @@ class Interfaces(ConfigBase):
                 elif interface["name"] in each["name"]:
                     break
             else:
-                # configuring non-existing interface
-                commands.extend(self._set_config(interface, dict()))
                 continue
             have_dict = filter_dict_having_none_value(interface, each)
             commands.extend(self._clear_config(dict(), have_dict))
@@ -219,8 +217,6 @@ class Interfaces(ConfigBase):
                 if each["name"] == interface["name"]:
                     break
             else:
-                # configuring non-existing interface
-                commands.extend(self._set_config(interface, dict()))
                 continue
             # commands.extend(self._clear_config(dict(), have_dict))
             commands.extend(self._set_config(interface, each))
@@ -311,13 +307,5 @@ class Interfaces(ConfigBase):
             and want.get("duplex") != have.get("duplex")
         ):
             remove_command_from_config_list(interface, "duplex", commands)
-
-        # if interface_type.lower() == 'gigabitethernet':
-        #     if have.get('speed') and have.get('speed') != 'auto' and want.get('speed') != have.get('speed'):
-        #         remove_command_from_config_list(interface, 'speed', commands)
-        #     if have.get('duplex') and have.get('duplex') != 'auto' and want.get('duplex') != have.get('duplex'):
-        #         remove_command_from_config_list(interface, 'duplex', commands)
-        #     if have.get('mtu') and want.get('mtu') != have.get('mtu'):
-        #         remove_command_from_config_list(interface, 'mtu', commands)
 
         return commands
