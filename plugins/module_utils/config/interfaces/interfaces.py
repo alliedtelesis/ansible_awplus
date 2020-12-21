@@ -14,7 +14,7 @@ is compared to the provided configuration (as dict) and the command set
 necessary to bring the current configuration to it's desired end-state is
 created
 """
-
+import re
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base import ConfigBase
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import to_list
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.facts import (
@@ -134,11 +134,92 @@ class Interfaces(ConfigBase):
             commands = self._state_replaced(want, have)
         return commands
 
+    def get_interfaces(self, want):
+        if "," in want:
+            intfs = re.findall(r"[\w\-\.]+", want)
+            int_type = get_interface_type(intfs[0])
+            for intf in intfs:
+                if int_type != get_interface_type(intf):
+                    self._module.fail_json("Interfaces mismatch, Interfaces in range must be of same type")
+            return intfs
+        else:
+            return [want]
+
+    def is_valid_input(self, want):
+        """ Determines whether the given interface/s is valid or not
+        :param want: the name of the interface
+        :rtype: bool
+        :returns: true if the interface name is valid
+        """
+        if get_interface_type(want) == "unknown":  # check if input is valid interface name
+            self._module.fail_json("Invalid interface name")
+        else:
+            return True
+
+    def is_existing_port(self, want, have):
+        """ Determines whether the given port/s exist
+        :param want: the name of the port
+        :param have: the current configuration as a dictionary
+        :rtype: bool
+        :returns: true if the port/s exist
+        """
+        start = want
+        end = want
+        if "-" in want:
+            port = re.search(r"port(\d+).(\d+).(\d+)-(\d+).(\d+).(\d+)", want)
+            if port:
+                for i in range(3):  # check if valid range
+                    if port.group(i + 1) > port.group(i + 4):
+                        self._module.fail_json("Invalid Input - range end must be greater than range start")
+                    elif port.group(i + 1) == port.group(i + 4):
+                        continue
+                    else:
+                        break
+                else:
+                    self._module.fail_json("Invalid Input - range end must be greater than range start")
+                start = "port{}.{}.{}".format(port.group(1), port.group(2), port.group(3))
+                end = "port{}.{}.{}".format(port.group(4), port.group(5), port.group(6))
+        start_exists = False
+        end_exists = False
+        for intf in have:  # check if port exists
+            if start == intf["name"]:
+                start_exists = True
+            if end == intf["name"]:
+                end_exists = True
+        return start_exists and end_exists
+
+    def is_existing_interface(self, want, have):
+        """ Determines whether the given interface/s exist
+        :param want: the name of the interface
+        :param have: the current configuration as a dictionary
+        :rtype: bool
+        :returns: true if the interface/s exist
+        """
+        if want.startswith("port"):
+            return self.is_existing_port(want, have)
+        if "-" in want:
+            intf_range = re.search(r"([a-z]+)(\d+)-(\d+)", want)
+            if intf_range:
+                if intf_range.group(3) <= intf_range.group(2):
+                    self._module.fail_json("Invalid Input - range end must be greater than range start")
+                for i in range(int(intf_range.group(3)), int(intf_range.group(2)) + 1):
+                    for intf in have:  # check if all interfaces in range exists
+                        if intf_range.group(1) + str(i) == intf["name"]:
+                            break
+                    else:
+                        return False  # returns false if one of the interfaces does not exist
+                return True
+        else:
+            for intf in have:  # check for singular input
+                if want == intf["name"]:
+                    return True
+            return False
+        return False
+
     def _state_replaced(self, want, have):
         """ The command generator when state is replaced
         :param want: the desired configuration as a dictionary
         :param have: the current configuration as a dictionary
-        :param interface_type: interface type
         :rtype: A list
         :returns: the commands necessary to migrate the current configuration
                   to the deisred configuration
@@ -213,13 +294,15 @@ class Interfaces(ConfigBase):
         commands = []
 
         for interface in want:
-            for each in have:
-                if each["name"] == interface["name"]:
+            intfs = self.get_interfaces(interface["name"])
+            for intf in intfs:
+                if not self.is_valid_input(intf):
+                    break
+                if not self.is_existing_interface(intf, have):
                     break
             else:
-                continue
+                commands.extend(self._set_config(interface, dict()))
             # commands.extend(self._clear_config(dict(), have_dict))
-            commands.extend(self._set_config(interface, each))
 
         return commands
 
@@ -227,7 +310,6 @@ class Interfaces(ConfigBase):
         """ The command generator when state is deleted
         :param want: the objects from which the configuration should be removed
         :param obj_in_have: the current configuration as a dictionary
-        :param interface_type: interface type
         :rtype: A list
         :returns: the commands necessary to remove the current configuration
                   of the provided objects
@@ -301,11 +383,11 @@ class Interfaces(ConfigBase):
                 and want.get("speed") != have.get("speed")
             ):
                 remove_command_from_config_list(interface, "speed", commands)
-        if (
-            have.get("duplex")
-            and have.get("duplex") != "auto"
-            and want.get("duplex") != have.get("duplex")
-        ):
-            remove_command_from_config_list(interface, "duplex", commands)
+            if (
+                have.get("duplex")
+                and have.get("duplex") != "auto"
+                and want.get("duplex") != have.get("duplex")
+            ):
+                remove_command_from_config_list(interface, "duplex", commands)
 
         return commands
