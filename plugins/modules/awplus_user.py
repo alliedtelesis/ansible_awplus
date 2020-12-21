@@ -8,123 +8,122 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {
-    "metadata_version": "1.1",
-    "status": ["preview"],
-    "supported_by": "network",
-}
-
 DOCUMENTATION = """
 ---
 module: awplus_user
 version_added: "2.9"
 author:
-    - Cheng Yi Kok (@cyk19)
-    - Isaac Daly (@dalyIsaac)
+  - Cheng Yi Kok (@cyk19)
+  - Isaac Daly (@dalyIsaac)
 short_description: Manage the aggregate of local users on AlliedWare Plus device
 description:
-    - This module provides declarative management of the local usernames
-        configured on network devices. It allows playbooks to manage
-        either individual usernames or the aggregate of usernames in the
-        current running config. It also supports purging usernames from the
-        configuration that are not explicitly defined.
+  - This module provides declarative management of the local usernames
+    configured on network devices. It allows playbooks to manage
+    either individual usernames or the aggregate of usernames in the
+    current running config. It also supports purging usernames from the
+    configuration that are not explicitly defined.
 options:
-    aggregate:
-        description:
-            - The set of username objects to be configured on the remote
-                AlliedWare Plus device. The list entries can either be the username
-                or a hash of username and properties. This argument is mutually
-                exclusive with the C(name) argument.
-        aliases: ['users', 'collection']
-    name:
-        description:
-            - The username to be configured on the AlliedWare Plus device.
-                This argument accepts a string value and is mutually exclusive
-                with the C(aggregate) argument.
-                Please note that this option is not same as C(provider username).
-    configured_password:
-        description:
-            - The password to be configured on the AlliedWare Plus device. The
-                password needs to be provided in clear and it will be encrypted
-                on the device.
-                Please note that this option is not same as C(provider password).
-    hashed_password:
-        description:
-            - This option allows configuring hashed passwords on AlliedWare Plus device.
-        suboptions:
-            value:
-                description:
-                    - The actual hashed password to be configured on the device
-                required: True
-    privilege:
-        description:
-            - The C(privilege) argument configures the privilege level of the
-                user when logged into the system. This argument accepts integer
-                values in the range of 1 to 15.
-    purge:
-        description:
-            - Instructs the module to consider the
-                resource definition absolute. It will remove any previously
-                configured usernames on the device with the exception of the
-                `admin` user (the current defined set of users).
-        type: bool
-        default: false
-    state:
-        description:
-            - Configures the state of the username definition
-                as it relates to the device operational configuration. When set
-                to I(present), the username(s) should be configured in the device active
-                configuration and when set to I(absent) the username(s) should not be
-                in the device active configuration
-        default: present
-        choices: ['present', 'absent']
+  aggregate:
+    description:
+      - The set of username objects to be configured on the remote
+        AlliedWare Plus device. The list entries can either be the username
+        or a hash of username and properties. This argument is mutually
+        exclusive with the I(name) argument.
+    aliases: ['users', 'collection']
+    type: list
+    elements: dict
+  name:
+    description:
+      - The username to be configured on the AlliedWare Plus device.
+        This argument accepts a string value and is mutually exclusive
+        with the I(aggregate) argument.
+    type: str
+  configured_password:
+    description:
+      - The password to be configured on the AlliedWare Plus device. The
+        password needs to be provided in clear and it will be encrypted
+        on the device.
+    type: str
+  hashed_password:
+    description:
+      - The hashed password to be configured on the device.
+    type: str
+  privilege:
+    description:
+      - Configures the privilege level of the user when logged into the system.
+        This argument accepts integer values in the range of 1 to 15.
+    type: int
+  purge:
+    description:
+      - Instructs the module to consider the
+        resource definition absolute. It removes any previously
+        configured usernames on the device with the exception of the
+        `manager` user (the default defined user).
+    type: bool
+    default: false
+  state:
+    description:
+      - Configures the state of the username definition
+        as it relates to the device operational configuration. When set
+        to I(state=present), the username(s) should be configured in the device active
+        configuration and when set to I(state=absent) the username(s) should not be
+        in the device active configuration.
+    default: present
+    choices: ['present', 'absent']
+    type: str
 notes:
-    - Check mode is supported.
+  - Check mode is supported.
 """
 
 EXAMPLES = """
 - name: create a new user with configured password
-    awplus_user:
-        name: ansible
-        configured_password: hello
-        state: present
+  alliedtelesis.awplus.awplus_user:
+    name: ansible
+    configured_password: hello
+    state: present
 
 - name: purge all users except manager
-    awplus_user:
-        name: manager
-        purge: yes
+  alliedtelesis.awplus.awplus_user:
+    name: manager
+    purge: yes
 
 - name: create a new user with hash password
-    awplus_user:
-        name: ansible1
-        hashed_password:
-            value: $1$Xbe4cg43$k7jjFxx8aJBm0oG8fzIc.0
+  alliedtelesis.awplus.awplus_user:
+    name: ansible1
+    hashed_password: $1$Xbe4cg43$k7jjFxx8aJBm0oG8fzIc.0
 
 - name: Delete user ansible1
-    awplus_user:
-        name: ansible1
-        state: absent
+  alliedtelesis.awplus.awplus_user:
+    name: ansible1
+    state: absent
 
 - name: Delete user ansible with aggregate
-    awplus_user:
-        aggregate:
-            - name: ansible1
-            - name: ansible
-        state: absent
+  alliedtelesis.awplus.awplus_user:
+    aggregate:
+      - name: ansible1
+      - name: ansible
+    state: absent
 
 - name: Change password for user ansible
-    awplus_user:
-        name: ansible
-        configured_password: bye
-        state: present
+  alliedtelesis.awplus.awplus_user:
+    name: ansible
+    configured_password: bye
+    state: present
 
 - name: set multiple users to privilege level 15
-    awplus_user:
-        aggregate:
-            - name: chengk
-            - name: ansible
-        privilege: 15
-        state: present
+  alliedtelesis.awplus.awplus_user:
+    aggregate:
+      - name: chengk
+      - name: ansible
+    privilege: 15
+    state: present
+
+- name: create new users minie and mickey and delete all other users
+  alliedtelesis.awplus.awplus_user:
+    aggregate:
+      - {name: mickey, configured_password: minie, privilege: 3}
+      - {name: minie, configured_password: mickey, privilege: 14}
+    purge: yes
 """
 
 RETURN = """
@@ -132,7 +131,8 @@ commands:
     description: Show the commands sent.
     returned: always
     type: list
-    sample: ['interface port1.0.5', 'static-channel-group 2 member-filters']
+    sample: ["username bun privilege 10",
+            "username bun password ********"]
 """
 
 from ansible.module_utils.six import iteritems
@@ -174,7 +174,7 @@ def map_obj_to_commands(updates, module):
         command.append("username %s %s" % (want["name"], x))
 
     def add_hashed_password(command, want, x):
-        command.append("username %s password 8 %s" % (want["name"], x.get("value")))
+        command.append("username %s password 8 %s" % (want["name"], x))
 
     for update in updates:
         want, have = update
@@ -182,11 +182,11 @@ def map_obj_to_commands(updates, module):
         if want["state"] == "absent":
             commands.append(user_del_cmd(want["name"]))
 
-        if needs_update(want, have, "privilege"):
-            add(commands, want, "privilege %s" % want["privilege"])
-
         if needs_update(want, have, "configured_password"):
             add(commands, want, "password %s" % (want["configured_password"]))
+
+        if needs_update(want, have, "privilege"):
+            add(commands, want, "privilege %s" % want["privilege"])
 
         if needs_update(want, have, "hashed_password"):
             add_hashed_password(commands, want, want["hashed_password"])
@@ -293,12 +293,10 @@ def map_params_to_obj(module):
 def main():
     """ main entry point for module execution
     """
-    hashed_password_spec = dict(value=dict(no_log=True, required=True))
-
     element_spec = dict(
         name=dict(),
         configured_password=dict(no_log=True),
-        hashed_password=dict(no_log=True, type="dict", options=hashed_password_spec),
+        hashed_password=dict(no_log=True),
         privilege=dict(type="int"),
         state=dict(default="present", choices=["present", "absent"]),
     )
@@ -344,7 +342,7 @@ def main():
         want_users = [x["name"] for x in want]
         have_users = [x["name"] for x in have]
         for item in set(have_users).difference(want_users):
-            if item != "admin":
+            if item != "manager":
                 commands.append(user_del_cmd(item))
 
     result["commands"] = commands
