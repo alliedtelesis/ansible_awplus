@@ -19,6 +19,7 @@ import platform
 import re
 import sys
 
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
     run_commands,
     get_capabilities,
@@ -153,6 +154,7 @@ class Interfaces(FactsBase):
         "show interface",
         "show ip interface",
         "show ipv6 interface",
+        "show ip irdp interface",
         "show lldp",
     ]
 
@@ -179,6 +181,11 @@ class Interfaces(FactsBase):
             self.populate_ipv6_interfaces(data)
 
         data = self.responses[3]
+        if data:
+            data = self.parse_irdp_interfaces(data)
+            self.populate_line_protocol(data)
+
+        data = self.responses[4]
         lldp_errs = ["Invalid input", "LLDP is not enabled"]
 
         if data and not any(err in data for err in lldp_errs):
@@ -194,20 +201,18 @@ class Interfaces(FactsBase):
             intf["macaddress"] = self.parse_macaddress(value)
             intf["mtu"] = self.parse_mtu(value)
             intf["bandwidth"] = self.parse_bandwidth(value)
-            intf["mediatype"] = self.parse_mediatype(value)
             intf["duplex"] = self.parse_duplex(value)
             intf["lineprotocol"] = self.parse_lineprotocol(value)
             intf["operstatus"] = self.parse_operstatus(value)
             intf["type"] = self.parse_type(value)
 
-            facts[key] = intf
+            facts[key] = utils.remove_empties(intf)
         return facts
 
     def populate_ipv4_interfaces(self, data):
         for key, value in data.items():
             self.facts["interfaces"][key]["ipv4"] = list()
             match = re.search(r"^(\w+)\s+(\S+)\s+(.+)\s+(\w+)", value, re.M)
-            # address = re.findall(r'broadcast (.+)$', value, re.M)
             if "/" not in match.group(2):
                 continue
             else:
@@ -233,6 +238,16 @@ class Interfaces(FactsBase):
                 ipv4 = dict(address=addr.strip(), subnet=subnet.strip())
                 self.add_ip_address(addr.strip(), "ipv6")
                 self.facts["interfaces"][key]["ipv6"].append(ipv4)
+
+    def populate_line_protocol(self, data):
+        for key, value in iteritems(data):
+            try:
+                self.facts["interfaces"][key]["lineprotocol"] = None
+            except KeyError:
+                self.facts["interfaces"][key] = dict()
+                self.facts["interfaces"][key]["lineprotocol"] = None
+            lineprotocol = self.parse_lineprotocol(value)
+            self.facts["interfaces"][key]["lineprotocol"] = lineprotocol
 
     def add_ip_address(self, address, family):
         if family == "ipv4":
@@ -289,26 +304,30 @@ class Interfaces(FactsBase):
                     parsed[key] = line
         return parsed
 
+    def parse_irdp_interfaces(self, data):
+        parsed = dict()
+        key = ""
+        for line in data.split("\n"):
+            if len(line) == 0:
+                continue
+            elif line[0] == " ":
+                continue
+            else:
+                match = re.match(r"^([a-z\d\.]+)", line)
+                if match:
+                    key = match.group(1)
+                    parsed[key] = line
+        return parsed
+
     def parse_description(self, data):
-        match = re.search(r"\<\S+\>", data, re.M)
-        descrip = ""
+        match = re.search(r"Description: (.+)$", data, re.M)
         if match:
-            descrip += match.group(0)
-            beginning = data.index(match.group(0))
-            for i in range(beginning + 1, len(data)):
-                descrip += data[i]
-            return descrip
+            return match.group(1)
 
     def parse_macaddress(self, data):
         match = re.search(r"Hardware is (?:.*), address is (\S+)", data)
         if match:
             return match.group(1)
-
-    def parse_ipv4(self, data):
-        match = re.search(r"IPv4 address (\S+)", data)
-        if match:
-            addr, masklen = match.group(1).split("/")
-            return dict(address=addr, masklen=int(masklen))
 
     def parse_mtu(self, data):
         match = re.search(r"mtu (\d+)", data)
@@ -322,11 +341,6 @@ class Interfaces(FactsBase):
 
     def parse_duplex(self, data):
         match = re.search(r"configured duplex (\w+)", data, re.M)
-        if match:
-            return match.group(1)
-
-    def parse_mediatype(self, data):
-        match = re.search(r"media type is (.+)$", data, re.M)
         if match:
             return match.group(1)
 
