@@ -8,12 +8,6 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {
-    "metadata_version": "1.1",
-    "status": ["preview"],
-    "supported_by": "network",
-}
-
 DOCUMENTATION = """
 ---
 module: awplus_facts
@@ -23,7 +17,7 @@ short_description: Get facts about AlliedWare Plus devices.
 description:
   - Collects facts from network devices running the AlliedWare Plus operating
     system. This module places the facts gathered in the fact tree keyed by the
-    respective resource name.  The facts module will always collect a
+    respective resource name. The facts module will always collect a
     base set of facts from the device and can enable or disable
     collection of additional facts.
 version_added: "2.9"
@@ -38,6 +32,8 @@ options:
         not be collected.
     required: false
     default: '!config'
+    type: list
+    elements: str
   gather_network_resources:
     description:
       - When supplied, this argument will restrict the facts collected
@@ -47,29 +43,31 @@ options:
         can also be used with an initial C(M(!)) to specify that a
         specific subset should not be collected.
     required: false
+    type: list
+    elements: str
 """
 
 EXAMPLES = """
-# Gather all facts
-- awplus_facts:
+- name: gather all facts
+  alliedtelesis.awplus.awplus_facts:
     gather_subset: all
     gather_network_resources: all
 
-# Collect only the interfaces facts
-- awplus_facts:
+- name: collect only the interfaces facts
+  alliedtelesis.awplus.awplus_facts:
     gather_subset:
-      - "!all"
-      - "!min"
+      - '!all'
+      - '!min'
     gather_network_resources:
       - interfaces
 
-# Do not collect interfaces facts
-- awplus_facts:
+- name: do not collect interfaces facts
+  alliedtelesis.awplus.awplus_facts:
     gather_network_resources:
       - "!interfaces"
 
-# Collect interfaces and minimal default facts
-- awplus_facts:
+- name: collect interfaces and minimal default facts
+  alliedtelesis.awplus.awplus_facts:
     gather_subset: min
     gather_network_resources: interfaces
 """
@@ -102,14 +100,6 @@ ansible_net_hostname:
   description: The configured hostname of the device
   returned: always
   type: str
-ansible_net_stacked_models:
-  description: The model names of each device in the stack
-  returned: when multiple devices are configured in a stack
-  type: list
-ansible_net_stacked_serialnums:
-  description: The serial numbers of each device in the stack
-  returned: when multiple devices are configured in a stack
-  type: list
 ansible_net_api:
   description: The name of the transport
   returned: always
@@ -128,11 +118,11 @@ ansible_net_filesystems_info:
   description: A hash of all file systems containing info about each file system (e.g. free and total space)
   returned: when hardware is configured
   type: dict
-ansible_net_memfree_mb:
+ansible_net_memfree:
   description: The available free memory on the remote device in Mb
   returned: when hardware is configured
   type: int
-ansible_net_memtotal_mb:
+ansible_net_memtotal:
   description: The total memory on the remote device in Mb
   returned: when hardware is configured
   type: int
