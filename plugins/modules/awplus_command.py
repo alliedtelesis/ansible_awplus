@@ -8,29 +8,23 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {
-    "metadata_version": "1.1",
-    "status": ["preview"],
-    "supported_by": "network",
-}
-
 DOCUMENTATION = """
 ---
 module: awplus_command
 author: Cheng Yi Kok (@cyk19)
 short_description: Run commands on remote devices running AlliedWare Plus
 description:
-  - Sends arbitrary commands to an AW+ node and returns the results
+  - Sends arbitrary commands to an AlliedWare Plus node and returns the results
     read from the device. This module includes an
     argument that will cause the module to wait for a specific condition
     before returning or timing out if the condition is not met.
   - This module does not support running commands in configuration mode.
-    Please use M(awplus_config) to configure AW+ devices.
+    Please use M(alliedtelesis.awplus.awplus_config) to configure AlliedWare Plus devices.
 version_added: "2.9"
 options:
   commands:
     description:
-      - List of commands to send to the remote awplus device over the
+      - List of commands to send to the remote AlliedWare Plus device over the
         configured provider. The resulting output from the command
         is returned. If the I(wait_for) argument is provided, the
         module is not returned until the condition is satisfied or
@@ -38,7 +32,9 @@ options:
         device requires answering a prompt, it is possible to pass
         a dict containing I(command), I(answer) and I(prompt).
         Common answers are 'y' or "\\r" (carriage return, must be
-        double quotes). See examples.
+        double quotes).
+    type: list
+    elements: raw
     required: true
   wait_for:
     description:
@@ -48,16 +44,19 @@ options:
         within the configured number of retries, the task fails.
         See examples.
     aliases: ['waitfor']
+    type: list
+    elements: str
   match:
     description:
       - The I(match) argument is used in conjunction with the
-        I(wait_for) argument to specify the match policy.  Valid
-        values are C(all) or C(any).  If the value is set to C(all)
-        then all conditionals in the wait_for must be satisfied.  If
+        I(wait_for) argument to specify the match policy. Valid
+        values are C(all) or C(any). If the value is set to C(all)
+        then all conditionals in the wait_for must be satisfied. If
         the value is set to C(any) then only one of the values must be
         satisfied.
     default: all
     choices: ['any', 'all']
+    type: str
   retries:
     description:
       - Specifies the number of retries a command should by tried
@@ -65,6 +64,7 @@ options:
         target device every retry and evaluated against the
         I(wait_for) conditions.
     default: 10
+    type: int
   interval:
     description:
       - Configures the interval in seconds to wait between retries
@@ -72,29 +72,31 @@ options:
         conditions, the interval indicates how long to wait before
         trying the command again.
     default: 1
+    type: int
 """
 
 EXAMPLES = """
 - name: run show version on remote devices
-  awplus_command:
+  alliedtelesis.awplus.awplus_command:
     commands: show version
-- name: run show version and check to see if output contains AlliedWare Plus
-  awplus_command:
-    commands: show version
-    wait_for: result[0] contains AlliedWare
-- name: run multiple commands on remote nodes
-  awplus_command:
-    commands:
-      - show version
-      - show interfaces
 - name: run multiple commands and evaluate the output
-  awplus_command:
+  alliedtelesis.awplus.awplus_command:
     commands:
       - show version
-      - show interfaces
+      - show interface
     wait_for:
       - result[0] contains AlliedWare
-      - result[1] contains Ethernet
+      - result[1] contains 8Ts7JJKaMi
+    match: all
+- name: copy config file to existing txt file
+  awplus_command:
+    commands:
+      - command: copy main.cfg text.txt
+        prompt: Overwrite flash:/text.txt
+        answer: y
+      - command: copy main.cfg text.txt
+        prompt: Overwrite flash:/text.txt
+        answer: "\\r"
 """
 
 RETURN = """
@@ -102,17 +104,19 @@ stdout:
   description: The set of responses from the commands
   returned: always apart from low level errors (such as action plugin)
   type: list
-  sample: ['...', '...']
+  sample: ['!\nservice password-encryption\n!\nhostname aw1\n!\nbanner exe...']
 stdout_lines:
   description: The value of stdout split into a list
   returned: always apart from low level errors (such as action plugin)
   type: list
-  sample: [['...', '...'], ['...'], ['...']]
+  sample: [['!', 'service password-encryption',
+            '!', 'hostname awplus',
+            '!', 'banner ex...']]
 failed_conditions:
   description: The list of conditionals that have failed
   returned: failed
   type: list
-  sample: ['...', '...']
+  sample: ['result[0] contains 8Ts7JJKaMi']
 """
 
 import time
@@ -153,7 +157,7 @@ def main():
         wait_for=dict(type="list", aliases=["waitfor"]),
         match=dict(default="all", choices=["all", "any"]),
         retries=dict(default=10, type="int"),
-        interval=dict(defult=1, type="int"),
+        interval=dict(default=1, type="int"),
     )
 
     argument_spec.update(awplus_argument_spec)
