@@ -135,35 +135,35 @@ class Interfaces(ConfigBase):
         return commands
 
     def get_interfaces(self, want):
+        """ Validates input and returns a list of interfaces to configure
+
+        :param want: the name of the interface/s
+        :rtype: list
+        :returns: list of interfaces to configure
+        """
         if " " in want:
             self._module.fail_json("Interface names and comma-separated names should not have spaces.")
         if "," in want:
             intfs = want.split(",")
             int_type = get_interface_type(intfs[0])
-            for intf in intfs[1:]:
-                if int_type != get_interface_type(intf):
-                    self._module.fail_json("Interfaces mismatch, Interfaces in range must be of the same type")
+            for intf in intfs:
+                intf_type = get_interface_type(intf)
+                if intf_type == "unknown":
+                    self._module.fail_json("Invalid interface name - unknown interface")
+                if int_type != intf_type:
+                    self._module.fail_json(f"Interfaces mismatch {int_type} & {intf_type}, "
+                        "Interfaces in range must be of the same type")
             return intfs
         else:
             return [want]
 
-    def is_valid_input(self, want):
-        """ Determines whether the given interface/s is valid or not
-        :param want: the name of the interface
-        :rtype: bool
-        :returns: true if the interface name is valid
-        """
-        if get_interface_type(want) == "unknown":  # check if input is valid interface name
-            self._module.fail_json("Invalid interface name")
-        else:
-            return True
-
-    def is_existing_port(self, want, have):
-        """ Determines whether the given port/s exist
+    def get_port_dict(self, want, have):
+        """ Determines whether the given port/s exist and returns the configuration of the wanted port,
+            blank dict for range and none if the port does not exist
         :param want: the name of the port
         :param have: the current configuration as a dictionary
-        :rtype: bool
-        :returns: true if the port/s exist
+        :rtype: dict
+        :returns: configuration of the wanted port
         """
         start = want
         end = want
@@ -195,14 +195,15 @@ class Interfaces(ConfigBase):
         return
 
     def get_have_dict(self, want, have):
-        """ Determines whether the given interface/s exist
+        """ Determines whether the given interface/s exist and returns the configuration of the wanted interface,
+            blank dict for range and none if the interface does not exist
         :param want: the name of the interface
         :param have: the current configuration as a dictionary
-        :rtype: bool
-        :returns: true if the interface/s exist
+        :rtype: dict
+        :returns: configuration of the wanted interface
         """
         if want.startswith("port"):
-            return self.is_existing_port(want, have)
+            return self.get_port_dict(want, have)
         if "-" in want:
             intf_range = re.search(r"([a-z]+)(\d+)-(\d+)", want)
             if intf_range:
@@ -234,8 +235,6 @@ class Interfaces(ConfigBase):
         for interface in want:
             intfs = self.get_interfaces(interface["name"])
             for intf in intfs:
-                if not self.is_valid_input(intf):
-                    self._module.fail_json(msg="Invalid input")
                 have_dict = self.get_have_dict(intf, have)
                 if have_dict is None:
                     self._module.fail_json(msg=f"{intf} does not exist")
@@ -306,8 +305,6 @@ class Interfaces(ConfigBase):
         for interface in want:
             intfs = self.get_interfaces(interface["name"])
             for intf in intfs:
-                if not self.is_valid_input(intf):
-                    self._module.fail_json(msg="Invalid input")
                 have_dict = self.get_have_dict(intf, have)
                 if have_dict is None:
                     self._module.fail_json(msg=f"{intf} does not exist")
@@ -334,8 +331,6 @@ class Interfaces(ConfigBase):
             for interface in want:
                 intfs = self.get_interfaces(interface["name"])
                 for intf in intfs:
-                    if not self.is_valid_input(intf):
-                        self._module.fail_json(msg="Invalid input")
                     have_dict = self.get_have_dict(intf, have)
                     if have_dict is None:
                         self._module.fail_json(msg=f"{intf} does not exist")
