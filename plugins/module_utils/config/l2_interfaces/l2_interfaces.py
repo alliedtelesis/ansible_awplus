@@ -13,6 +13,7 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+import re
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base import ConfigBase
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import to_list
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.facts import (
@@ -83,7 +84,9 @@ class L2_interfaces(ConfigBase):
         commands.extend(self.set_config(existing_l2_interfaces_facts))
         if commands:
             if not self._module.check_mode:
-                self._connection.edit_config(commands)
+                warning = self._connection.edit_config(commands).get("response")
+                if warning[-1] != "":
+                    warnings = warning[-1]
             changed_l2_interfaces_facts = self.get_l2_interfaces_facts()
             if existing_l2_interfaces_facts != changed_l2_interfaces_facts:
                 result["changed"] = True
@@ -141,6 +144,18 @@ class L2_interfaces(ConfigBase):
             commands = self._state_replaced(want, have, self._module)
         return commands
 
+    def is_in_ports(self, want, have):
+        if "-" in have:
+            have_ports = re.search(r"(port1.0.)(\d+)(-1.0.)(\d+)", have)
+            if have_ports:
+                min_ = int(have_ports.group(2))
+                max_ = int(have_ports.group(4))
+                want_port = re.search(r"(port1.0.)(\d+)", want)
+                return min_ <= int(want_port.group(2)) <= max_
+        elif want == have:
+            return True
+        return False
+
     def _state_replaced(self, want, have, module):
         """ The command generator when state is replaced
         :param want: the desired configuration as a dictionary
@@ -154,7 +169,7 @@ class L2_interfaces(ConfigBase):
 
         for interface in want:
             for each in have:
-                if each["name"] == interface["name"]:
+                if self.is_in_ports(interface["name"], each["name"]):
                     break
             else:
                 continue
@@ -176,7 +191,7 @@ class L2_interfaces(ConfigBase):
         commands = []
         for each in have:
             for interface in want:
-                if each["name"] == interface["name"]:
+                if self.is_in_ports(interface["name"], each["name"]):
                     break
             else:
                 # We didn't find a matching desired state, which means we can
@@ -204,7 +219,7 @@ class L2_interfaces(ConfigBase):
 
         for interface in want:
             for each in have:
-                if each["name"] == interface["name"]:
+                if self.is_in_ports(interface["name"], each["name"]):
                     break
             else:
                 continue
@@ -224,7 +239,7 @@ class L2_interfaces(ConfigBase):
         if want:
             for interface in want:
                 for each in have:
-                    if each["name"] == interface["name"]:
+                    if self.is_in_ports(interface["name"], each["name"]):
                         break
                 else:
                     continue
@@ -297,8 +312,9 @@ class L2_interfaces(ConfigBase):
                 add_command_to_config_list(interface, cmd, commands)
 
             if want_trunk:
-                cmd = "switchport mode trunk"
-                self._add_command_to_config_list(interface, cmd, commands)
+                if have.get("trunk") is None:
+                    cmd = "switchport mode trunk"
+                    self._add_command_to_config_list(interface, cmd, commands)
                 if diff.get("trunk"):
                     diff = dict(diff.get("trunk"))
                 allowed_vlans = diff.get("allowed_vlans")
