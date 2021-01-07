@@ -58,7 +58,8 @@ options:
       - Instructs the module to consider the
         resource definition absolute. It removes any previously
         configured usernames on the device with the exception of the
-        `manager` user (the default defined user).
+        `manager` user (the default defined user). If `manager` user does not exist,
+        it is created.
     type: bool
     default: false
   state:
@@ -290,6 +291,15 @@ def map_params_to_obj(module):
     return objects
 
 
+def add_default_user(module):
+    want = dict(name="manager",
+                configured_password="friend",
+                privilege=15,
+                state="present")
+    have = dict()
+    return map_obj_to_commands([(want, have)], module)
+
+
 def main():
     """ main entry point for module execution
     """
@@ -341,6 +351,10 @@ def main():
     if module.params["purge"]:
         want_users = [x["name"] for x in want]
         have_users = [x["name"] for x in have]
+
+        if "manager" not in have_users:
+            commands.extend(add_default_user(module))
+
         for item in set(have_users).difference(want_users):
             if item != "manager":
                 commands.append(user_del_cmd(item))
