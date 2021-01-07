@@ -135,12 +135,14 @@ class Interfaces(ConfigBase):
         return commands
 
     def get_interfaces(self, want):
+        if " " in want:
+            self._module.fail_json("Interface names and comma-separated names should not have spaces.")
         if "," in want:
-            intfs = re.findall(r"[\w\-\.]+", want)
+            intfs = want.split(",")
             int_type = get_interface_type(intfs[0])
-            for intf in intfs:
+            for intf in intfs[1:]:
                 if int_type != get_interface_type(intf):
-                    self._module.fail_json("Interfaces mismatch, Interfaces in range must be of same type")
+                    self._module.fail_json("Interfaces mismatch, Interfaces in range must be of the same type")
             return intfs
         else:
             return [want]
@@ -186,9 +188,13 @@ class Interfaces(ConfigBase):
                 start_exists = True
             if end == intf["name"]:
                 end_exists = True
-        return start_exists and end_exists
+            if start == end and start_exists:
+                return intf
+        if start_exists and end_exists:
+            return dict()
+        return
 
-    def is_existing_interface(self, want, have):
+    def get_have_dict(self, want, have):
         """ Determines whether the given interface/s exist
         :param want: the name of the interface
         :param have: the current configuration as a dictionary
@@ -207,14 +213,13 @@ class Interfaces(ConfigBase):
                         if intf_range.group(1) + str(i) == intf["name"]:
                             break
                     else:
-                        return False  # returns false if one of the interfaces does not exist
-                return True
+                        return  # returns none if one of the interfaces does not exist
+                return dict()
         else:
             for intf in have:  # check for singular input
                 if want == intf["name"]:
-                    return True
-            return False
-        return False
+                    return intf
+            return
 
     def _state_replaced(self, want, have):
         """ The command generator when state is replaced
@@ -227,16 +232,21 @@ class Interfaces(ConfigBase):
         commands = []
 
         for interface in want:
-            for each in have:
-                if each["name"] == interface["name"]:
-                    break
-                elif interface["name"] in each["name"]:
-                    break
+            intfs = self.get_interfaces(interface["name"])
+            for intf in intfs:
+                if not self.is_valid_input(intf):
+                    self._module.fail_json(msg="Invalid input")
+                have_dict = self.get_have_dict(intf, have)
+                if have_dict is None:
+                    self._module.fail_json(msg=f"{intf} does not exist")
             else:
-                continue
-            have_dict = filter_dict_having_none_value(interface, each)
-            commands.extend(self._clear_config(dict(), have_dict))
-            commands.extend(self._set_config(interface, each))
+                if have_dict:
+                    filtered_have = filter_dict_having_none_value(interface, have_dict)
+                    commands.extend(self._clear_config(dict(), filtered_have))
+                    commands.extend(self._set_config(interface, have_dict))
+                else:
+                    # commands.extend(self._clear_config(dict(), dict(name=interface["name"])))
+                    commands.extend(self._set_config(interface, dict()))
         # Remove the duplicate interface call
         commands = remove_duplicate_interface(commands)
 
@@ -297,11 +307,15 @@ class Interfaces(ConfigBase):
             intfs = self.get_interfaces(interface["name"])
             for intf in intfs:
                 if not self.is_valid_input(intf):
-                    break
-                if not self.is_existing_interface(intf, have):
-                    break
+                    self._module.fail_json(msg="Invalid input")
+                have_dict = self.get_have_dict(intf, have)
+                if have_dict is None:
+                    self._module.fail_json(msg=f"{intf} does not exist")
             else:
-                commands.extend(self._set_config(interface, dict()))
+                if have_dict:
+                    commands.extend(self._set_config(interface, have_dict))
+                else:
+                    commands.extend(self._set_config(interface, dict()))
             # commands.extend(self._clear_config(dict(), have_dict))
 
         return commands
@@ -318,17 +332,21 @@ class Interfaces(ConfigBase):
 
         if want:
             for interface in want:
-                for each in have:
-                    if each["name"] == interface["name"]:
-                        break
+                intfs = self.get_interfaces(interface["name"])
+                for intf in intfs:
+                    if not self.is_valid_input(intf):
+                        self._module.fail_json(msg="Invalid input")
+                    have_dict = self.get_have_dict(intf, have)
+                    if have_dict is None:
+                        self._module.fail_json(msg=f"{intf} does not exist")
                 else:
-                    continue
-                interface = dict(name=interface["name"])
-                commands.extend(self._clear_config(interface, each))
+                    if have_dict:
+                        interface = dict(name=interface["name"])
+                        commands.extend(self._clear_config(interface, have_dict))
+                    # else:
         else:
             for each in have:
-                want = dict()
-                commands.extend(self._clear_config(want, each))
+                commands.extend(self._clear_config(dict(), each))
 
         return commands
 
