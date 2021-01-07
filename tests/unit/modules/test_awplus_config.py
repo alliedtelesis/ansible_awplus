@@ -21,6 +21,7 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+import os
 from ansible_collections.alliedtelesis.awplus.tests.unit.compat.mock import (
     patch,
     MagicMock,
@@ -77,10 +78,11 @@ class TestAwplusConfigModule(TestAwplusModule):
         self.get_connection.edit_config.return_value = None
 
     def test_awplus_config_src(self):
-        src = load_fixture("awplus_config_src.cfg")
+        fixture_path = os.path.join(os.path.dirname(__file__), "fixtures")
+        src = os.path.join(fixture_path, "awplus_config_src.cfg")
         set_module_args(dict(src=src))
         self.conn.get_diff = MagicMock(
-            return_value=self.cliconf_obj.get_diff(src, self.running_config)
+            return_value=self.cliconf_obj.get_diff(load_fixture("awplus_config_src.cfg"), self.running_config)
         )
         commands = ["hostname foo", "interface port1.0.1", "description testing"]
         self.execute_module(changed=True, commands=commands)
@@ -101,11 +103,12 @@ class TestAwplusConfigModule(TestAwplusModule):
         self.assertIn("copy running-config startup-config\r", args)
 
     def test_awplus_config_save_changed_true(self):
-        src = load_fixture("awplus_config_src.cfg")
+        fixture_path = os.path.join(os.path.dirname(__file__), "fixtures")
+        src = os.path.join(fixture_path, "awplus_config_src.cfg")
         set_module_args(dict(src=src, save_when="changed"))
         commands = ["hostname foo", "interface port1.0.1", "description testing"]
         self.conn.get_diff = MagicMock(
-            return_value=self.cliconf_obj.get_diff(src, self.running_config)
+            return_value=self.cliconf_obj.get_diff(load_fixture("awplus_config_src.cfg"), self.running_config)
         )
         self.execute_module(changed=True, commands=commands)
         self.assertEqual(self.run_commands.call_count, 1)

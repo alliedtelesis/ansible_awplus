@@ -8,12 +8,6 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {
-    "metadata_version": "1.1",
-    "status": ["preview"],
-    "supported_by": "network",
-}
-
 DOCUMENTATION = """
 ---
 module: awplus_config
@@ -21,7 +15,7 @@ author: Cheng Yi Kok (@cyk19)
 short_description: Manage AlliedWare Plus configuration sections
 description:
   - AlliedWare Plus configurations use a simple block indent file syntax
-    for segmenting configuration into sections.  This module provides
+    for segmenting configuration into sections. This module provides
     an implementation for working with AlliedWare Plus configuration sections in
     a deterministic way.
 version_added: "2.9"
@@ -29,65 +23,77 @@ options:
   lines:
     description:
       - The ordered set of commands that should be configured in the
-        section.  The commands must be the exact same commands as found
-        in the device running-config.  Be sure to note the configuration
+        section. The commands must be the exact same commands as found
+        in the device running-config. Be sure to note the configuration
         command syntax as some commands are automatically modified by the
         device config parser.
+    type: list
+    elements: str
     aliases: ['commands']
   parents:
     description:
       - The ordered set of parents that uniquely identify the section or hierarchy
-        the commands should be checked against.  If the parents argument
+        the commands should be checked against. If the parents argument
         is omitted, the commands are checked against the set of top
         level or global commands.
+    type: list
+    elements: str
   src:
     description:
       - Specifies the source path to the file that contains the configuration
-        or configuration template to load.  The path to the source file can
+        or configuration template to load. The path to the source file can
         either be the full path on the Ansible control host or a relative
-        path from the playbook or role root directory.  This argument is mutually
+        path from the playbook or role root directory. This argument is mutually
         exclusive with I(lines), I(parents).
+    type: str
   before:
     description:
       - The ordered set of commands to push on to the command stack if
-        a change needs to be made.  This allows the playbook designer
+        a change needs to be made. This allows the playbook designer
         the opportunity to perform configuration commands prior to pushing
         any changes without affecting how the set of commands are matched
         against the system.
+    type: list
+    elements: str
   after:
     description:
       - The ordered set of commands to append to the end of the command
-        stack if a change needs to be made.  Just like with I(before) this
+        stack if a change needs to be made. Just like with I(before) this
         allows the playbook designer to append a set of commands to be
         executed after the command set.
+    type: list
+    elements: str
   match:
     description:
       - Instructs the module on the way to perform the matching of
-        the set of commands against the current device config.  If
-        match is set to I(line), commands are matched line by line.  If
-        match is set to I(strict), command lines are matched with respect
-        to position.  If match is set to I(exact), command lines
-        must be an equal match.  Finally, if match is set to I(none), the
+        the set of commands against the current device config. If
+        match is set to C(line), commands are matched line by line. If
+        match is set to C(strict), command lines are matched with respect
+        to position. If match is set to C(exact), command lines
+        must be an equal match. Finally, if match is set to C(none), the
         module will not attempt to compare the source configuration with
         the running configuration on the remote device.
+    type: str
     choices: ['line', 'strict', 'exact', 'none']
     default: line
   replace:
     description:
       - Instructs the module on the way to perform the configuration
-        on the device. If the replace argument is set to I(line) then
+        on the device. If the replace argument is set to C(line) then
         the modified lines are pushed to the device in configuration
-        mode.  If the replace argument is set to I(block) then the entire
+        mode. If the replace argument is set to C(block) then the entire
         command block is pushed to the device in configuration mode if any
         line is not correct.
+    type: str
     default: line
     choices: ['line', 'block']
   multiline_delimiter:
     description:
       - This argument is used when pushing a multiline configuration
-        element to the AlliedWare Plus device.  It specifies the character to use
-        as the delimiting character.  This only applies to the
+        element to the AlliedWare Plus device. It specifies the character to use
+        as the delimiting character. This only applies to the
         configuration action.
+    type: str
     default: "@"
   backup:
     description:
@@ -105,124 +111,139 @@ options:
         retrieve the current running-config to use as a base for comparing
         against the contents of source. There are times when it is not
         desirable to have the task get the current running-config for
-        every task in a playbook.  The I(running_config) argument allows the
+        every task in a playbook. This argument allows the
         implementer to pass in the configuration to use as the base
         config for comparison.
+    type: str
     aliases: ['config']
-  defaults:
-    description:
-      - This argument specifies whether or not to collect all defaults
-        when getting the remote device running config.  When enabled,
-        the module will get the current config by issuing the command
-        C(show running-config all).
-    type: bool
-    default: 'no'
   save_when:
     description:
       - When changes are made to the device running-configuration, the
-        changes are not copied to non-volatile storage by default.  Using
-        this argument will change that before.  If the argument is set to
-        I(always), then the running-config will always be copied to the
-        startup-config and the I(modified) flag will always be set to
-        True.  If the argument is set to I(modified), then the running-config
+        changes are not copied to non-volatile storage by default. Using
+        this argument will change that before. If the argument is set to
+        C(always), then the running-config will always be copied to the
+        startup-config and the C(modified) flag will always be set to
+        True.  If the argument is set to C(modified), then the running-config
         will only be copied to the startup-config if it has changed since
-        the last save to startup-config.  If the argument is set to
-        I(never), the running-config will never be copied to the
-        startup-config.  If the argument is set to I(changed), then the running-config
+        the last save to startup-config. If the argument is set to
+        C(never), the running-config will never be copied to the
+        startup-config.  If the argument is set to C(changed), then the running-config
         will only be copied to the startup-config if the task has made a change.
-        I(changed) was added in Ansible 2.5.
+    type: str
     default: never
     choices: ['always', 'never', 'modified', 'changed']
   diff_against:
     description:
       - When using the C(ansible-playbook --diff) command line argument
         the module can generate diffs against different sources.
-      - When this option is configure as I(startup), the module will return
+      - When this option is configure as C(startup), the module will return
         the diff of the running-config against the startup-config.
-      - When this option is configured as I(intended), the module will
+      - When this option is configured as C(intended), the module will
         return the diff of the running-config against the configuration
         provided in the C(intended_config) argument.
-      - When this option is configured as I(running), the module will
+      - When this option is configured as C(running), the module will
         return the before and after diff of the running-config with respect
         to any changes made to the device configuration.
+    type: str
     choices: ['running', 'startup', 'intended']
   diff_ignore_lines:
     description:
       - Use this argument to specify one or more lines that should be
-        ignored during the diff.  This is used for lines in the configuration
-        that are automatically updated by the system.  This argument takes
+        ignored during the diff. This is used for lines in the configuration
+        that are automatically updated by the system. This argument takes
         a list of regular expressions or exact line matches.
+    type: list
+    elements: str
   intended_config:
     description:
-      - The C(intended_config) provides the master configuration that
+      - This provides the master configuration that
         the node should conform to and is used to check the final
         running-config against. This argument will not modify any settings
         on the remote device and is strictly used to check the compliance
-        of the current device's configuration against.  When specifying this
+        of the current device's configuration against. When specifying this
         argument, the task should also modify the C(diff_against) value and
-        set it to I(intended).
+        set it to C(intended).
+    type: str
   backup_options:
     description:
       - This is a dict object containing configurable options related to backup file path.
-        The value of this option is read only when C(backup) is set to I(yes), if C(backup) is set
-        to I(no) this option will be silently ignored.
+        The value of this option is read only when I(backup=yes), if I(backup=no)
+        this option will be silently ignored.
     suboptions:
       filename:
         description:
-          - The filename to be used to store the backup configuration. If the filename
-            is not given it will be generated based on the hostname, current time and date
-            in format defined by <hostname>_config.<current-date>@<current-time>
+          - The filename to be used to store the backup configuration in the format
+            <filename>.<current-date>@<current-time>. If the filename is not given it will
+            be replaced with `awplus`.
+        type: str
       dir_path:
         description:
           - This option provides the path ending with directory name in which the backup
             configuration file will be stored. If the directory does not exist it will be first
-            created and the filename is either the value of C(filename) or default filename
-            as described in C(filename) options description. If the path value is not given
+            created and the filename is either the value of I(filename) or default filename
+            as described in I(filename) options description. If the path value is not given
             in that case a I(backup) directory will be created in the current working directory
-            and backup configuration will be copied in C(filename) within I(backup) directory.
+            and backup configuration will be copied in I(filename) within I(backup) directory.
         type: path
     type: dict
 """
 
 EXAMPLES = """
 - name: Change hostname
-      awplus_config:
-        lines:
-          - hostname aw1
-    - name: configure interface settings
-      awplus_config:
-        lines:
-          - description test interface
-        parents: interface port1.0.2
-    - name: configure ip helpers on multiple interfaces
-      awplus_config:
-        lines:
-          - ip helper-address 172.26.1.10
-          - ip helper-address 172.26.3.8
-        parents: "{{ item }}"
-      with_items:
-        - interface eth1
-        - interface vlan1
-    - name: check startup-config against master config
-      awplus_config:
-        diff_against: intended
-        intended_config: "{{ lookup('file', 'master.cfg') }}"
-    - name: check the startup-config against the running-config
-      awplus_config:
-        diff_against: startup
-    - name: for idempotency, use full-form commands
-      awplus_config:
-        lines:
-          - shutdown
-        parents: interface port1.0.2
-    - name: save running to startup when modified
-      awplus_config:
-        save_when: modified
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - hostname aw1
+- name: configure interface settings
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - description test interface
+    parents: interface port1.0.2
+- name: configure ip helpers on multiple interfaces
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - ip helper-address 172.26.1.10
+      - ip helper-address 172.26.3.8
+    parents: "{{ item }}"
+  with_items:
+    - interface eth1
+    - interface vlan1
+- name: check startup-config against master config
+  alliedtelesis.awplus.awplus_config:
+    diff_against: intended
+    intended_config: "{{ lookup('file', 'master.cfg') }}"
+- name: check the startup-config against the running-config
+  alliedtelesis.awplus.awplus_config:
+    diff_against: startup
+- name: for idempotency, use full-form commands
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - shutdown
+    parents: interface port1.0.2
+- name: save running to startup when modified
+  alliedtelesis.awplus.awplus_config:
+    save_when: modified
 """
 
-RETURN = """#"""
+RETURN = """
+commands:
+  description: The set of commands that will be pushed to the remote device
+  returned: always
+  type: list
+  sample: ['hostname foo', 'router ospf 1', 'router-id 192.0.2.1']
+filename:
+  description: The name of the backup file
+  returned: when backup is yes
+  type: str
+  sample: awplus.2020-12-22@16:36:59.795714
+backup_path:
+  description: The path to the backup file
+  returned: when backup is yes
+  type: str
+  sample: ./backup
+"""
 
 import json
+import os
 
 from ansible.module_utils._text import to_text
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.connection import (
@@ -244,18 +265,20 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.c
 
 
 def check_args(module, warnings):
+    """ checks if arguments are valid """
     if module.params["multiline_delimiter"]:
         if len(module.params["multiline_delimiter"]) != 1:
             module.fail_json(
-                msg="multiline_delimiter value can only be a " "single character"
+                msg="multiline_delimiter value can only be a single character"
             )
 
 
 def get_candidate_config(module):
+    """ gets the set of commands to configure """
     candidate = ""
     candidate_obj = NetworkConfig(indent=1)
     if module.params["src"]:
-        candidate_obj.load(module.params["src"])
+        candidate_obj.loadfp(module.params["src"])
 
     elif module.params["lines"]:
         parents = module.params["parents"] or list()
@@ -265,26 +288,24 @@ def get_candidate_config(module):
     return candidate
 
 
-def get_running_config(module, current_config=None, flags=None):
+def get_running_config(module, current_config=None):
+    """ gets the current configuration of the device """
     running = module.params["running_config"]
     if not running:
-        if not module.params["defaults"] and current_config:
+        if current_config:
             running = current_config
         else:
-            running = get_config(module, flags=flags)
+            running = get_config(module)
     return running
 
 
-def edit_config_or_macro(connection, commands):
-    # only catch the macro configuration command,
-    # not negated 'no' variation.
-    if commands[0].startswith("macro name"):
-        connection.edit_macro(candidate=commands)
-    else:
-        connection.edit_config(candidate=commands)
+def edit_runconfig(connection, commands):
+    connection.edit_config(candidate=commands)
 
 
 def save_config(module, result):
+    """ copies the running-config into the file set as the
+        current startup-config file """
     result["changed"] = True
     if not module.check_mode:
         run_commands(module, "copy running-config startup-config\r")
@@ -296,10 +317,32 @@ def save_config(module, result):
         )
 
 
+def write_backup(contents, path, filename):
+    """ writes the current configuration to a file with the format
+        <filename>.<date>@<time> in the path specified
+    """
+    from datetime import datetime
+    now = datetime.now()
+    current_time = now.strftime("%Y-%m-%d@%H:%M:%S.%f")
+    if not os.path.isdir(path):  # create path if it does not exist
+        os.mkdir(path)
+    i = 2
+    filename += "." + current_time
+    while (os.path.isfile(path + "/" + filename)):
+        filename = filename + "-" + str(i)  # to avoid overwriting file
+        i += 1
+    f = open(path + "/" + filename, "w")
+    f.write(contents)
+    f.close()
+
+
 def main():
     """ main entry point for module execution
     """
-    backup_spec = dict(filename=dict(), dir_path=dict(type="path"))
+    backup_spec = dict(
+        filename=dict(default="awplus"),
+        dir_path=dict(type="path", default="./backup")
+    )
     argument_spec = dict(
         src=dict(type="path"),
         lines=dict(aliases=["commands"], type="list"),
@@ -311,7 +354,6 @@ def main():
         multiline_delimiter=dict(default="@"),
         running_config=dict(aliases=["config"]),
         intended_config=dict(),
-        defaults=dict(type="bool", default=False),
         backup=dict(type="bool", default=False),
         backup_options=dict(type="dict", options=backup_spec),
         save_when=dict(
@@ -348,16 +390,25 @@ def main():
     diff_ignore_lines = module.params["diff_ignore_lines"]
     config = None
     contents = None
-    flags = get_defaults_flag(module) if module.params["defaults"] else []
     connection = get_connection(module)
 
     if module.params["backup"] or (
         module._diff and module.params["diff_against"] == "running"
     ):
-        contents = get_config(module, flags=flags)
+        contents = get_config(module)
         config = NetworkConfig(indent=1, contents=contents)
         if module.params["backup"]:
             result["__backup__"] = contents
+            backup_options = module.params["backup_options"]
+            if backup_options:
+                dir_path = backup_options["dir_path"]
+                filename = backup_options["filename"]
+            else:
+                dir_path = "./backup"
+                filename = "awplus"
+            write_backup(contents, dir_path, filename)
+            result["filename"] = filename
+            result["backup_path"] = dir_path
 
     if any((module.params["lines"], module.params["src"])):
         match = module.params["match"]
@@ -365,7 +416,7 @@ def main():
         path = module.params["parents"]
 
         candidate = get_candidate_config(module)
-        running = get_running_config(module, contents, flags=flags)
+        running = get_running_config(module, contents)
 
         try:
             response = connection.get_diff(
@@ -392,14 +443,13 @@ def main():
                 commands.extend(module.params["after"])
 
             result["commands"] = commands
-            result["updates"] = commands
             result["banners"] = banner_diff
 
             # send the configuration commands to the device and merge
             # them with the current running config
             if not module.check_mode:
                 if commands:
-                    edit_config_or_macro(connection, commands)
+                    edit_runconfig(connection, commands)
                 if banner_diff:
                     connection.edit_banner(
                         candidate=json.dumps(banner_diff),
