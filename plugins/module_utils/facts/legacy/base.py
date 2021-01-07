@@ -14,8 +14,6 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-
-import platform
 import re
 import sys
 
@@ -80,7 +78,6 @@ class Default(FactsBase):
                 platform_facts[item] = val
 
         platform_facts["api"] = resp["network_api"]
-        platform_facts["python_version"] = platform.python_version()
         return platform_facts
 
 
