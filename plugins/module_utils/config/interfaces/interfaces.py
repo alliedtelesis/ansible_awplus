@@ -151,9 +151,7 @@ class Interfaces(ConfigBase):
                 if intf_type == "unknown":
                     self._module.fail_json("Invalid interface name - unknown interface")
                 if int_type != intf_type:
-                    self._module.fail_json(
-                        f"Interfaces mismatch {int_type} & {intf_type}, "
-                        "Interfaces in range must be of the same type")
+                    self._module.fail_json("Interfaces mismatch, Interfaces in range must be of the same type")
             return intfs
         else:
             return [want]
@@ -238,7 +236,7 @@ class Interfaces(ConfigBase):
             for intf in intfs:
                 have_dict = self.get_have_dict(intf, have)
                 if have_dict is None:
-                    self._module.fail_json(msg=f"{intf} does not exist")
+                    self._module.fail_json(msg="Interface does not exist")
             else:
                 if have_dict:
                     filtered_have = filter_dict_having_none_value(interface, have_dict)
@@ -289,7 +287,7 @@ class Interfaces(ConfigBase):
             for intf in intfs:
                 have_dict = self.get_have_dict(intf, have)
                 if have_dict is None:
-                    self._module.fail_json(msg=f"{intf} does not exist")
+                    self._module.fail_json(msg="Interface does not exist")
             else:
                 if have_dict:
                     commands.extend(self._set_config(interface, have_dict))
@@ -315,7 +313,7 @@ class Interfaces(ConfigBase):
             for intf in intfs:
                 have_dict = self.get_have_dict(intf, have)
                 if have_dict is None:
-                    self._module.fail_json(msg=f"{intf} does not exist")
+                    self._module.fail_json(msg="Interface does not exist")
             else:
                 if have_dict:
                     commands.extend(self._set_config(interface, have_dict))
@@ -341,7 +339,7 @@ class Interfaces(ConfigBase):
                 for intf in intfs:
                     have_dict = self.get_have_dict(intf, have)
                     if have_dict is None:
-                        self._module.fail_json(msg=f"Can't parse interface, {intf} may not exist")
+                        self._module.fail_json(msg="Interface does not exist")
                 else:
                     if have_dict:
                         interface = dict(name=interface["name"])
