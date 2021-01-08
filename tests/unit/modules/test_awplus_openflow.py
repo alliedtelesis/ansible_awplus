@@ -66,9 +66,9 @@ class TestAwplusOpenFlowModule(TestAwplusModule):
 
     def test_awplus_openflow_add_new_controller(self):
         set_module_args(
-            dict(controllers=[dict(protocol="tcp", address="184.5.3.2", ssl_port=10)])
+            dict(controllers=[dict(name="oc2", protocol="tcp", address="184.5.3.2", ssl_port=10)])
         )
-        commands = ["openflow controller tcp 184.5.3.2 10"]
+        commands = ["openflow controller oc2 tcp 184.5.3.2 10"]
         result = self.execute_module(changed=True)
         self.assertEqual(commands, result["commands"])
 
