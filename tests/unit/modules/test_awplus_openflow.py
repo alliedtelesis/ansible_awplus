@@ -36,7 +36,7 @@ class TestAwplusOpenFlowModule(TestAwplusModule):
         self.mock_run_commands.stop()
 
     def load_fixtures(self, commands=None, transport="cli"):
-        self.get_config.return_value = load_fixture("awplus_openflow_config.cfg")
+        self.get_config.return_value = load_fixture("awplus_openflow_show_run.cfg")
         self.load_config.return_value = None
 
         def load_from_file(*args, **kwargs):
