@@ -32,7 +32,7 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.utils i
     filter_dict_having_none_value,
     remove_duplicate_interface,
 )
-
+from copy import deepcopy
 
 class Interfaces(ConfigBase):
     """
@@ -81,7 +81,10 @@ class Interfaces(ConfigBase):
         commands.extend(self.set_config(existing_interfaces_facts))
         if commands:
             if not self._module.check_mode:
-                self._connection.edit_config(commands)
+                warning = self._connection.edit_config(commands).get("response")
+                for warn in warning:
+                    if warn != "":
+                        warnings.append(warn)
             result["changed"] = True
         result["commands"] = commands
 
@@ -237,13 +240,12 @@ class Interfaces(ConfigBase):
                 have_dict = self.get_have_dict(intf, have)
                 if have_dict is None:
                     self._module.fail_json(msg="Interface does not exist")
-            else:
                 if have_dict:
-                    filtered_have = filter_dict_having_none_value(interface, have_dict)
-                    commands.extend(self._clear_config(dict(), filtered_have))
-                    commands.extend(self._set_config(interface, have_dict))
+                    partial_want = deepcopy(interface)
+                    partial_want["name"] = intf
+                    commands.extend(self._clear_config(partial_want, have_dict))
+                    commands.extend(self._set_config(partial_want, have_dict))
                 else:
-                    # commands.extend(self._clear_config(dict(), dict()))
                     commands.extend(self._set_config(interface, dict()))
         # Remove the duplicate interface call
         commands = remove_duplicate_interface(commands)
@@ -288,9 +290,10 @@ class Interfaces(ConfigBase):
                 have_dict = self.get_have_dict(intf, have)
                 if have_dict is None:
                     self._module.fail_json(msg="Interface does not exist")
-            else:
                 if have_dict:
-                    commands.extend(self._set_config(interface, have_dict))
+                    partial_want = deepcopy(interface)
+                    partial_want["name"] = intf
+                    commands.extend(self._set_config(partial_want, have_dict))
                 else:
                     commands.extend(self._set_config(interface, dict()))
         # Remove the duplicate interface call
@@ -314,9 +317,10 @@ class Interfaces(ConfigBase):
                 have_dict = self.get_have_dict(intf, have)
                 if have_dict is None:
                     self._module.fail_json(msg="Interface does not exist")
-            else:
                 if have_dict:
-                    commands.extend(self._set_config(interface, have_dict))
+                    partial_want = deepcopy(interface)
+                    partial_want["name"] = intf
+                    commands.extend(self._set_config(partial_want, have_dict))
                 else:
                     commands.extend(self._set_config(interface, dict()))
             # commands.extend(self._clear_config(dict(), have_dict))
@@ -344,7 +348,6 @@ class Interfaces(ConfigBase):
                     if have_dict:
                         interface = dict(name=interface["name"])
                         commands.extend(self._clear_config(interface, have_dict))
-                    # else:
         else:
             for each in have:
                 commands.extend(self._clear_config(dict(), each))

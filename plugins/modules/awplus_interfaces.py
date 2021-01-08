@@ -10,7 +10,7 @@ __metaclass__ = type
 
 DOCUMENTATION = """
 ---
-module: alliedtelesis.awplus.awplus_interfaces
+module: awplus_interfaces
 author: Cheng Yi Kok (@cyk19)
 short_description: Manages attribute of AlliedWare Plus interfaces
 description: Manages attribute of AlliedWare Plus network interfaces.
@@ -22,7 +22,8 @@ options:
     suboptions:
       name:
         description:
-        - Full name of interface, e.g. port1.0.3, vlan2.
+        - Full name of interface, interface range or comma-separated interfaces.
+          Comma-separated interface names should be of the same type.
         type: str
         required: True
       description:
@@ -37,11 +38,11 @@ options:
         default: True
       speed:
         description:
-        - Interface link speed. Applicable for switchport interfaces only.
+        - Interface link speed. Applicable for ethernet and switchport interfaces only.
         type: str
       mtu:
         description:
-        - MTU size for a specific interface. Applicable for VLAN interfaces only.
+        - MTU size for a specific interface. Applicable for VLAN, ethernet and openflow interfaces only.
         - Refer to documentation for valid values.
         type: int
       duplex:
@@ -53,9 +54,13 @@ options:
   state:
     description:
     - The state of the configuration after module completion.
+    - Note that configuring a range of interfaces with replaced state works the same as merged; and
+      deleted state only works with singular
     choices: ['merged', 'replaced', 'overridden', 'deleted']
     default: merged
     type: str
+note: Configuring a range of interfaces may not be idempotent as the interfaces
+  within the range may have different configurations.
 """
 
 EXAMPLES = """
