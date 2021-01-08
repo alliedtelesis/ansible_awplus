@@ -191,6 +191,12 @@ def map_obj_to_commands(want, have, module):
 
             if controllers:
                 for controller_w in controllers:
+                    if controller_w.get("address") is None:
+                        module.fail_json(msg="New controller address missing")
+                    if controller_w.get("protocol") is None:
+                        module.fail_json(msg="New controller protocol missing")
+                    if controller_w.get("ssl_port") is None:
+                        module.fail_json(msg="New controller port missing")
                     new_controller = True
                     cmd = "openflow controller "
                     for controller_h in controllers_have:
@@ -206,7 +212,7 @@ def map_obj_to_commands(want, have, module):
 
                     if new_controller:
                         if controller_w["name"]:
-                            cmd += controller["name"] + " "
+                            cmd += controller_w["name"] + " "
                             postfix = "{0} {1} {2}".format(
                                 controller_w["protocol"],
                                 controller_w["address"],
@@ -250,28 +256,37 @@ def map_obj_to_commands(want, have, module):
 
 
 def get_openflow_config(module):
-    return run_commands(module, "show openflow config")
+    return run_commands(module, "show openflow config")[0]
 
 
 def parse_name(line):
-    match = re.search(r'name="(\S+)"', line, re.U)
+    match = re.search(r'name=(\S+)}', line, re.U)
     if match:
         return match.group(1)
 
 
 def parse_ports(line):
     port = dict()
-    match = re.search(r'Port "(port\S+)"', line)
+    match = re.search(r'Port (port\S+)', line)
     if match:
         port["name"] = match.group(1)
         port["openflow"] = True
         return port
 
 
-def parse_native_vlan(line):
+def parse_native_vlan(line, run_config):
+    # Look for native VLAN in a configured port
     match = re.search(r'native_vlan="(\d+)"', line, re.U)
     if match:
         return int(match.group(1))
+
+    # Look for global native VLAN setting if no ports defined
+    match = re.search(r'openflow native vlan (\d+)', run_config, re.U)
+    if match:
+        return int(match.group(1))
+
+    # Default native VLAN
+    return 1
 
 
 def parse_fail_mode(line):
@@ -288,6 +303,7 @@ def map_config_to_obj(module):
 
     config = get_openflow_config(module)
     lines = config.splitlines()
+    run_config = get_config(module, flags="| include openflow")
 
     for i in range(len(lines)):
         lines[i] = lines[i].strip()
@@ -304,7 +320,7 @@ def map_config_to_obj(module):
         if port:
             obj_dict["ports"].append(port)
 
-        native_vlan = parse_native_vlan(lines[i])
+        native_vlan = parse_native_vlan(lines[i], run_config)
         if native_vlan:
             obj_dict["native_vlan"] = native_vlan
 
@@ -335,10 +351,10 @@ def main():
     """ main entry point for module execution
     """
     controller_spec = dict(
-        name=dict(type="str"),
-        protocol=dict(type="str", choices=["ssl", "tcp"], required=True),
-        address=dict(type="str", required=True),
-        ssl_port=dict(type="int", required=True),
+        name=dict(type="str", required=True),
+        protocol=dict(type="str", choices=["ssl", "tcp"], required=False),
+        address=dict(type="str", required=False),
+        ssl_port=dict(type="int", required=False),
     )
 
     port_spec = dict(
