@@ -199,7 +199,6 @@ class Interfaces(FactsBase):
             intf["mtu"] = self.parse_mtu(value)
             intf["bandwidth"] = self.parse_bandwidth(value)
             intf["duplex"] = self.parse_duplex(value)
-            intf["lineprotocol"] = self.parse_lineprotocol(value)
             intf["operstatus"] = self.parse_operstatus(value)
             intf["type"] = self.parse_type(value)
 
@@ -305,11 +304,7 @@ class Interfaces(FactsBase):
         parsed = dict()
         key = ""
         for line in data.split("\n"):
-            if len(line) == 0:
-                continue
-            elif line[0] == " ":
-                continue
-            else:
+            if len(line) != 0:
                 match = re.match(r"^([a-z\d\.]+)", line)
                 if match:
                     key = match.group(1)
