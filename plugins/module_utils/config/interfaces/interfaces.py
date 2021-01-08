@@ -151,7 +151,8 @@ class Interfaces(ConfigBase):
                 if intf_type == "unknown":
                     self._module.fail_json("Invalid interface name - unknown interface")
                 if int_type != intf_type:
-                    self._module.fail_json(f"Interfaces mismatch {int_type} & {intf_type}, "
+                    self._module.fail_json(
+                        f"Interfaces mismatch {int_type} & {intf_type}, "
                         "Interfaces in range must be of the same type")
             return intfs
         else:
@@ -209,7 +210,7 @@ class Interfaces(ConfigBase):
             if intf_range:
                 if intf_range.group(3) <= intf_range.group(2):
                     self._module.fail_json("Invalid Input - range end must be greater than range start")
-                for i in range(int(intf_range.group(3)), int(intf_range.group(2)) + 1):
+                for i in range(int(intf_range.group(2)), int(intf_range.group(3)) + 1):
                     for intf in have:  # check if all interfaces in range exists
                         if intf_range.group(1) + str(i) == intf["name"]:
                             break
@@ -244,7 +245,7 @@ class Interfaces(ConfigBase):
                     commands.extend(self._clear_config(dict(), filtered_have))
                     commands.extend(self._set_config(interface, have_dict))
                 else:
-                    # commands.extend(self._clear_config(dict(), dict(name=interface["name"])))
+                    # commands.extend(self._clear_config(dict(), dict()))
                     commands.extend(self._set_config(interface, dict()))
         # Remove the duplicate interface call
         commands = remove_duplicate_interface(commands)
@@ -266,8 +267,6 @@ class Interfaces(ConfigBase):
                 count = 0
                 if each["name"] == interface["name"]:
                     break
-                elif interface["name"] in each["name"]:
-                    break
                 count += 1
             else:
                 # We didn't find a matching desired state, which means we can
@@ -283,10 +282,19 @@ class Interfaces(ConfigBase):
             # interface entry from the want list
             del want[count]
 
-        # Iterating through want list which now only have new interfaces to be
+        # Iterating through want list which now only have range interfaces to be
         # configured
-        for each in want:
-            commands.extend(self._set_config(each, dict()))
+        for interface in want:
+            intfs = self.get_interfaces(interface["name"])
+            for intf in intfs:
+                have_dict = self.get_have_dict(intf, have)
+                if have_dict is None:
+                    self._module.fail_json(msg=f"{intf} does not exist")
+            else:
+                if have_dict:
+                    commands.extend(self._set_config(interface, have_dict))
+                else:
+                    commands.extend(self._set_config(interface, dict()))
         # Remove the duplicate interface call
         commands = remove_duplicate_interface(commands)
 
@@ -333,7 +341,7 @@ class Interfaces(ConfigBase):
                 for intf in intfs:
                     have_dict = self.get_have_dict(intf, have)
                     if have_dict is None:
-                        self._module.fail_json(msg=f"{intf} does not exist")
+                        self._module.fail_json(msg=f"Can't parse interface, {intf} may not exist")
                 else:
                     if have_dict:
                         interface = dict(name=interface["name"])
