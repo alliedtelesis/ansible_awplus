@@ -45,8 +45,25 @@ class InterfacesFacts(object):
 
         self.generated_spec = utils.generate_dict(facts_argument_spec)
 
-    def get_device_data(self, connection):
+    def get_running_interface(self, connection):
         return connection.get("show running-config interface")
+
+    def get_interface_brief(self, connection):
+        return connection.get("show interface brief")
+
+    def get_interfaces(self, connection):
+        interfaces = []
+        brief = self.get_interface_brief(connection)
+        int_brief = brief.split("\n")
+        for line in int_brief:
+            if "interface" in line.lower():
+                continue
+            else:
+                int_name = re.search(r"(\S+)", line)
+                if int_name:
+                    if get_interface_type(int_name.group(1)) != "unknown":
+                        interfaces.append(int_name.group(1))
+        return interfaces
 
     def populate_facts(self, connection, ansible_facts, data=None):
         """ Populate the facts for interfaces
@@ -60,13 +77,20 @@ class InterfacesFacts(object):
 
         if not data:
             # CHECK PRIVILEGE BEFOREHAND
-            data = self.get_device_data(connection)
+            interfaces = self.get_interfaces(connection)
+            data = self.get_running_interface(connection)
             config = data.split("!")
             for conf in config:
                 if conf:
-                    obj = self.render_configs(self.generated_spec, conf)
+                    obj = self.render_configs(self.generated_spec, conf, interfaces)
                     if obj:
                         objs.extend(obj)
+
+            if interfaces:  # add interfaces not shown in running-config
+                for interface in interfaces:
+                    obj = self.render_config(self.generated_spec, "interface " + interface, interface)
+                    if obj:
+                        objs.append(obj)
 
         facts = {}
         if objs:
@@ -77,9 +101,50 @@ class InterfacesFacts(object):
             ansible_facts["ansible_network_resources"].update(facts)
         return ansible_facts
 
-    def render_configs(self, spec, conf):
+    def render_configs(self, spec, conf, interfaces):
+        """ Render config for either a range or a single interface
+
+        :param spec: The facts tree, generated from the argspec
+        :param conf: The configuration
+        :rtype: dictionary
+        :returns: The generated config as a list
         """
-        Render config as dictionary structure and delete keys
+        match = re.search(r"interface (\S+)", conf)
+        if match:
+            intf = match.group(1)
+            if get_interface_type(intf) == "unknown":
+                return []
+        else:
+            return []
+        # populate facts from configuration
+        int_range = ""
+        if "-" in intf:
+            if get_interface_type(intf) == "port":
+                int_range = re.search(r"port(\d+).(\d+).(\d+)-\d+.\d+.(\d+)", intf)
+            else:
+                int_range = re.search(r"()([a-z]+)(\d+)-(\d+)", intf)
+
+        if int_range:
+            start = int(int_range.group(3))
+            end = int(int_range.group(4))
+            # Looping to produce a list of interface configuration
+            intf_configs = []
+            for i in range(start, end + 1):
+                if get_interface_type(intf) == "port":
+                    interface = "port" + int_range.group(1) + "." + int_range.group(2) + "." + str(i)
+                else:
+                    interface = int_range.group(2) + str(i)
+                if interface in interfaces:  # check if interface exists
+                    intf_configs.append(self.render_config(spec, conf, interface))
+                    interfaces.remove(interface)
+            return intf_configs
+        else:
+            if intf in interfaces:
+                interfaces.remove(intf)
+            return [self.render_config(spec, conf, intf)]
+
+    def render_config(self, spec, conf, intf):
+        """ Render config as dictionary structure and delete keys
           from spec for null values
 
         :param spec: The facts tree, generated from the argspec
@@ -87,28 +152,6 @@ class InterfacesFacts(object):
         :rtype: dictionary
         :returns: The generated config
         """
-        match = re.search(r"interface (\S+)", conf)
-        if match:
-            intf = match.group(1)
-            if get_interface_type(intf) == "unknown":
-                return {}
-        else:
-            return {}
-        # populate facts from configuration
-        port_range = re.search(r"port(\d+).(\d+).(\d+)-(\d+).(\d+).(\d+)", intf)
-        if port_range:
-            start = int(port_range.group(3))
-            end = int(port_range.group(6))
-            # Looping to produce a list of interface configuration
-            intf_configs = []
-            for i in range(start, end + 1):
-                interface = "port1.0." + str(i)
-                intf_configs.append(self.render_config(spec, conf, interface))
-            return intf_configs
-        else:
-            return [self.render_config(spec, conf, intf)]
-
-    def render_config(self, spec, conf, intf):
         config = deepcopy(spec)
         config["name"] = normalize_interface(intf)
         config["description"] = utils.parse_conf_arg(conf, "description")
