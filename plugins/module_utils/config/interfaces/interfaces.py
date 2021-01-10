@@ -34,6 +34,7 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.utils i
 )
 from copy import deepcopy
 
+
 class Interfaces(ConfigBase):
     """
     The awplus_interfaces class
@@ -152,7 +153,7 @@ class Interfaces(ConfigBase):
             for intf in intfs:
                 intf_type = get_interface_type(intf)
                 if intf_type == "unknown":
-                    self._module.fail_json("Invalid interface name - unknown interface")
+                    self._module.fail_json("Invalid interface - unknown interface")
                 if int_type != intf_type:
                     self._module.fail_json("Interfaces mismatch, Interfaces in range must be of the same type")
             return intfs
@@ -243,7 +244,8 @@ class Interfaces(ConfigBase):
                 if have_dict:
                     partial_want = deepcopy(interface)
                     partial_want["name"] = intf
-                    commands.extend(self._clear_config(partial_want, have_dict))
+                    filtered_have = filter_dict_having_none_value(partial_want, have_dict)
+                    commands.extend(self._clear_config(dict(), filtered_have))
                     commands.extend(self._set_config(partial_want, have_dict))
                 else:
                     commands.extend(self._set_config(interface, dict()))
@@ -382,10 +384,8 @@ class Interfaces(ConfigBase):
         commands = []
 
         if want.get("name"):
-            interface_type = get_interface_type(want["name"])
             interface = "interface " + want["name"]
         else:
-            interface_type = get_interface_type(have["name"])
             interface = "interface " + have["name"]
 
         if have.get("description") and want.get("description") != have.get(
@@ -395,21 +395,19 @@ class Interfaces(ConfigBase):
         if not have.get("enabled") and want.get("enabled") != have.get("enabled"):
             # if enable is False set enable as True which is the default behavior
             remove_command_from_config_list(interface, "shutdown", commands)
-        if interface_type.lower().startswith("vlan"):
-            if have.get("mtu") and want.get("mtu") != have.get("mtu"):
-                remove_command_from_config_list(interface, "mtu", commands)
-        else:
-            if (
-                have.get("speed")
-                and have.get("speed") != "auto"
-                and want.get("speed") != have.get("speed")
-            ):
-                remove_command_from_config_list(interface, "speed", commands)
-            if (
-                have.get("duplex")
-                and have.get("duplex") != "auto"
-                and want.get("duplex") != have.get("duplex")
-            ):
-                remove_command_from_config_list(interface, "duplex", commands)
+        if have.get("mtu") and want.get("mtu") != have.get("mtu"):
+            remove_command_from_config_list(interface, "mtu", commands)
+        if (
+            have.get("speed")
+            and have.get("speed") != "auto"
+            and want.get("speed") != have.get("speed")
+        ):
+            remove_command_from_config_list(interface, "speed", commands)
+        if (
+            have.get("duplex")
+            and have.get("duplex") != "auto"
+            and want.get("duplex") != have.get("duplex")
+        ):
+            remove_command_from_config_list(interface, "duplex", commands)
 
         return commands

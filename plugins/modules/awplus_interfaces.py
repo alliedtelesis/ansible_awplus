@@ -49,6 +49,8 @@ options:
         description:
         - Interface link status. Applicable for switchport interfaces only, either in half duplex,
           full duplex or in automatic state which negotiates the duplex automatically.
+        - Note, some AlliedWare Plus devices does not support half duplex. Refer to documentation for
+          valid values.
         type: str
         choices: ['full', 'half', 'auto']
   state:
