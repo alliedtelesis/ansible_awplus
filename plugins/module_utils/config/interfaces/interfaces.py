@@ -174,9 +174,9 @@ class Interfaces(ConfigBase):
             port = re.search(r"port(\d+).(\d+).(\d+)-(\d+).(\d+).(\d+)", want)
             if port:
                 for i in range(3):  # check if valid range
-                    if port.group(i + 1) > port.group(i + 4):
+                    if int(port.group(i + 1)) > int(port.group(i + 4)):
                         self._module.fail_json("Invalid Input - range end must be greater than range start")
-                    elif port.group(i + 1) == port.group(i + 4):
+                    elif int(port.group(i + 1)) == int(port.group(i + 4)):
                         continue
                     else:
                         break
@@ -210,7 +210,7 @@ class Interfaces(ConfigBase):
         if "-" in want:
             intf_range = re.search(r"([a-z]+)(\d+)-(\d+)", want)
             if intf_range:
-                if intf_range.group(3) <= intf_range.group(2):
+                if int(intf_range.group(3)) <= int(intf_range.group(2)):
                     self._module.fail_json("Invalid Input - range end must be greater than range start")
                 for i in range(int(intf_range.group(2)), int(intf_range.group(3)) + 1):
                     for intf in have:  # check if all interfaces in range exists
