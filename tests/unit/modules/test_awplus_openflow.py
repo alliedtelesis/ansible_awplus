@@ -36,7 +36,7 @@ class TestAwplusOpenFlowModule(TestAwplusModule):
         self.mock_run_commands.stop()
 
     def load_fixtures(self, commands=None, transport="cli"):
-        self.get_config.return_value = load_fixture("awplus_openflow_config.cfg")
+        self.get_config.return_value = load_fixture("awplus_openflow_show_run.cfg")
         self.load_config.return_value = None
 
         def load_from_file(*args, **kwargs):
@@ -66,9 +66,9 @@ class TestAwplusOpenFlowModule(TestAwplusModule):
 
     def test_awplus_openflow_add_new_controller(self):
         set_module_args(
-            dict(controllers=[dict(protocol="tcp", address="184.5.3.2", ssl_port=10)])
+            dict(controllers=[dict(name="oc2", protocol="tcp", address="184.5.3.2", ssl_port=10)])
         )
-        commands = ["openflow controller tcp 184.5.3.2 10"]
+        commands = ["openflow controller oc2 tcp 184.5.3.2 10"]
         result = self.execute_module(changed=True)
         self.assertEqual(commands, result["commands"])
 
