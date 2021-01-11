@@ -56,13 +56,10 @@ class InterfacesFacts(object):
         brief = self.get_interface_brief(connection)
         int_brief = brief.split("\n")
         for line in int_brief:
-            if "interface" in line.lower():
-                continue
-            else:
-                int_name = re.search(r"(\S+)", line)
-                if int_name:
-                    if get_interface_type(int_name.group(1)) != "unknown":
-                        interfaces.append(int_name.group(1))
+            int_name = re.search(r"^(\S+)", line)
+            if int_name:
+                if get_interface_type(int_name.group(1)) != "unknown":
+                    interfaces.append(int_name.group(1))
         return interfaces
 
     def populate_facts(self, connection, ansible_facts, data=None):
