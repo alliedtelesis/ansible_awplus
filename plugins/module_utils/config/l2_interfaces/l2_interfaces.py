@@ -246,17 +246,17 @@ class L2_interfaces(ConfigBase):
         for interface in want:
             intfs = self.get_interfaces(interface["name"])
             for intf in intfs:
+                partial_want = deepcopy(interface)
+                partial_want["name"] = intf
                 have_dict = self.get_have_dict(intf, have)
                 if have_dict is None:
                     self._module.fail_json(msg="Interface does not exist")
                 if have_dict:
-                    partial_want = deepcopy(interface)
-                    partial_want["name"] = intf
                     filtered_have = filter_dict_having_none_value(partial_want, have_dict)
                     commands.extend(self._clear_config(partial_want, filtered_have))
                     commands.extend(self._set_config(partial_want, have_dict))
                 else:
-                    commands.extend(self._set_config(interface, dict()))
+                    commands.extend(self._set_config(partial_want, dict()))
         # Remove the duplicate interface call
         commands = remove_duplicate_interface(commands)
 
@@ -270,43 +270,33 @@ class L2_interfaces(ConfigBase):
         :returns: the commands necessary to migrate the current configuration
                   to the desired configuration
         """
-        p_want = deepcopy(want)
         commands = []
         for each in have:
             for interface in want:
-                count = 0
-                if each["name"] == interface["name"]:
+                if each["name"] in interface["name"]:
                     break
-                count += 1
             else:
                 # We didn't find a matching desired state, which means we can
-                # pretend we recieved an empty desired state.
+                # pretend we received an empty desired state.
                 interface = dict(name=each["name"])
                 kwargs = {"want": interface, "have": each}
                 commands.extend(self._clear_config(**kwargs))
                 continue
-            have_dict = filter_dict_having_none_value(interface, each)
-            commands.extend(self._clear_config(interface, have_dict))
-            commands.extend(self._set_config(interface, each))
-            # as the pre-existing interface are now configured by
-            # above set_config call, deleting the respective
-            # interface entry from the want list
-            del p_want[count]
 
         # Iterating through want list which now only have range interfaces to be
         # configured
-        for interface in p_want:
+        for interface in want:
             intfs = self.get_interfaces(interface["name"])
             for intf in intfs:
+                partial_want = deepcopy(interface)
+                partial_want["name"] = intf
                 have_dict = self.get_have_dict(intf, have)
                 if have_dict is None:
                     self._module.fail_json(msg="Interface does not exist")
                 if have_dict:
-                    partial_want = deepcopy(interface)
-                    partial_want["name"] = intf
                     commands.extend(self._set_config(partial_want, have_dict))
                 else:
-                    commands.extend(self._set_config(interface, dict()))
+                    commands.extend(self._set_config(partial_want, dict()))
         # Remove the duplicate interface call
         return remove_duplicate_interface(commands)
 
@@ -323,15 +313,15 @@ class L2_interfaces(ConfigBase):
         for interface in want:
             intfs = self.get_interfaces(interface["name"])
             for intf in intfs:
+                partial_want = deepcopy(interface)
+                partial_want["name"] = intf
                 have_dict = self.get_have_dict(intf, have)
                 if have_dict is None:
                     self._module.fail_json(msg="Interface does not exist")
                 if have_dict:
-                    partial_want = deepcopy(interface)
-                    partial_want["name"] = intf
                     commands.extend(self._set_config(partial_want, have_dict))
                 else:
-                    commands.extend(self._set_config(interface, dict()))
+                    commands.extend(self._set_config(partial_want, dict()))
             # commands.extend(self._clear_config(dict(), have_dict))
 
         return commands
@@ -353,9 +343,8 @@ class L2_interfaces(ConfigBase):
                     have_dict = self.get_have_dict(intf, have)
                     if have_dict is None:
                         self._module.fail_json(msg="Interface does not exist")
-                else:
                     if have_dict:
-                        interface = dict(name=interface["name"])
+                        interface = dict(name=intf)
                         commands.extend(self._clear_config(interface, have_dict))
         else:
             for each in have:
@@ -368,7 +357,7 @@ class L2_interfaces(ConfigBase):
         for each in vlan:
             vlan_range = each.split("-")
             if len(vlan_range) > 1:
-                if vlan_range[0] < vlan_range[1]:
+                if int(vlan_range[0]) < int(vlan_range[1]):
                     return True
                 else:
                     self._module.fail_json(
@@ -403,8 +392,9 @@ class L2_interfaces(ConfigBase):
             diff = dict(diff)
 
             if diff.get("access"):
-                cmd = "switchport mode access"
-                add_command_to_config_list(interface, cmd, commands)
+                if have.get("access") is None:
+                    cmd = "switchport mode access"
+                    self._add_command_to_config_list(interface, cmd, commands)
                 cmd = "switchport access vlan {0}".format(diff.get("access")[0][1])
                 add_command_to_config_list(interface, cmd, commands)
 
