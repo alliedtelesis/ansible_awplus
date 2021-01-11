@@ -112,7 +112,7 @@ class L2_interfacesFacts(object):
         if "-" in intf:
             if get_interface_type(intf) == "port":
                 int_range = re.search(r"port(\d+).(\d+).(\d+)-\d+.\d+.(\d+)", intf)
-            elif get_interface_type(intf)  in ("dynamic aggregator", "static aggregator"):
+            elif get_interface_type(intf) in ("dynamic aggregator", "static aggregator"):
                 int_range = re.search(r"()([a-z]+)(\d+)-(\d+)", intf)
 
             if int_range:
