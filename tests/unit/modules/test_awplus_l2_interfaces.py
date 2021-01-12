@@ -79,7 +79,6 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
             "switchport mode trunk",
             "switchport trunk native vlan 2",
             "interface port1.0.4",
-            "switchport mode access",
             "switchport access vlan 2",
         ]
         self.execute_module(changed=True, commands=commands)
@@ -112,7 +111,6 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
             "switchport mode trunk",
             "switchport trunk native vlan 2",
             "interface port1.0.2",
-            "switchport mode access",
             "switchport access vlan 1",
         ]
         self.execute_module(changed=True, commands=commands)

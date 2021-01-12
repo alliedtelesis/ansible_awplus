@@ -46,8 +46,24 @@ class L2_interfacesFacts(object):
     def get_device_data(self, connection):
         return connection.get("show running-config interface")
 
+    def get_interface_brief(self, connection):
+        return connection.get("show interface brief")
+
+    def get_interfaces(self, connection):
+        interfaces = []
+        brief = self.get_interface_brief(connection)
+        int_brief = brief.split("\n")
+        for line in int_brief:
+            int_name = re.search(r"^(\S+)", line)
+            if int_name:
+                if get_interface_type(int_name.group(1)) != "unknown":
+                    interfaces.append(int_name.group(1))
+        return interfaces
+
     def populate_facts(self, connection, ansible_facts, data=None):
-        """ Populate the facts for l2_interfaces
+        """
+        Populate the facts for l2_interfaces
+
         :param connection: the device connection
         :param ansible_facts: Facts dictionary
         :param data: previously collected conf
@@ -58,13 +74,14 @@ class L2_interfacesFacts(object):
 
         if not data:
             data = self.get_device_data(connection)
+            interfaces = self.get_interfaces(connection)
         # operate on a collection of resource x
         config = data.split("!")
         for conf in config:
             if conf:
-                obj = self.render_config(self.generated_spec, conf)
+                obj = self.generate_config_dict(conf, interfaces)
                 if obj:
-                    objs.append(obj)
+                    objs.extend(obj)
 
         facts = {}
         if objs:
@@ -76,46 +93,78 @@ class L2_interfacesFacts(object):
 
         return ansible_facts
 
-    def render_config(self, spec, conf):
+    def generate_config_dict(self, conf, interfaces):
         """
-        Render config as dictionary structure and delete keys
-          from spec for null values
+        Generate a list of config as dict for all existing interfaces
 
-        :param spec: The facts tree, generated from the argspec
         :param conf: The configuration
-        :rtype: dictionary
-        :returns: The generated config
+        :param interfaces: list of existing interfaces
+        :rtype: list
+        :returns: The generated configs
         """
-        config = deepcopy(spec)
         match = re.search(r"interface (\S+)", conf)
         intf = match.group(1)
+        intf_configs = []
 
-        if get_interface_type(intf) == "unknown":
+        if get_interface_type(intf) not in ("port", "dynamic aggregator", "static aggregator"):
             return {}
 
-        if intf.upper()[:2] in ("PO"):
-            # populate the facts from the configuration
-            config["name"] = normalize_interface(intf)
+        int_range = ""
+        if "-" in intf:
+            if get_interface_type(intf) == "port":
+                int_range = re.search(r"port(\d+).(\d+).(\d+)-\d+.\d+.(\d+)", intf)
+            elif get_interface_type(intf) in ("dynamic aggregator", "static aggregator"):
+                int_range = re.search(r"()([a-z]+)(\d+)-(\d+)", intf)
 
-            mode = utils.parse_conf_arg(conf, "switchport mode")
-            if mode == "access":
-                has_access = utils.parse_conf_arg(conf, "switchport access vlan")
-                if has_access:
-                    config["access"] = {"vlan": int(has_access)}
-                else:
-                    config["access"] = {"vlan": 1}
+            if int_range:
+                start = int(int_range.group(3))
+                end = int(int_range.group(4))
 
-            trunk = dict()
-            native_vlan = utils.parse_conf_arg(conf, "native vlan")
-            if native_vlan and native_vlan != "none":
-                trunk["native_vlan"] = int(native_vlan)
-            allowed_vlan = utils.parse_conf_arg(conf, "allowed vlan")
-            if allowed_vlan:
-                trunk["allowed_vlans"] = allowed_vlan.split(",")
-                first_vlan = trunk["allowed_vlans"][0]
-                if "add" in first_vlan:
-                    first_vlan = first_vlan.replace("add ", "")
-                    trunk["allowed_vlans"][0] = first_vlan
-            config["trunk"] = trunk
+                for i in range(start, end + 1):
+                    if get_interface_type(intf) == "port":
+                        interface = "port" + int_range.group(1) + "." + int_range.group(2) + "." + str(i)
+                    else:
+                        interface = int_range.group(2) + str(i)
 
+                    if interface in interfaces:  # check if interface exists
+                        # populate the facts from the configuration
+                        intf_configs.append(self.parse_config(conf, interface))
+
+        else:
+            intf_configs.append(self.parse_config(conf, intf))
+
+        return intf_configs
+
+    def parse_config(self, conf, intf):
+        """
+        Translate a given config into dictionary and delete keys from spec for null values
+
+        :param conf: The configuration
+        :param intf: name of the interface
+        :rtype: dict
+        :returns: The generated config
+        """
+        config = deepcopy(self.generated_spec)
+        config["name"] = normalize_interface(intf)
+
+        mode = utils.parse_conf_arg(conf, "switchport mode")
+        if mode == "access":
+            has_access = utils.parse_conf_arg(conf, "switchport access vlan")
+            if has_access:
+                config["access"] = {"vlan": int(has_access)}
+            else:
+                config["access"] = {"vlan": 1}
+
+        trunk = dict()
+        native_vlan = utils.parse_conf_arg(conf, "native vlan")
+        if native_vlan and native_vlan != "none":
+            trunk["native_vlan"] = int(native_vlan)
+        allowed_vlan = utils.parse_conf_arg(conf, "allowed vlan")
+        if allowed_vlan:
+            trunk["allowed_vlans"] = allowed_vlan.split(",")
+            first_vlan = trunk["allowed_vlans"][0]
+            if "add" in first_vlan:
+                first_vlan = first_vlan.replace("add ", "")
+                trunk["allowed_vlans"][0] = first_vlan
+        config["trunk"] = trunk
         return utils.remove_empties(config)
