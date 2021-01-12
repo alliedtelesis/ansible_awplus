@@ -61,7 +61,9 @@ class L2_interfacesFacts(object):
         return interfaces
 
     def populate_facts(self, connection, ansible_facts, data=None):
-        """ Populate the facts for l2_interfaces
+        """
+        Populate the facts for l2_interfaces
+
         :param connection: the device connection
         :param ansible_facts: Facts dictionary
         :param data: previously collected conf
@@ -77,7 +79,7 @@ class L2_interfacesFacts(object):
         config = data.split("!")
         for conf in config:
             if conf:
-                obj = self.render_configs(self.generated_spec, conf, interfaces)
+                obj = self.generate_config_dict(conf, interfaces)
                 if obj:
                     objs.extend(obj)
 
@@ -91,15 +93,14 @@ class L2_interfacesFacts(object):
 
         return ansible_facts
 
-    def render_configs(self, spec, conf, interfaces):
+    def generate_config_dict(self, conf, interfaces):
         """
-        Render config as dictionary structure and delete keys
-          from spec for null values
+        Generate a list of config as dict for all existing interfaces
 
-        :param spec: The facts tree, generated from the argspec
         :param conf: The configuration
-        :rtype: dictionary
-        :returns: The generated config
+        :param interfaces: list of existing interfaces
+        :rtype: list
+        :returns: The generated configs
         """
         match = re.search(r"interface (\S+)", conf)
         intf = match.group(1)
@@ -127,15 +128,23 @@ class L2_interfacesFacts(object):
 
                     if interface in interfaces:  # check if interface exists
                         # populate the facts from the configuration
-                        intf_configs.append(self.render_config(spec, conf, interface))
+                        intf_configs.append(self.parse_config(conf, interface))
 
         else:
-            intf_configs.append(self.render_config(spec, conf, intf))
+            intf_configs.append(self.parse_config(conf, intf))
 
         return intf_configs
 
-    def render_config(self, spec, conf, intf):
-        config = deepcopy(spec)
+    def parse_config(self, conf, intf):
+        """
+        Translate a given config into dictionary and delete keys from spec for null values
+
+        :param conf: The configuration
+        :param intf: name of the interface
+        :rtype: dict
+        :returns: The generated config
+        """
+        config = deepcopy(self.generated_spec)
         config["name"] = normalize_interface(intf)
 
         mode = utils.parse_conf_arg(conf, "switchport mode")
