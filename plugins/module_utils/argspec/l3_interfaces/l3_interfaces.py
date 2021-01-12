@@ -52,7 +52,7 @@ class L3_interfacesArgs(object):  # pylint: disable=R0903
                 },
                 "ipv6": {
                     "elements": "dict",
-                    "options": {"address": {"type": "str"}, "dhcp": {"type": "bool"}},
+                    "options": {"address": {"type": "str"}},
                     "type": "list",
                 },
                 "name": {"required": True, "type": "str"},

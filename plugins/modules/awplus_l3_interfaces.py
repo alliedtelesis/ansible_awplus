@@ -8,12 +8,6 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {
-    "metadata_version": "1.1",
-    "status": ["preview"],
-    "supported_by": "network",
-}
-
 DOCUMENTATION = """
 ---
 module: awplus_l3_interfaces
@@ -128,7 +122,7 @@ EXAMPLES = """
 #  ip helper-address 172.26.3.8
 # !
 - name: Override device configuration of all l3 interfaces with provided configuration
-  awplus_l3_interfaces:
+  alliedtelesis.awplus.awplus_l3_interfaces:
     config:
       - name: vlan1
         ipv4:
@@ -223,7 +217,7 @@ EXAMPLES = """
 #  ip address 192.168.4.4/24
 # !
   - name: Replaces device config of listed interfaces with provided config
-    awplus_l3_interfaces:
+    alliedtelesis.awplus.awplus_l3_interfaces:
       config:
         - name: vlan2
           ipv4:
@@ -364,7 +358,7 @@ EXAMPLES = """
 #  ipv6 enable
 # !
 - name: Override device configuration of all interfaces with provided configuration
-  awplus_l3_interfaces:
+  alliedtelesis.awplus.awplus_l3_interfaces:
     config:
       - name: vlan2
         ipv6:
@@ -465,7 +459,7 @@ EXAMPLES = """
 #  ipv6 address dhcp
 # !
 - name: Delete attributes of given interface
-  awplus_l3_interfaces:
+  alliedtelesis.awplus.awplus_l3_interfaces:
     config:
       - name: vlan2
     state: deleted
@@ -527,7 +521,8 @@ commands:
   description: The set of commands pushed to the remote device.
   returned: always
   type: list
-  sample: ['command 1', 'command 2', 'command 3']
+  sample: ["interface vlan5",
+          "ipv6 address dhcp"]
 """
 
 from ansible.module_utils.basic import AnsibleModule
