@@ -76,13 +76,13 @@ class L3_interfacesFacts(object):
         config = data.split("!")
         for conf in config:
             if conf:
-                obj = self.render_configs(self.generated_spec, conf, interfaces)
+                obj = self.generate_config_list(self.generated_spec, conf, interfaces)
                 if obj:
                     objs.extend(obj)
 
         if interfaces:  # add interfaces not shown in running-config
             for interface in interfaces:
-                obj = self.render_config(self.generated_spec, "interface " + interface, interface)
+                obj = self.parse_config(self.generated_spec, "interface " + interface, interface)
                 if obj:
                     objs.append(obj)
 
@@ -97,7 +97,7 @@ class L3_interfacesFacts(object):
 
         return ansible_facts
 
-    def render_configs(self, spec, conf, interfaces):
+    def generate_config_list(self, spec, conf, interfaces):
         """
         Render config as dictionary structure and delete keys
           from spec for null values
@@ -130,17 +130,17 @@ class L3_interfacesFacts(object):
 
                     if interface in interfaces:  # check if interface exists
                         # populate the facts from the configuration
-                        intf_configs.append(self.render_config(spec, conf, interface))
+                        intf_configs.append(self.parse_config(spec, conf, interface))
                         interfaces.remove(interface)
         
         else:
             if intf in interfaces:
                 interfaces.remove(intf)
-            intf_configs.append(self.render_config(spec, conf, intf))
+            intf_configs.append(self.parse_config(spec, conf, intf))
 
         return intf_configs
 
-    def render_config(self, spec, conf, intf):
+    def parse_config(self, spec, conf, intf):
         config = deepcopy(spec)
         config["name"] = normalize_interface(intf)
 
