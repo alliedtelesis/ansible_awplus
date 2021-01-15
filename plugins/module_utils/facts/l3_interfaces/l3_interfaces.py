@@ -132,7 +132,7 @@ class L3_interfacesFacts(object):
                         # populate the facts from the configuration
                         intf_configs.append(self.parse_config(spec, conf, interface))
                         interfaces.remove(interface)
-        
+
         else:
             if intf in interfaces:
                 interfaces.remove(intf)
