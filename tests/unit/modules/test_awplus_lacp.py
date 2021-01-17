@@ -48,7 +48,7 @@ class TestAwplusLacpInterfacesModule(TestAwplusModule):
         self.edit_config = self.mock_edit_config.start()
 
         self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.lacp.lacp.LacpFacts.get_device_data"
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lacp.lacp.LacpFacts.get_device_data"
         )
         self.execute_show_command = self.mock_execute_show_command.start()
 
@@ -73,7 +73,7 @@ class TestAwplusLacpInterfacesModule(TestAwplusModule):
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_lacp_default_idempotent(self):
-        set_module_args(dict(config=dict(system=dict(priority=32768))))
+        set_module_args(dict(config=dict(system=dict(priority=9))))
         self.execute_module(changed=False, commands=[])
 
     def test_awplus_lacp_merged(self):
@@ -82,18 +82,7 @@ class TestAwplusLacpInterfacesModule(TestAwplusModule):
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_lacp_merged_idempotent(self):
-        set_module_args(dict(config=dict(system=dict(priority=32768)), state="merged"))
-        self.execute_module(changed=False, commands=[])
-
-    def test_awplus_l3_interfaces_replaced(self):
-        set_module_args(dict(config=dict(system=dict(priority=20)), state="replaced"))
-        commands = ["lacp system-priority 20"]
-        self.execute_module(changed=True, commands=commands)
-
-    def test_awplus_l3_interfaces_replaced_idempotent(self):
-        set_module_args(
-            dict(config=dict(system=dict(priority=32768)), state="replaced")
-        )
+        set_module_args(dict(config=dict(system=dict(priority=9)), state="merged"))
         self.execute_module(changed=False, commands=[])
 
     def test_awplus_l3_interfaces_deleted(self):
