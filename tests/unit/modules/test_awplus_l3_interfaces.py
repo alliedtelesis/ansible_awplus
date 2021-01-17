@@ -46,7 +46,7 @@ class TestAwplusL3InterfacesModule(TestAwplusModule):
         )
 
         self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.l3_interfaces.l3_interfaces.L3_interfacesFacts.get_device_data"
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l3_interfaces.l3_interfaces.L3_interfacesFacts.get_device_data"
         )
         self.execute_show_command = self.mock_execute_show_command.start()
 
@@ -68,11 +68,8 @@ class TestAwplusL3InterfacesModule(TestAwplusModule):
         set_module_args(
             dict(
                 config=[
-                    dict(
-                        name="vlan1",
-                        ipv4=[dict(address="182.56.3.1/24", secondary="True")],
-                    ),
-                    dict(name="vlan2", ipv6=[dict(address="dhcp")]),
+                    dict(name="vlan1", ipv4=[dict(address="182.56.3.1/24", secondary=True)]),
+                    dict(name="vlan2", ipv6=[dict(address="2001:db8::1/64")]),
                 ],
                 state="merged",
             )
@@ -81,7 +78,7 @@ class TestAwplusL3InterfacesModule(TestAwplusModule):
             "interface vlan1",
             "ip address 182.56.3.1/24 secondary",
             "interface vlan2",
-            "ipv6 address dhcp",
+            "ipv6 address 2001:db8::1/64",
         ]
         self.execute_module(changed=True, commands=commands)
 
@@ -122,7 +119,6 @@ class TestAwplusL3InterfacesModule(TestAwplusModule):
         commands = [
             "interface vlan1",
             "ip address 182.56.3.1/24 secondary",
-            "no ipv6 address dhcp",
             "interface vlan2",
             "ip address dhcp client-id vlan3 hostname example.com",
         ]
@@ -135,7 +131,6 @@ class TestAwplusL3InterfacesModule(TestAwplusModule):
                     dict(
                         name="vlan1",
                         ipv4=[dict(address="192.168.5.77/24")],
-                        ipv6=[dict(dhcp=True, address="dhcp")],
                     ),
                     dict(name="vlan2", ipv4=[dict(address="192.168.4.4/24")],),
                 ],
@@ -151,7 +146,6 @@ class TestAwplusL3InterfacesModule(TestAwplusModule):
                     dict(
                         name="vlan1",
                         ipv4=[dict(address="192.168.5.77/24")],
-                        ipv6=[dict(dhcp=False)],
                     ),
                     dict(name="vlan2", ipv4=[dict(address="192.168.4.5/24")]),
                 ],
@@ -159,8 +153,6 @@ class TestAwplusL3InterfacesModule(TestAwplusModule):
             )
         )
         commands = [
-            "interface vlan1",
-            "ipv6 address None",
             "interface vlan2",
             "ip address 192.168.4.5/24",
         ]
@@ -173,7 +165,6 @@ class TestAwplusL3InterfacesModule(TestAwplusModule):
                     dict(
                         name="vlan1",
                         ipv4=[dict(address="192.168.5.77/24")],
-                        ipv6=[dict(dhcp=True, address="dhcp")],
                     ),
                     dict(name="vlan2", ipv4=[dict(address="192.168.4.4/24")],),
                 ],

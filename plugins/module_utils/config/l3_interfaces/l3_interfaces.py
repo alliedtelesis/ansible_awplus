@@ -81,8 +81,10 @@ class L3_interfaces(ConfigBase):
         commands.extend(self.set_config(existing_l3_interfaces_facts))
         if commands:
             if not self._module.check_mode:
-                self._connection.edit_config(commands)
-            changed_l3_interfaces_facts = self.get_l3_interfaces_facts()
+                warning = self._connection.edit_config(commands).get("response")
+                for warn in warning:
+                    if warn != "":
+                        warnings.append(warn)
             result["changed"] = True
         result["commands"] = commands
 
@@ -323,7 +325,7 @@ class L3_interfaces(ConfigBase):
                 if ipv4:
                     for each in ipv4:
                         ipv4_dict = dict(each)
-                        if ipv4_dict.get("address") != "dhcp":
+                        if ipv4_dict.get("address") and ipv4_dict.get("address") != "dhcp":
                             cmd = "ip address {0}".format(ipv4_dict["address"])
                             if ipv4_dict.get("secondary"):
                                 cmd += " secondary"
