@@ -65,7 +65,7 @@ class TestAwplusLagInterfacesModule(TestAwplusModule):
         self.edit_config = self.mock_edit_config.start()
 
         self.mock_execute_show_run_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lag_interfaces.lag_interfaces.Lag_interfacesFacts.get_running_config"
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lag_interfaces.lag_interfaces.Lag_interfacesFacts.get_run_conf"
         )
         self.execute_show_run_command = self.mock_execute_show_run_command.start()
 
@@ -73,7 +73,6 @@ class TestAwplusLagInterfacesModule(TestAwplusModule):
             "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lag_interfaces.lag_interfaces.Lag_interfacesFacts.get_int_brief"
         )
         self.execute_show_int_command = self.mock_execute_show_int_command.start()
-
 
     def tearDown(self):
         super(TestAwplusLagInterfacesModule, self).tearDown()
