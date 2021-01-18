@@ -180,15 +180,16 @@ class Lag_interfaces(ConfigBase):
                 ret_member[port] = {"have": {"group": group.get("name"), "mode": member.get("mode")}}
         for group in want:
             ret_want_group.append(group.get("name"))
-            for member in group.get("members"):
-                port = member.get("member")
-                if port not in ret_member:
-                    ret_member[port] = {"want": {"group": group.get("name"), "mode": member.get("mode")}}
-                else:
-                    if "want" in ret_member[port]:
-                        self._module.fail_json(msg="duplicate port in desired config")
-                        return None, None, None
-                    ret_member[port].update({"want": {"group": group.get("name"), "mode": member.get("mode")}})
+            if group.get("members"):
+                for member in group.get("members"):
+                    port = member.get("member")
+                    if port not in ret_member:
+                        ret_member[port] = {"want": {"group": group.get("name"), "mode": member.get("mode")}}
+                    else:
+                        if "want" in ret_member[port]:
+                            self._module.fail_json(msg="duplicate port in desired config")
+                            return None, None, None
+                        ret_member[port].update({"want": {"group": group.get("name"), "mode": member.get("mode")}})
         return ret_member, ret_want_group, ret_have_group
 
     def gen_commands(self, by_member, want_groups, merge=False, delete=False):
@@ -209,13 +210,15 @@ class Lag_interfaces(ConfigBase):
             w_group = w.get("group") if w else None
             h_mode = h.get("mode") if h else None
             w_mode = w.get("mode") if w else None
+            changed = h_group != w_group or h_mode != w_mode
             if not delete:
                 if w_group in want_groups or (w is None and h_group in want_groups):
-                    cmds.append("interface {}".format(port_name))
-                    if h and ((not w and not merge) or (w and h_group != w_group)):
-                        cmds.append("no channel-group")
-                    if w and (not h or h_mode != w_mode or h_group != w_group):
-                        cmds.append("channel-group {} mode {}".format(w_group, w_mode))
+                    if changed:
+                        cmds.append("interface {}".format(port_name))
+                        if h and ((not w and not merge) or (w and h_group != w_group)):
+                            cmds.append("no channel-group")
+                        if w and (not h or h_mode != w_mode or h_group != w_group):
+                            cmds.append("channel-group {} mode {}".format(w_group, w_mode))
             elif h_group == w_group and w_group in want_groups:
                 cmds.append("interface {}".format(port_name))
                 cmds.append("no channel-group")

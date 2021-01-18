@@ -39,6 +39,17 @@ class Lag_interfacesFacts(object):
 
         self.generated_spec = utils.generate_dict(facts_argument_spec)
 
+    # Needs to be mockable for unit tests.
+    @staticmethod
+    def get_running_config(connection):
+        return connection.get("show running-config interface")
+
+    # Needs to be mockable for unit tests.
+    @staticmethod
+    def get_int_brief(connection):
+        int_brief = connection.get("show interface brief").splitlines()
+        return [i.split()[0].strip() for i in int_brief][1:]
+
     def populate_facts(self, connection, ansible_facts, data=None):
         """ Populate the facts for lag_interfaces
         :param connection: the device connection
@@ -48,9 +59,8 @@ class Lag_interfacesFacts(object):
         :returns: facts
         """
         if not data:
-            data = connection.get("show running-config interface")
-        int_brief = connection.get("show interface brief").splitlines()
-        int_list = [i.split()[0].strip() for i in int_brief][1:]
+            data = self.get_running_config(connection)
+        int_list = self.get_int_brief(connection)
 
         # split the config into instances of the resource
         objs = []
@@ -67,7 +77,8 @@ class Lag_interfacesFacts(object):
                 merge_dict[obj["name"]] = obj
             else:
                 merge_dict[obj["name"]]["members"].extend(obj["members"])
-        objs = merge_dict.values()
+        objs = list(merge_dict.values())
+        print(objs)
 
         ansible_facts['ansible_network_resources'].pop('lag_interfaces', None)
         facts = {}
