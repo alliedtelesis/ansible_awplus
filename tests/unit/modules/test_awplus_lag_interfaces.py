@@ -64,10 +64,15 @@ class TestAwplusLagInterfacesModule(TestAwplusModule):
         )
         self.edit_config = self.mock_edit_config.start()
 
-        self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.lag_interfaces.lag_interfaces.Lag_interfacesFacts.get_device_data"
+        self.mock_execute_show_run_command = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lag_interfaces.lag_interfaces.Lag_interfacesFacts.get_run_conf"
         )
-        self.execute_show_command = self.mock_execute_show_command.start()
+        self.execute_show_run_command = self.mock_execute_show_run_command.start()
+
+        self.mock_execute_show_int_command = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lag_interfaces.lag_interfaces.Lag_interfacesFacts.get_int_brief"
+        )
+        self.execute_show_int_command = self.mock_execute_show_int_command.start()
 
     def tearDown(self):
         super(TestAwplusLagInterfacesModule, self).tearDown()
@@ -76,13 +81,16 @@ class TestAwplusLagInterfacesModule(TestAwplusModule):
         self.mock_edit_config.stop()
         self.mock_get_config.stop()
         self.mock_load_config.stop()
-        self.mock_execute_show_command.stop()
+        self.mock_execute_show_run_command.stop()
+        self.mock_execute_show_int_command.stop()
 
     def load_fixtures(self, commands=None, transport="cli"):
         def load_from_file(*args, **kwargs):
             return load_fixture("awplus_lag_interfaces_config.cfg")
 
-        self.execute_show_command.side_effect = load_from_file
+        self.execute_show_run_command.side_effect = load_from_file
+        self.execute_show_int_command.return_value = ["port1.0.1", "port1.0.2", "port1.0.3", "port1.0.4",
+                                                      "eth1", "po1", "po2", "vlan1", "vlan2"]
 
     def test_awplus_lag_interfaces_default(self):
         set_module_args(
@@ -180,6 +188,6 @@ class TestAwplusLagInterfacesModule(TestAwplusModule):
         self.execute_module(changed=False, commands=[])
 
     def test_awplus_lag_interfaces_deleted(self):
-        set_module_args(dict(config=[dict(name="1")], state="deleted"))
+        set_module_args(dict(config=[dict(name="1", members=[dict(member="port1.0.2", mode="active")])], state="deleted"))
         commands = ["interface port1.0.2", "no channel-group"]
         self.execute_module(changed=True, commands=commands)

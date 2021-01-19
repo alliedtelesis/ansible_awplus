@@ -18,6 +18,7 @@ class FactsArgs(object):  # pylint: disable=R0903
     choices = [
         'all',
         'l3_interfaces',
+        'lag_interfaces',
     ]
 
     argument_spec = {

@@ -15,12 +15,14 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.f
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l3_interfaces.l3_interfaces import L3_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lacp.lacp import LacpFacts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lag_interfaces.lag_interfaces import Lag_interfacesFacts
 
 
 FACT_LEGACY_SUBSETS = {}
 FACT_RESOURCE_SUBSETS = dict(
     l3_interfaces=L3_interfacesFacts,
     lacp=LacpFacts,
+    lag_interfaces=Lag_interfacesFacts,
 )
 
 
@@ -43,7 +45,6 @@ class Facts(FactsBase):
         :rtype: dict
         :return: the facts gathered
         """
-        # netres_choices = FactsArgs.argument_spec['gather_network_resources'].get('choices', [])
         if self.VALID_RESOURCE_SUBSETS:
             self.get_network_resources_facts(FACT_RESOURCE_SUBSETS, resource_facts_type, data)
 
