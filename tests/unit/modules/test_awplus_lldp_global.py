@@ -49,7 +49,7 @@ class TestAwplusLldpGlobalModule(TestAwplusModule):
         self.edit_config = self.mock_edit_config.start()
 
         self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.lldp_global.lldp_global.Lldp_globalFacts.get_lldp_facts"
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lldp_global.lldp_global.Lldp_globalFacts.get_device_data"
         )
         self.execute_show_command = self.mock_execute_show_command.start()
 
@@ -69,45 +69,39 @@ class TestAwplusLldpGlobalModule(TestAwplusModule):
         self.execute_show_command.side_effect = load_from_file
 
     def test_awplus_lldp_default(self):
-        set_module_args(dict(config=dict(enabled=True, reinit=3)))
-        commands = ["lldp run", "lldp reinit 3"]
+        set_module_args(dict(config=dict(notification_interval=35, reinit=3)))
+        commands = ["lldp notification-interval 35", "lldp reinit 3"]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_lldp_default_idempotent(self):
         set_module_args(
-            dict(config=dict(enabled=False, reinit=2, holdtime=4, timer=30))
+            dict(config=dict(enabled=True, holdtime_multiplier=10, faststart_count=4, non_strict_med_tlv_order_check=True))
         )
         self.execute_module(changed=False, commands=[])
 
     def test_awplus_lldp_merged(self):
-        set_module_args(dict(config=dict(holdtime=6, timer=36), state="merged"))
-        commands = ["lldp holdtime 6", "lldp timer 36"]
+        set_module_args(dict(config=dict(holdtime_multiplier=6, timer=36), state="merged"))
+        commands = ["lldp holdtime-multiplier 6", "lldp timer 36"]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_lldp_merged_idempotent(self):
         set_module_args(
-            dict(
-                config=dict(enabled=False, reinit=2, holdtime=4, timer=30),
-                state="merged",
-            )
+            dict(config=dict(enabled=True, holdtime_multiplier=10, faststart_count=4, non_strict_med_tlv_order_check=True))
         )
         self.execute_module(changed=False, commands=[])
 
     def test_awplus_lldp_replaced(self):
-        set_module_args(dict(config=dict(enabled=True, holdtime=1,), state="replaced"))
-        commands = ["lldp run", "lldp holdtime 1", "no lldp reinit", "no lldp timer"]
+        set_module_args(dict(config=dict(enabled=True, holdtime_multiplier=6,), state="replaced"))
+        commands = ["no lldp faststart-count", "no lldp non-strict-med-tlv-order-check", "lldp holdtime-multiplier 6"]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_lldp_replaced_idempotent(self):
         set_module_args(
-            dict(
-                config=dict(enabled=False, reinit=2, holdtime=4, timer=30),
-                state="replaced",
-            )
+            dict(config=dict(enabled=True, holdtime_multiplier=10, faststart_count=4, non_strict_med_tlv_order_check=True))
         )
         self.execute_module(changed=False, commands=[])
 
     def test_awplus_lldp_deleted(self):
         set_module_args(dict(config=dict(), state="deleted"))
-        commands = ["no lldp timer", "no lldp holdtime", "no lldp reinit"]
+        commands = ["no lldp run", "no lldp faststart-count", "no lldp holdtime-multiplier", "no lldp non-strict-med-tlv-order-check"]
         self.execute_module(changed=True, commands=commands)
