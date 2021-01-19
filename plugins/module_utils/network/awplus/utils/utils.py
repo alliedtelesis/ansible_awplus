@@ -25,56 +25,6 @@ def add_command_to_config_list(interface, cmd, commands):
     commands.append(cmd)
 
 
-def filter_dict_having_none_value(want, have):
-    # Generate dict with have dict value which is None in want dict
-    test_dict = dict()
-    test_key_dict = dict()
-    name = want.get('name')
-    if name:
-        test_dict['name'] = name
-    diff_ip = False
-    want_ip = ''
-    for k, v in iteritems(want):
-        if isinstance(v, dict):
-            for key, value in iteritems(v):
-                intermediate_dict_val = have.get(k)
-                if isinstance(intermediate_dict_val, dict):
-                    dict_val = intermediate_dict_val.get(key)
-                else:
-                    break
-                test_key_dict.update({key: dict_val})
-            test_dict.update({k: test_key_dict})
-        if isinstance(v, list):
-            for key, value in iteritems(v[0]):
-                if value is None:
-                    intermediate_dict_val = have.get(k)
-                    if isinstance(intermediate_dict_val, dict):
-                        dict_val = intermediate_dict_val.get(key)
-                    else:
-                        break
-                    test_key_dict.update({key: dict_val})
-                test_dict.update({k: test_key_dict})
-            # below conditions checks are added to check if
-            # secondary IP is configured, if yes then delete
-            # the already configured IP if want and have IP
-            # is different else if it's same no need to delete
-            for each in v:
-                if each.get('secondary'):
-                    want_ip = each.get('address').split('/')
-                    have_ip = have.get('ipv4')
-                    if len(want_ip) > 1 and have_ip and have_ip[0].get('secondary'):
-                        have_ip = have_ip[0]['address'].split(' ')[0]
-                        if have_ip != want_ip[0]:
-                            diff_ip = True
-                    if each.get('secondary') and diff_ip is True:
-                        test_key_dict.update({'secondary': True})
-                    test_dict.update({'ipv4': test_key_dict})
-        if v is None:
-            val = have.get(k)
-            test_dict.update({k: val})
-    return test_dict
-
-
 def remove_duplicate_interface(commands):
     # Remove duplicate interface from commands
     set_cmd = []
@@ -257,3 +207,18 @@ def int_range_to_list(range_string, int_list):
         if int_name in int_list:
             ret_list.append(int_name)
     return ret_list
+
+
+def get_lldp_defaults():
+    defaults = {
+        'enabled': False,
+        'faststart_count': 3,
+        'holdtime_multiplier': 4,
+        'non_strict_med_tlv_order_check': False,
+        'notification_interval': 5,
+        'port_number_type': 'number',
+        'reinit': 2,
+        'timer': 30,
+        'tx_delay': 2,
+    }
+    return defaults
