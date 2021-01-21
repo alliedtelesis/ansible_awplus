@@ -35,10 +35,10 @@ class Static_lag_interfacesArgs(object):  # pylint: disable=R0903
         pass
 
     argument_spec = {'config': {'elements': 'dict',
-            'options': {'member-filters': {'required': True, 'type': 'bool'},
-                        'members': {'elements': 'str', 'type': 'list'},
-                        'name': {'required': True, 'type': 'str'}},
-            'type': 'list'},
- 'state': {'choices': ['merged', 'replaced', 'overridden', 'deleted'],
-           'default': 'merged',
-           'type': 'str'}}  # pylint: disable=C0301
+                     'options': {'member-filters': {'required': True, 'type': 'bool'},
+                                 'members': {'elements': 'str', 'type': 'list'},
+                                 'name': {'required': True, 'type': 'str'}},
+                                'type': 'list'},
+                     'state': {'choices': ['merged', 'replaced', 'overridden', 'deleted'],
+                               'default': 'merged',
+                               'type': 'str'}}  # pylint: disable=C0301

@@ -211,7 +211,7 @@ class Static_lag_interfaces(ConfigBase):
                             commands.append("static-channel-group {}".format(g))
             if redo:
                 for port in h_b_p:
-                    if h_b_p[port] == g and not port in w_b_p:
+                    if h_b_p[port] == g and port not in w_b_p:
                         commands.append("interface {}".format(port))
                         if port not in ports_cleared:
                             commands.append("no static-channel-group")
