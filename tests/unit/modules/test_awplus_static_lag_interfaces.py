@@ -64,11 +64,16 @@ class TestAwplusStaticLagInterfacesModule(TestAwplusModule):
         )
         self.edit_config = self.mock_edit_config.start()
 
-        self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils."
-            "facts.static_lag_interfaces.static_lag_interfaces.Static_Lag_interfacesFacts.get_device_data"
+        x = "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.static_lag_interfaces.static_lag_interfaces."
+        self.mock_execute_show_run_command = patch(
+            x + "Static_lag_interfacesFacts.get_run_conf"
         )
-        self.execute_show_command = self.mock_execute_show_command.start()
+        self.execute_show_run_command = self.mock_execute_show_run_command.start()
+
+        self.mock_execute_show_int_command = patch(
+            x + "Static_lag_interfacesFacts.get_int_brief"
+        )
+        self.execute_show_int_command = self.mock_execute_show_int_command.start()
 
     def tearDown(self):
         super(TestAwplusStaticLagInterfacesModule, self).tearDown()
@@ -77,23 +82,27 @@ class TestAwplusStaticLagInterfacesModule(TestAwplusModule):
         self.mock_edit_config.stop()
         self.mock_get_config.stop()
         self.mock_load_config.stop()
-        self.mock_execute_show_command.stop()
+        self.mock_execute_show_run_command.stop()
+        self.mock_execute_show_int_command.stop()
 
     def load_fixtures(self, commands=None, transport="cli"):
         def load_from_file(*args, **kwargs):
             return load_fixture("awplus_static_lag_interfaces_config.cfg")
 
-        self.execute_show_command.side_effect = load_from_file
+        self.execute_show_run_command.side_effect = load_from_file
+        self.execute_show_int_command.return_value = ["port1.0.1", "port1.0.2", "port1.0.3", "port1.0.4", "port1.0.5", "port1.0.6", "port1.0.7", "port1.0.8",
+                                                      "port1.0.9", "port1.0.10", "port1.0.11", "port1.0.12", "port1.0.13", "port1.0.14", "port1.0.15",
+                                                      "port1.0.16", "port1.0.17", "port1.0.18", "port1.0.19", "port1.0.20", "port1.0.21", "port1.0.22",
+                                                      "port1.0.23", "port1.0.24", "port1.0.25", "port1.0.26", "port1.0.27", "port1.0.28", "port1.0.29",
+                                                      "port1.0.30", "port1.0.31", "port1.0.32", "port1.0.33", "port1.0.34", "port1.0.35", "port1.0.36",
+                                                      "port1.0.37", "port1.0.38", "port1.0.39", "port1.0.40", "port1.0.41", "port1.0.42", "port1.0.43",
+                                                      "port1.0.44", "port1.0.45", "port1.0.46", "port1.0.47", "port1.0.48", "port1.0.49", "port1.0.50",
+                                                      "port1.0.51", "port1.0.52", "eth1", "sa2", "sa3", "vlan1", "vlan2"]
 
     def test_awplus_static_lag_interfaces_default(self):
         set_module_args(
             dict(
-                config=[
-                    dict(
-                        name="2",
-                        members=[dict(member="port1.0.5", member_filters=True)],
-                    )
-                ]
+                config=[{'name': "2", 'members': ["port1.0.5"], 'member-filters': True}]
             )
         )
         commands = ["interface port1.0.5", "static-channel-group 2 member-filters"]
@@ -102,12 +111,7 @@ class TestAwplusStaticLagInterfacesModule(TestAwplusModule):
     def test_awplus_static_lag_interfaces_default_idempotent(self):
         set_module_args(
             dict(
-                config=[
-                    dict(
-                        name="2",
-                        members=[dict(member="port1.0.2", member_filters=True)],
-                    )
-                ]
+                config=[{'name': "2", 'members': ["port1.0.2"], 'member-filters': True}]
             )
         )
         self.execute_module(changed=False, commands=[])
@@ -115,12 +119,7 @@ class TestAwplusStaticLagInterfacesModule(TestAwplusModule):
     def test_awplus_static_lag_interfaces_merged(self):
         set_module_args(
             dict(
-                config=[
-                    dict(
-                        name="4",
-                        members=[dict(member="port1.0.5", member_filters=False)],
-                    )
-                ],
+                config=[{'name': "4", 'members': ["port1.0.5"], 'member-filters': False}],
                 state="merged",
             )
         )
@@ -130,12 +129,7 @@ class TestAwplusStaticLagInterfacesModule(TestAwplusModule):
     def test_awplus_static_lag_interfaces_merged_idempotent(self):
         set_module_args(
             dict(
-                config=[
-                    dict(
-                        name="3",
-                        members=[dict(member="port1.0.4", member_filters=False)],
-                    )
-                ],
+                config=[{'name': "3", 'members': ["port1.0.4"], 'member-filters': False}],
                 state="merged",
             )
         )
@@ -144,18 +138,15 @@ class TestAwplusStaticLagInterfacesModule(TestAwplusModule):
     def test_awplus_static_lag_interfaces_replaced(self):
         set_module_args(
             dict(
-                config=[
-                    dict(
-                        name="2",
-                        members=[dict(member="port1.0.4", member_filters=True)],
-                    )
-                ],
+                config=[{'name': "2", 'members': ["port1.0.4"], 'member-filters': True}],
                 state="replaced",
             )
         )
         commands = [
+            "interface port1.0.2",
             "no static-channel-group",
             "interface port1.0.4",
+            "no static-channel-group",
             "static-channel-group 2 member-filters",
         ]
         self.execute_module(changed=True, commands=commands)
@@ -163,12 +154,7 @@ class TestAwplusStaticLagInterfacesModule(TestAwplusModule):
     def test_awplus_static_lag_interfaces_replaced_idempotent(self):
         set_module_args(
             dict(
-                config=[
-                    dict(
-                        name="2",
-                        members=[dict(member="port1.0.2", member_filters=True)],
-                    )
-                ],
+                config=[{'name': "2", 'members': ["port1.0.2"], 'member-filters': True}],
                 state="replaced",
             )
         )
@@ -177,12 +163,7 @@ class TestAwplusStaticLagInterfacesModule(TestAwplusModule):
     def test_awplus_static_lag_interfaces_overridden(self):
         set_module_args(
             dict(
-                config=[
-                    dict(
-                        name="3",
-                        members=[dict(member="port1.0.2", member_filters=False)],
-                    )
-                ],
+                config=[{'name': "3", 'members': ["port1.0.2"], 'member-filters': False}],
                 state="overridden",
             )
         )
@@ -198,32 +179,23 @@ class TestAwplusStaticLagInterfacesModule(TestAwplusModule):
     def test_awplus_static_lag_interfaces_overridden_idempotent(self):
         set_module_args(
             dict(
-                config=[
-                    dict(
-                        name="2",
-                        members=[dict(member="port1.0.2", member_filters=True)],
-                    ),
-                    dict(
-                        name="3",
-                        members=[dict(member="port1.0.4", member_filters=False)],
-                    ),
-                ],
+                config=[{'name': "2", 'members': ["port1.0.2"], 'member-filters': True},
+                        {'name': "3", 'members': ["port1.0.4"], 'member-filters': False}],
                 state="overridden",
             )
         )
         self.execute_module(changed=False, commands=[])
 
     def test_awplus_static_lag_interfaces_deleted(self):
-        set_module_args(dict(config=[dict(name="2")], state="deleted"))
+        set_module_args(dict(config=[{'name': "2", 'member-filters': True}], state="deleted"))
         commands = ["interface port1.0.2", "no static-channel-group"]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_static_lag_interfaces_delete_all(self):
-        set_module_args(dict(config=[], state="deleted"))
-        commands = [
-            "interface port1.0.2",
-            "no static-channel-group",
-            "interface port1.0.4",
-            "no static-channel-group",
-        ]
+        set_module_args(dict(config=[{'name': "2", 'member-filters': True},
+                                     {'name': "3", 'member-filters': True}], state="deleted"))
+        commands = ["interface port1.0.2",
+                    "no static-channel-group",
+                    "interface port1.0.4",
+                    "no static-channel-group"]
         self.execute_module(changed=True, commands=commands)
