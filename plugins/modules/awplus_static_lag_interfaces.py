@@ -108,7 +108,8 @@ EXAMPLES = """
     config:
       - name: 33
         members:
-          - member: port1.1.4
+          - port1.1.4
+        member-filters: false
     operation: merged
 
 # After state:
@@ -172,7 +173,8 @@ EXAMPLES = """
     config:
       - name: 33
         members:
-          - member: port1.1.4
+          - port1.1.4
+        member-filters: false
     operation: replaced
 
 # After state:
@@ -230,7 +232,8 @@ EXAMPLES = """
     config:
       - name: 33
         members:
-          - member: port1.1.4
+          - port1.1.4
+        member-filters: false
     operation: overridden
 
 # After state:
@@ -283,8 +286,9 @@ EXAMPLES = """
   awplus_static_lag_interfaces:
     config:
       - name: 33
-      - members:
-        - member: port1.1.1
+        members:
+        - port1.1.1
+        member-filters: false
     operation: deleted
 
 # After state:
