@@ -150,7 +150,7 @@ EXAMPLES = """
 # Before state:
 # -------------
 #                                            Optional TLVs Enabled for Tx
-#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED       
+#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED
 # --------------------------------------------------------------------------------
 #  1.0.1    Rx Tx  -- --  10.38.55.3       ---------- -------- -------- McNpLoPe--
 #  1.0.2    -- --  -- --  eccd.6ddf.6d33   --------Ma -------- Mp--La-- McNp--PeIn
@@ -171,7 +171,7 @@ EXAMPLES = """
 # After state:
 # ------------
 #                                            Optional TLVs Enabled for Tx
-#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED       
+#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED
 # --------------------------------------------------------------------------------
 #  1.0.1    Rx Tx  -- --  10.38.55.3       ---------- -------- -------- McNpLoPe--
 #  1.0.2    Rx --  -- --  eccd.6ddf.6d33   --------Ma ------Pi Mp--La-- Mc----PeIn
@@ -184,7 +184,7 @@ EXAMPLES = """
 # Before state:
 # -------------
 #                                            Optional TLVs Enabled for Tx
-#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED       
+#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED
 # --------------------------------------------------------------------------------
 #  1.0.1    Rx Tx  -- --  10.38.55.3       ---------- -------- -------- McNpLoPe--
 #  1.0.2    -- --  -- --  eccd.6ddf.6d33   --------Ma -------- Mp--La-- McNp--PeIn
@@ -201,7 +201,7 @@ EXAMPLES = """
 # After state:
 # ------------
 #                                            Optional TLVs Enabled for Tx
-#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED       
+#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED
 # --------------------------------------------------------------------------------
 #  1.0.1    Rx Tx  -- --  10.38.55.3       ---------- -------- -------- McNpLoPe--
 #  1.0.2    -- --  -- --  eccd.6ddf.6d33   --------Ma -------- Mp--La-- McNp--PeIn
@@ -214,7 +214,7 @@ EXAMPLES = """
 # Before state:
 # -------------
 #                                            Optional TLVs Enabled for Tx
-#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED       
+#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED
 # --------------------------------------------------------------------------------
 #  1.0.1    Rx Tx  -- --  10.38.55.3       ---------- -------- -------- McNpLoPe--
 #  1.0.2    -- --  -- --  eccd.6ddf.6d33   --------Ma -------- Mp--La-- McNp--PeIn
@@ -234,7 +234,7 @@ EXAMPLES = """
 # After state:
 # ------------
 #                                            Optional TLVs Enabled for Tx
-#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED       
+#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED
 # --------------------------------------------------------------------------------
 #  1.0.1    -- Tx  -- --  10.38.55.3       ---------- ------Pi -------- McNpLoPe--
 #  1.0.2    Rx Tx  -- --  eccd.6ddf.6d33   ---------- -------- -------- McNpLoPe--
@@ -247,7 +247,7 @@ EXAMPLES = """
 # Before state:
 # -------------
 #                                            Optional TLVs Enabled for Tx
-#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED       
+#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED
 # --------------------------------------------------------------------------------
 #  1.0.1    Rx Tx  -- --  10.38.55.3       ---------- -------- -------- McNpLoPe--
 #  1.0.2    -- --  -- --  eccd.6ddf.6d33   --------Ma -------- Mp--La-- McNp--PeIn
@@ -263,7 +263,7 @@ EXAMPLES = """
 # After state:
 # -------------
 #                                            Optional TLVs Enabled for Tx
-#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED       
+#  Port     Rx/Tx  Notif  Management Addr  Base       802.1    802.3    MED
 # --------------------------------------------------------------------------------
 #  1.0.1    Rx Tx  -- --  10.38.55.3       ---------- -------- -------- McNpLoPe--
 #  1.0.2    Rx Tx  -- --  eccd.6ddf.6d33   ---------- -------- -------- McNpLoPe--
