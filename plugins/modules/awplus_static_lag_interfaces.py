@@ -282,9 +282,9 @@ EXAMPLES = """
 - name: Delete a port from a channel group
   awplus_static_lag_interfaces:
     config:
-      - name: 10
+      - name: 33
       - members:
-        -member: port1.1.1
+        - member: port1.1.1
     operation: deleted
 
 # After state:
