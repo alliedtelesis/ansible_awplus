@@ -51,9 +51,16 @@ class TestAwplusLldpGlobalModule(TestAwplusModule):
         self.edit_config = self.mock_edit_config.start()
 
         self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.lldp_interfaces.lldp_interfaces.Lldp_interfacesFacts.get_lldp_facts"
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lldp_interfaces.lldp_interfaces."
+            "Lldp_interfacesFacts.get_device_data"
         )
         self.execute_show_command = self.mock_execute_show_command.start()
+
+        self.mock_execute_show_int_command = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lldp_interfaces.lldp_interfaces."
+            "Lldp_interfacesFacts.get_int_brief"
+        )
+        self.execute_show_int_command = self.mock_execute_show_int_command.start()
 
     def tearDown(self):
         super(TestAwplusLldpGlobalModule, self).tearDown()
@@ -69,33 +76,7 @@ class TestAwplusLldpGlobalModule(TestAwplusModule):
             return load_fixture("awplus_lldp_interfaces.cfg")
 
         self.execute_show_command.side_effect = load_from_file
-
-    def test_awplus_lldp_interfaces_default(self):
-        set_module_args(
-            dict(
-                config=[
-                    dict(
-                        name="port1.0.2",
-                        receive=False,
-                        med_tlv_select=dict(location=True),
-                        tlv_select=dict(vlan_names=True),
-                    )
-                ]
-            )
-        )
-        commands = [
-            "interface port1.0.2",
-            "no lldp receive",
-            "lldp med-tlv-select location",
-            "lldp tlv-select vlan-names",
-        ]
-        self.execute_module(changed=True, commands=commands)
-
-    def test_awplus_lldp_interfaces_default_idempotent(self):
-        set_module_args(
-            dict(config=[dict(name="port1.0.2", receive=True, transmit=True)])
-        )
-        self.execute_module(changed=False, commands=[])
+        self.execute_show_int_command.return_value = ["port1.0.1", "port1.0.2", "port1.0.3", "port1.0.4"]
 
     def test_awplus_lldp_interfaces_merged(self):
         set_module_args(
@@ -103,8 +84,8 @@ class TestAwplusLldpGlobalModule(TestAwplusModule):
                 config=[
                     dict(
                         name="port1.0.2",
-                        receive=False,
-                        med_tlv_select=dict(network_policy=True),
+                        receive=True,
+                        med_tlv_select=dict(network_policy=False),
                         tlv_select=dict(protocol_ids=True),
                     )
                 ],
@@ -113,16 +94,16 @@ class TestAwplusLldpGlobalModule(TestAwplusModule):
         )
         commands = [
             "interface port1.0.2",
-            "no lldp receive",
-            "lldp med-tlv-select network-policy",
+            "lldp receive",
             "lldp tlv-select protocol-ids",
+            "no lldp med-tlv-select network-policy",
         ]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_lldp_interfaces_merged_idempotent(self):
         set_module_args(
             dict(
-                config=[dict(name="port1.0.2", receive=True, transmit=True)],
+                config=[dict(name="port1.0.2", receive=False, transmit=False)],
                 state="merged",
             )
         )
@@ -136,7 +117,7 @@ class TestAwplusLldpGlobalModule(TestAwplusModule):
                         name="port1.0.3",
                         transmit=False,
                         receive=True,
-                        med_tlv_select=dict(network_policy=True),
+                        med_tlv_select=dict(network_policy=False),
                         tlv_select=dict(protocol_ids=True),
                     )
                 ],
@@ -146,15 +127,17 @@ class TestAwplusLldpGlobalModule(TestAwplusModule):
         commands = [
             "interface port1.0.3",
             "no lldp transmit",
-            "lldp med-tlv-select network-policy",
+            "lldp receive",
+            "no lldp med-tlv-select network-policy",
             "lldp tlv-select protocol-ids",
+            "no lldp tlv-select link-aggregation",
         ]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_lldp_interfaces_replaced_idempotent(self):
         set_module_args(
             dict(
-                config=[dict(name="port1.0.2", receive=True, transmit=True)],
+                config=[dict(name="port1.0.3", receive=False, tlv_select=dict(link_aggregation=True))],
                 state="replaced",
             )
         )
@@ -165,7 +148,7 @@ class TestAwplusLldpGlobalModule(TestAwplusModule):
             dict(
                 config=[
                     dict(name="port1.0.1", transmit=True, receive=True),
-                    dict(name="port1.0.2", transmit=True, receive=True),
+                    dict(name="port1.0.2", transmit=False, receive=False),
                     dict(name="port1.0.3"),
                     dict(
                         name="port1.0.4",
@@ -178,13 +161,17 @@ class TestAwplusLldpGlobalModule(TestAwplusModule):
             )
         )
         commands = [
+            "interface port1.0.2",
+            "no lldp med-tlv-select inventory-management",
+            "lldp med-tlv-select location",
+            "no lldp tlv-select link-aggregation",
+            "no lldp tlv-select mac-phy-config",
+            "no lldp tlv-select management-address",
             "interface port1.0.3",
-            "no lldp receive",
-            "no lldp transmit",
+            "lldp receive",
+            "no lldp tlv-select link-aggregation",
             "interface port1.0.4",
             "no lldp transmit",
-            "no lldp receive",
-            "lldp med-tlv-select network-policy",
             "lldp tlv-select protocol-ids",
         ]
         self.execute_module(changed=True, commands=commands)
@@ -193,10 +180,14 @@ class TestAwplusLldpGlobalModule(TestAwplusModule):
         set_module_args(
             dict(
                 config=[
-                    dict(name="port1.0.1", receive=True, transmit=True),
-                    dict(name="port1.0.2", receive=True, transmit=True),
-                    dict(name="port1.0.3", receive=True, transmit=True),
-                    dict(name="port1.0.4", receive=True, transmit=True),
+                    dict(
+                        name="port1.0.2",
+                        receive=False,
+                        transmit=False,
+                        med_tlv_select=dict(inventory_management=True, location=False),
+                        tlv_select=dict(management_address=True, mac_phy_config=True, link_aggregation=True),
+                    ),
+                    dict(name="port1.0.3", receive=False, tlv_select=dict(link_aggregation=True)),
                 ],
                 state="overridden",
             )
@@ -204,6 +195,10 @@ class TestAwplusLldpGlobalModule(TestAwplusModule):
         self.execute_module(changed=False, commands=[])
 
     def test_awplus_lldp_interfaces_deleted(self):
-        set_module_args(dict(config=[dict(name="port1.0.2")], state="deleted"))
-        commands = ["interface port1.0.2", "no lldp receive", "no lldp transmit"]
+        set_module_args(dict(config=[dict(name="port1.0.3")], state="deleted"))
+        commands = [
+            "interface port1.0.3",
+            "lldp receive",
+            "no lldp tlv-select link-aggregation",
+        ]
         self.execute_module(changed=True, commands=commands)
