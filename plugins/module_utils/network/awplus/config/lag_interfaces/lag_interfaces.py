@@ -154,11 +154,38 @@ class Lag_interfaces(ConfigBase):
         :returns: the commands necessary to remove the current configuration
                   of the provided objects
         """
-        by_member, want_groups, have_groups = self.conf_by_member(have, want)
-        if by_member is None:
-            return []
+        cmds = []
+        delete_ports = []
 
-        return self.gen_commands(by_member, want_groups, delete=True)
+        if want is not None:
+            # Get dict by ports of current group {"port1.1.1": "33"}
+            current_ports = {}
+            for h_group in have:
+                h_name = h_group.get("name")
+                for member in h_group.get("members"):
+                    current_ports[member.get("member")] = h_name
+
+            # Go through groups we want to delete
+            for w_group in want:
+                w_name = w_group.get("name")
+                w_members = w_group.get("members")
+                if w_members is None or len(w_members) == 0:
+                    for port in current_ports:
+                        if current_ports[port] == w_name:
+                            delete_ports.append(port)
+                else:
+                    for member in w_members:
+                        w_port = member.get("member")
+                        if w_port in current_ports and current_ports[w_port] == w_name:
+                            delete_ports.append(w_port)
+                        else:
+                            self._module.fail_json(msg="trying to delete port not in group")
+
+        # Now have list of ports to delete, do it.
+        for port in delete_ports:
+            cmds.append("interface {}".format(port))
+            cmds.append("no channel-group")
+        return cmds
 
     def conf_by_member(self, have, want):
         """ Return a dictionary of have and want indexed by member port. This
@@ -178,26 +205,26 @@ class Lag_interfaces(ConfigBase):
                     self._module.fail_json(msg="duplicate port in current config")
                     return None, None, None
                 ret_member[port] = {"have": {"group": group.get("name"), "mode": member.get("mode")}}
-        for group in want:
-            ret_want_group.append(group.get("name"))
-            if group.get("members"):
-                for member in group.get("members"):
-                    port = member.get("member")
-                    if port not in ret_member:
-                        ret_member[port] = {"want": {"group": group.get("name"), "mode": member.get("mode")}}
-                    else:
-                        if "want" in ret_member[port]:
-                            self._module.fail_json(msg="duplicate port in desired config")
-                            return None, None, None
-                        ret_member[port].update({"want": {"group": group.get("name"), "mode": member.get("mode")}})
+        if want is not None:
+            for group in want:
+                ret_want_group.append(group.get("name"))
+                if group.get("members"):
+                    for member in group.get("members"):
+                        port = member.get("member")
+                        if port not in ret_member:
+                            ret_member[port] = {"want": {"group": group.get("name"), "mode": member.get("mode")}}
+                        else:
+                            if "want" in ret_member[port]:
+                                self._module.fail_json(msg="duplicate port in desired config")
+                                return None, None, None
+                            ret_member[port].update({"want": {"group": group.get("name"), "mode": member.get("mode")}})
         return ret_member, ret_want_group, ret_have_group
 
-    def gen_commands(self, by_member, want_groups, merge=False, delete=False):
-        """ Generate commands for interfaces, for groups in the list.
+    def gen_commands(self, by_member, want_groups, merge=False):
+        """ Generate commands for interfaces, for groups in the list. Not called for state == deleted.
         :param: by_member: dictionary of have/want by member port.
         :param: want_groups: list of groups for which to apply config
-        :param: merge: is this a replace/override or merge?
-        :param: delete: is this a delete?
+        :param: merge: is this a replace/override or is it a merge?
         :rtype: list
         :returns: List of commands required to get to desired result
         """
@@ -210,16 +237,13 @@ class Lag_interfaces(ConfigBase):
             w_group = w.get("group") if w else None
             h_mode = h.get("mode") if h else None
             w_mode = w.get("mode") if w else None
-            changed = h_group != w_group or h_mode != w_mode
-            if not delete:
-                if w_group in want_groups or (w is None and h_group in want_groups):
-                    if changed:
-                        cmds.append("interface {}".format(port_name))
-                        if h and ((not w and not merge) or (w and h_group != w_group)):
-                            cmds.append("no channel-group")
-                        if w and (not h or h_mode != w_mode or h_group != w_group):
-                            cmds.append("channel-group {} mode {}".format(w_group, w_mode))
-            elif h_group == w_group and w_group in want_groups:
-                cmds.append("interface {}".format(port_name))
-                cmds.append("no channel-group")
+            if w_group in want_groups or (w is None and h_group in want_groups):
+                pcmds = []
+                if h and ((not w and not merge) or (w and h_group != w_group)):
+                    pcmds.append("no channel-group")
+                if w and (not h or h_mode != w_mode or h_group != w_group):
+                    pcmds.append("channel-group {} mode {}".format(w_group, w_mode))
+                if len(pcmds) > 0:
+                    cmds.append("interface {}".format(port_name))
+                    cmds.extend(pcmds)
         return cmds

@@ -1,0 +1,515 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags:
+        - test_init
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: active
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.3
+                mode: passive
+          - name: "66"
+            members:
+              - member: port1.1.4
+                mode: active
+              - member: port1.1.5
+                mode: passive
+              - member: port1.1.6
+                mode: passive
+        state: overridden
+
+    - name: Override test - add new port
+      tags:
+        - override1
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: active
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.3
+                mode: passive
+              - member: port1.1.8
+                mode: passive
+          - name: "66"
+            members:
+              - member: port1.1.4
+                mode: active
+              - member: port1.1.5
+                mode: passive
+              - member: port1.1.6
+                mode: passive
+        state: overridden
+
+    - name: Override test - add port from group 55
+      tags:
+        - override2
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: active
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.3
+                mode: passive
+              - member: port1.1.4
+                mode: active
+          - name: "66"
+            members:
+              - member: port1.1.5
+                mode: passive
+              - member: port1.1.6
+                mode: passive
+        state: overridden
+
+    - name: Override test - change mode for some ports
+      tags:
+        - override3
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: passive
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.3
+                mode: passive
+          - name: "66"
+            members:
+              - member: port1.1.4
+                mode: passive
+              - member: port1.1.5
+                mode: active
+              - member: port1.1.6
+                mode: active
+        state: overridden
+
+
+    - name: Override test - add port, change modes
+      tags:
+        - override4
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: passive
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.3
+                mode: passive
+              - member: port1.1.8
+                mode: passive
+          - name: "66"
+            members:
+              - member: port1.1.4
+                mode: active
+              - member: port1.1.5
+                mode: active
+              - member: port1.1.6
+                mode: passive
+        state: overridden
+
+    - name: Override test - move port, change modes
+      tags:
+        - override5
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: active
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.3
+                mode: passive
+              - member: port1.1.4
+                mode: passive
+          - name: "66"
+            members:
+              - member: port1.1.5
+                mode: active
+              - member: port1.1.6
+                mode: passive
+        state: overridden
+
+    - name: Override test - swap ports
+      tags:
+        - override6
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: active
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.4
+                mode: passive
+          - name: "66"
+            members:
+              - member: port1.1.3
+                mode: active
+              - member: port1.1.5
+                mode: passive
+              - member: port1.1.6
+                mode: passive
+        state: overridden
+
+    - name: Override test - swap ports, change modes
+      tags:
+        - override7
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: active
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.4
+                mode: passive
+          - name: "66"
+            members:
+              - member: port1.1.3
+                mode: active
+              - member: port1.1.5
+                mode: active
+              - member: port1.1.6
+                mode: passive
+        state: overridden
+
+
+    - name: Override test - wipe out everything
+      tags:
+        - override8
+      awplus_lag_interfaces:
+        config:
+        state: overridden
+
+    - name: Merge test - do nothing
+      tags:
+        - merge0
+      awplus_lag_interfaces:
+        config:
+        state: merged
+
+    - name: Merge test - add new port
+      tags:
+        - merge1
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.8
+                mode: active
+        state: merged
+
+    - name: Merge test - add port from group 55
+      tags:
+        - merge2
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.4
+                mode: passive
+        state: merged
+
+    - name: Merge test - mode change
+      tags:
+        - merge3
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: passive
+        state: merged
+
+    - name: Merge test - mode change, add new port
+      tags:
+        - merge4
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: passive
+              - member: port1.1.8
+                mode: active
+        state: merged
+
+    - name: Merge test - mode change, move port
+      tags:
+        - merge5
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: passive
+              - member: port1.1.4
+                mode: passive
+        state: merged
+
+    - name: Merge test - swap ports
+      tags:
+        - merge6
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.4
+                mode: active
+          - name: "66"
+            members:
+              - member: port1.1.1
+                mode: active
+        state: merged
+
+    - name: Merge test - swap ports, change modes
+      tags:
+        - merge7
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.5
+                mode: active
+          - name: "66"
+            members:
+              - member: port1.1.2
+                mode: active
+        state: merged
+
+    - name: Replace test - do nothing
+      tags:
+        - replace0
+      awplus_lag_interfaces:
+        config:
+        state: replaced
+
+    - name: Replace test - add new port
+      tags:
+        - replace1
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: active
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.3
+                mode: passive
+              - member: port1.1.8
+                mode: passive
+        state: replaced
+
+    - name: Replace test - add port from group 55
+      tags:
+        - replace2
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: active
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.3
+                mode: passive
+              - member: port1.1.4
+                mode: active
+        state: replaced
+
+    - name: Replace test - modes changes
+      tags:
+        - replace3
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: passive
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.3
+                mode: active
+          - name: "66"
+            members:
+              - member: port1.1.4
+                mode: passive
+              - member: port1.1.5
+                mode: active
+              - member: port1.1.6
+                mode: passive
+        state: replaced
+
+    - name: Replace test - mode change, add new port
+      tags:
+        - replace4
+      awplus_lag_interfaces:
+        config:
+          - name: "66"
+            members:
+              - member: port1.1.4
+                mode: active
+              - member: port1.1.5
+                mode: passive
+              - member: port1.1.6
+                mode: active
+              - member: port1.1.8
+                mode: passive
+        state: replaced
+
+    - name: Replace test - mode change, move port
+      tags:
+        - replace5
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: active
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.3
+                mode: active
+              - member: port1.1.4
+                mode: active
+        state: replaced
+
+    - name: Replace test - swap ports
+      tags:
+        - replace6
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: active
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.4
+                mode: active
+          - name: "66"
+            members:
+              - member: port1.1.3
+                mode: passive
+              - member: port1.1.5
+                mode: passive
+              - member: port1.1.6
+                mode: passive
+        state: replaced
+
+    - name: Replace test - swap ports, change mode
+      tags:
+        - replace7
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.3
+                mode: passive
+              - member: port1.1.5
+                mode: active
+          - name: "66"
+            members:
+              - member: port1.1.1
+                mode: passive
+              - member: port1.1.4
+                mode: active
+              - member: port1.1.6
+                mode: passive
+        state: replaced
+
+    - name: Replace test - whole group replaced with nothing
+      tags:
+        - replace8
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+        state: replaced
+
+    - name: Delete test - do nothing
+      tags:
+        - delete0
+      awplus_lag_interfaces:
+        config:
+        state: deleted
+
+    - name: Delete test - delete one port
+      tags:
+        - delete1
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: active
+        state: deleted
+
+    - name: Delete test - delete all ports
+      tags:
+        - delete2
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: active
+              - member: port1.1.2
+                mode: active
+              - member: port1.1.3
+                mode: passive
+          - name: "66"
+            members:
+              - member: port1.1.4
+                mode: active
+              - member: port1.1.5
+                mode: passive
+              - member: port1.1.6
+                mode: passive
+        state: deleted
+
+    - name: Delete test - two groups
+      tags:
+        - delete3
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+              - member: port1.1.1
+                mode: active
+          - name: "66"
+            members:
+              - member: port1.1.4
+                mode: active
+        state: deleted
+
+    - name: Delete test - whole group
+      tags:
+        - delete4
+      awplus_lag_interfaces:
+        config:
+          - name: "44"
+            members:
+        state: deleted
