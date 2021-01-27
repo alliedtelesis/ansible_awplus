@@ -294,7 +294,7 @@ EXAMPLES = """
 - name: Delete a given channel group
   awplus_lag_interfaces:
     config:
-      - name: 10
+      - name: 33
     operation: deleted
 
 # After state:
