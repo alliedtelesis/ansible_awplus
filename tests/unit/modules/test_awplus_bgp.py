@@ -33,80 +33,101 @@ class TestAwplusBgpModule(TestAwplusModule):
     def setUp(self):
         super(TestAwplusBgpModule, self).setUp()
 
-        self.mock_load_config = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_bgp.load_config"
-        )
-        self.load_config = self.mock_load_config.start()
-
         self.mock_get_config = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_bgp.get_config"
+            'ansible_collections.ansible.netcommon.plugins.module_utils.network.common.network.Config.get_config'
         )
         self.get_config = self.mock_get_config.start()
 
+        self.mock_load_config = patch(
+            'ansible_collections.ansible.netcommon.plugins.module_utils.network.common.network.Config.load_config'
+        )
+        self.load_config = self.mock_load_config.start()
+
+        self.mock_get_resource_connection_config = patch(
+            'ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base.get_resource_connection'
+        )
+        self.get_resource_connection_config = self.mock_get_resource_connection_config.start()
+
+        self.mock_get_resource_connection_facts = patch(
+            'ansible_collections.ansible.netcommon.plugins.module_utils.network.common.facts.facts.get_resource_connection'
+        )
+        self.get_resource_connection_facts = self.mock_get_resource_connection_facts.start()
+
+        self.mock_edit_config = patch(
+            'ansible_collections.alliedtelesis.awplus.plugins.module_utils.providers.providers.CliProvider.edit_config'
+        )
+        self.edit_config = self.mock_edit_config.start()
+
+        self.mock_execute_show_command = patch(
+            'ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.bgp.bgp.BgpFacts.get_device_data'
+        )
+        self.execute_show_command = self.mock_execute_show_command.start()
+
     def tearDown(self):
         super(TestAwplusBgpModule, self).tearDown()
-        self.mock_load_config.stop()
+        self.mock_get_resource_connection_config.stop()
+        self.mock_get_resource_connection_facts.stop()
+        self.mock_edit_config.stop()
         self.mock_get_config.stop()
+        self.mock_load_config.stop()
+        self.mock_execute_show_command.stop()
 
-    def load_fixtures(self, commands=None, device=""):
-        self.get_config.return_value = load_fixture("awplus_bgp_config.cfg")
-        self.load_config.return_value = []
+    def load_fixtures(self, commands=None, transport='cli'):
+        def load_from_file(*args, **kwargs):
+            return load_fixture('awplus_bgp_config.cfg')
 
-    def test_awplus_bgp(self):
-        set_module_args(dict(asn=100, router_id="192.0.2.2"))
-        result = self.execute_module(changed=True)
-        self.assertEqual(
-            result["commands"], ["router bgp 100", "bgp router-id 192.0.2.2"]
-        )
+        self.execute_show_command.side_effect = load_from_file
 
-    def test_awplus_bgp_change_nothing(self):
-        set_module_args(dict(asn=100, router_id="192.0.2.1", state="present"))
+    def test_awplus_bgp_merged(self):
+        set_module_args(dict(config=dict(bgp_as=100, router_id='192.0.2.2'), state='merged'))
+        commands = ['router bgp 100', 'bgp router-id 192.0.2.2']
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_bgp_merged_idempotent(self):
+        set_module_args(dict(config=dict(bgp_as=100, router_id='1.2.3.4'), state='merged'))
         self.execute_module(changed=False)
 
-    def test_awplus_bgp_wrong_asn(self):
-        set_module_args(dict(asn=10, router_id="192.168.1.1"))
-        result = self.execute_module(failed=True)
-        self.assertEqual(result["msg"], "Another BGP ASN already exists.")
+    def test_awplus_bgp_add_neighbor(self):
+        set_module_args(dict(config=dict(bgp_as=100, neighbors=[dict(
+            neighbor='1.2.2.2', remote_as=3)]), state='merged'))
+        commands = ['router bgp 100', 'neighbor 1.2.2.2 remote-as 3']
+        self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_bgp_remove(self):
-        set_module_args(dict(asn=100, state="absent"))
-        self.execute_module(changed=True, commands=["no router bgp 100"])
+    def test_awplus_bgp_add_network(self):
+        set_module_args(dict(config=dict(bgp_as=100, networks=[dict(
+            prefix='4.2.2.2', route_map='map1')]), state='merged'))
+        commands = ['router bgp 100', 'network 4.2.2.2/32 route-map map1']
+        self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_bgp_remove_vrf(self):
-        set_module_args(dict(asn=100, vrf="red", state="absent"))
-        self.execute_module(
-            changed=True, commands=["router bgp 100", "no address-family ipv4 vrf red"]
-        )
+    def test_awplus_bgp_conf_existing_neighbor(self):
+        set_module_args(dict(config=dict(bgp_as=100, neighbors=[dict(
+            neighbor='1.1.1.1', remote_as=3, enabled=False)]), state='merged'))
+        commands = ['router bgp 100', 'neighbor 1.1.1.1 shutdown']
+        self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_bgp_remove_nonexistant_vrf(self):
-        set_module_args(dict(asn=100, vrf="foo", state="absent"))
+    def test_awplus_bgp_add_neighbor_to_af(self):
+        set_module_args(dict(config=dict(bgp_as=100, address_family=[dict(vrf='red', neighbors=[
+            dict(neighbor='2.3.3.3', remote_as=4, remove_private_as=True)])]), state='merged'))
+        commands = ['router bgp 100', 'address-family ipv4 vrf red',
+                    'neighbor 2.3.3.3 remote-as 4', 'neighbor 2.3.3.3 remove-private-as',
+                    'exit-address-family']
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_bgp_deleted(self):
+        set_module_args(dict(config=dict(bgp_as=100, router_id='1.2.3.4'), state='deleted'))
+        self.execute_module(changed=True, commands=['no router bgp 100'])
+
+    def test_awplus_bgp_replaced(self):
+        set_module_args(dict(config=dict(bgp_as=100, router_id='192.0.2.2'), state='replaced'))
+        commands = ['no router bgp 100', 'router bgp 100', 'bgp router-id 192.0.2.2']
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_bgp_replaced_idempotent(self):
+        set_module_args(dict(
+            config=dict(bgp_as=100, router_id='1.2.3.4',
+                        neighbors=[dict(neighbor='1.1.1.1', remote_as=3)],
+                        address_family=[dict(vrf='red',
+                                             networks=[dict(prefix='2.2.2.2', masklen=32, route_map='f')],
+                                             neighbors=[dict(neighbor='6.6.6.6', remote_as=3)])]),
+            state='merged'))
         self.execute_module(changed=False)
-
-    def test_awplus_bgp_remove_wrong_asn(self):
-        set_module_args(dict(asn=10, state="absent"))
-        self.execute_module(changed=False)
-
-    def test_awplus_bgp_vrf(self):
-        set_module_args(dict(asn=100, vrf="test", router_id="192.0.2.1"))
-        result = self.execute_module(failed=True)
-        self.assertEqual(result["msg"], "VRF test doesn't exist.")
-
-    def test_awplus_bgp_global_param(self):
-        set_module_args(dict(asn=100, confederation_id=16))
-        self.execute_module(
-            changed=True, commands=["router bgp 100", "bgp confederation identifier 16"]
-        )
-
-    def test_awplus_bgp_global_param_outside_default(self):
-        set_module_args(dict(asn=100, vrf="run", enforce_first_as=True))
-        result = self.execute_module(failed=True)
-        self.assertEqual(
-            result["msg"], 'Global params can be modified only under "default" VRF.'
-        )
-
-    def test_awplus_bgp_default_value(self):
-        set_module_args(dict(asn=100, graceful_restart_timers_restart="default"))
-        self.execute_module(
-            changed=True,
-            commands=["router bgp 100", "bgp graceful-restart restart-time 120"],
-        )
