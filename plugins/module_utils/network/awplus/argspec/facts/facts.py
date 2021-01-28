@@ -19,6 +19,7 @@ class FactsArgs(object):  # pylint: disable=R0903
         'all',
         'bgp',
         'l3_interfaces',
+        'l2_interfaces',
         'lacp'
         'lag_interfaces',
         'lldp_global',

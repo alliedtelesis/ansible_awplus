@@ -46,9 +46,14 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
         )
 
         self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.l2_interfaces.l2_interfaces.L2_interfacesFacts.get_device_data"
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l2_interfaces.l2_interfaces.L2_interfacesFacts.get_run_conf"
         )
         self.execute_show_command = self.mock_execute_show_command.start()
+
+        self.mock_execute_show_int_command = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l2_interfaces.l2_interfaces.L2_interfacesFacts.get_int_brief"
+        )
+        self.execute_show_int_command = self.mock_execute_show_int_command.start()
 
     def tearDown(self):
         super(TestAwplusL2InterfacesModule, self).tearDown()
@@ -57,12 +62,14 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
         self.mock_get_config.stop()
         self.mock_load_config.stop()
         self.mock_execute_show_command.stop()
+        self.mock_execute_show_int_command.stop()
 
     def load_fixtures(self, commands=None, transport="cli"):
         def load_from_file(*args, **kwargs):
             return load_fixture("awplus_l2_interfaces_config.cfg")
 
         self.execute_show_command.side_effect = load_from_file
+        self.execute_show_int_command.return_value = ["port1.0.1", "port1.0.2", "port1.0.3", "port1.0.4"]
 
     def test_awplus_l2_interfaces_merged(self):
         set_module_args(
@@ -79,6 +86,7 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
             "switchport mode trunk",
             "switchport trunk native vlan 2",
             "interface port1.0.4",
+            "switchport mode access",
             "switchport access vlan 2",
         ]
         self.execute_module(changed=True, commands=commands)
@@ -87,8 +95,8 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
         set_module_args(
             dict(
                 config=[
-                    dict(name="port1.0.2", access=dict(vlan=2)),
-                    dict(name="port1.0.3", access=dict(vlan=1),),
+                    dict(name="port1.0.1", access=dict(vlan=3)),
+                    dict(name="port1.0.2", trunk=dict(allowed_vlans=['2']),),
                 ],
                 state="merged",
             )
@@ -100,18 +108,18 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
             dict(
                 config=[
                     dict(name="port1.0.3", trunk=dict(native_vlan=2)),
-                    dict(name="port1.0.2", access=dict(vlan=1),),
+                    dict(name="port1.0.2", access=dict(vlan=4),),
                 ],
                 state="replaced",
             )
         )
         commands = [
             "interface port1.0.3",
-            "no switchport access vlan",
             "switchport mode trunk",
             "switchport trunk native vlan 2",
             "interface port1.0.2",
-            "switchport access vlan 1",
+            "switchport mode access",
+            "switchport access vlan 4",
         ]
         self.execute_module(changed=True, commands=commands)
 
@@ -119,8 +127,8 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
         set_module_args(
             dict(
                 config=[
-                    dict(name="port1.0.3", access=dict(vlan=1),),
-                    dict(name="port1.0.4", access=dict(vlan=1),),
+                    dict(name="port1.0.1", access=dict(vlan=3)),
+                    dict(name="port1.0.2", trunk=dict(allowed_vlans=['2']),),
                 ],
                 state="replaced",
             )
@@ -133,15 +141,18 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
                 config=[dict(name="port1.0.1", access=dict(vlan=1))], state="overridden"
             )
         )
-        commands = ["interface port1.0.2", "no switchport access vlan"]
+        commands = ["interface port1.0.1",
+                    "switchport access vlan 1",
+                    "interface port1.0.2",
+                    "no switchport trunk", ]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_l2_interfaces_overridden_idempotent(self):
         set_module_args(
             dict(
                 config=[
-                    dict(name="port1.0.2", access=dict(vlan=2)),
-                    dict(name="port1.0.1", access=dict(vlan=1),),
+                    dict(name="port1.0.1", access=dict(vlan=3)),
+                    dict(name="port1.0.2", trunk=dict(allowed_vlans=['2']),),
                 ],
                 state="overridden",
             )
@@ -150,5 +161,5 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
 
     def test_awplus_l2_interfaces_deleted(self):
         set_module_args(dict(config=[dict(name="port1.0.2",)], state="deleted"))
-        commands = ["interface port1.0.2", "no switchport access vlan"]
+        commands = ["interface port1.0.2", "no switchport trunk"]
         self.execute_module(changed=True, commands=commands)

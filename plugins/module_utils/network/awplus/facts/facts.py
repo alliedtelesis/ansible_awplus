@@ -15,6 +15,7 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.f
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.bgp.bgp import BgpFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l3_interfaces.l3_interfaces import L3_interfacesFacts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l2_interfaces.l2_interfaces import L2_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lacp.lacp import LacpFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lag_interfaces.lag_interfaces import Lag_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lldp_global.lldp_global import Lldp_globalFacts
@@ -28,6 +29,7 @@ FACT_LEGACY_SUBSETS = {}
 FACT_RESOURCE_SUBSETS = dict(
     bgp=BgpFacts,
     l3_interfaces=L3_interfacesFacts,
+    l2_interfaces=L2_interfacesFacts,
     lacp=LacpFacts,
     lag_interfaces=Lag_interfacesFacts,
     lldp_global=Lldp_globalFacts,
