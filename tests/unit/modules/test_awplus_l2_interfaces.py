@@ -141,11 +141,10 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
                 config=[dict(name="port1.0.1", access=dict(vlan=1))], state="overridden"
             )
         )
-        commands = ["interface port1.0.1", 
+        commands = ["interface port1.0.1",
                     "switchport access vlan 1",
-                    "interface port1.0.2", 
-                    "no switchport trunk",
-        ]
+                    "interface port1.0.2",
+                    "no switchport trunk", ]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_l2_interfaces_overridden_idempotent(self):
