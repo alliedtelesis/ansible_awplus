@@ -1,0 +1,402 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags:
+        - test_init
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 1
+            description: "Bob's network"
+            export_map: mape1
+            import_map: mapi1
+            max_fib_routes: 234
+            max_fib_routes_warning: 67
+            max_static_routes: 123
+            rd: "62345:1"
+            router_id: "2.2.2.2"
+          - name: "bill"
+            id: 2
+            description: "Bill's network"
+            route_target:
+              - target: "62345:2"
+                direction: "import"
+              - target: "62345:3"
+                direction: "export"
+              - target: "62345:4"
+                direction: "both"
+            export_map: mape2
+            import_map: mapi2
+            max_fib_routes: 345
+            max_static_routes: 234
+            rd: "62345:4"
+            router_id: "2.2.2.3"
+        state: overridden
+
+    - name: Override test - invalid name/id combination 1
+      tags:
+        - override_err1
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 1
+          - name: "bob"
+            id: 2
+        state: overridden
+
+    - name: Override test - invalid name/id combination 2
+      tags:
+        - override_err2
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 1
+          - name: "bill"
+            id: 1
+        state: overridden
+
+    - name: Override test - change rd, delete a VRF, change route targets
+      tags:
+        - override1
+      awplus_vrfs:
+        config:
+          - name: "bill"
+            id: 2
+            description: "Bill's network"
+            route_target:
+              - target: "62345:2"
+                direction: "both"
+            export_map: mape2
+            import_map: mapi2
+            max_fib_routes: 345
+            max_static_routes: 234
+            rd: "62345:5"
+            router_id: "2.2.2.3"
+        state: overridden
+
+    - name: Override test - wipe out all VRFs
+      tags:
+        - override2
+      awplus_vrfs:
+        config:
+        state: overridden
+
+    - name: Merge test - invalid name/id combination 1
+      tags:
+        - merge_err1
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 1
+          - name: "bob"
+            id: 2
+        state: merged
+
+    - name: Merge test - invalid name/id combination 2
+      tags:
+        - merge_err2
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 1
+          - name: "bill"
+            id: 1
+        state: merged
+
+    - name: Merge test - invalid name/id combination 3
+      tags:
+        - merge_err3
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 2
+        state: merged
+
+    - name: Merge test - invalid name/id combination 4
+      tags:
+        - merge_err4
+      awplus_vrfs:
+        config:
+          - name: "bill"
+            id: 1
+        state: merged
+
+    - name: Merge test - invalid name/id combination 5
+      tags:
+        - merge_err5
+      awplus_vrfs:
+        config:
+          - name: "fred"
+            id: 1
+        state: merged
+
+    - name: Merge test - invalid name/id combination 6
+      tags:
+        - merge_err6
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 3
+        state: merged
+
+    - name: Merge test - do nothing
+      tags:
+        - merge0
+      awplus_vrfs:
+        config:
+        state: merged
+
+    - name: Merge test - change rd for bob
+      tags:
+        - merge1
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 1
+            rd: "62345:2"
+        state: merged
+
+    - name: Merge test - change rd for bill
+      tags:
+        - merge2
+      awplus_vrfs:
+        config:
+          - name: "bill"
+            id: 2
+            rd: "62345:2"
+        state: merged
+
+    - name: Merge test - change some parameters
+      tags:
+        - merge3
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 1
+            description: "Bob's new network"
+            import_map: mapi4
+        state: merged
+
+    - name: Merge test - change rd and description
+      tags:
+        - merge4
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 1
+            description: "Bob's new network"
+            rd: "62345:6"
+        state: merged
+
+    - name: Merge test - route_target - all import
+      tags:
+        - merge5
+      awplus_vrfs:
+        config:
+          - name: "bill"
+            id: 2
+            route_target:
+              - target: "62345:2"
+                direction: "import"
+              - target: "62345:3"
+                direction: "import"
+              - target: "62345:4"
+                direction: "import"
+        state: merged
+
+    - name: Merge test - route_target - all export
+      tags:
+        - merge6
+      awplus_vrfs:
+        config:
+          - name: "bill"
+            id: 2
+            route_target:
+              - target: "62345:2"
+                direction: "export"
+              - target: "62345:3"
+                direction: "export"
+              - target: "62345:4"
+                direction: "export"
+        state: merged
+
+    - name: Merge test - route_target - all both
+      tags:
+        - merge7
+      awplus_vrfs:
+        config:
+          - name: "bill"
+            id: 2
+            route_target:
+              - target: "62345:2"
+                direction: "both"
+              - target: "62345:3"
+                direction: "both"
+              - target: "62345:4"
+                direction: "both"
+        state: merged
+
+    - name: Merge test - route_target - one both
+      tags:
+        - merge8
+      awplus_vrfs:
+        config:
+          - name: "bill"
+            id: 2
+            route_target:
+              - target: "62345:2"
+                direction: "both"
+        state: merged
+
+    - name: Merge test - route_target - one import
+      tags:
+        - merge9
+      awplus_vrfs:
+        config:
+          - name: "bill"
+            id: 2
+            route_target:
+              - target: "62345:4"
+                direction: "import"
+        state: merged
+
+    - name: Merge test - route_target - one export
+      tags:
+        - merge10
+      awplus_vrfs:
+        config:
+          - name: "bill"
+            id: 2
+            route_target:
+              - target: "62345:2"
+                direction: "export"
+        state: merged
+
+    - name: Merge test - route_target and rd change
+      tags:
+        - merge11
+      awplus_vrfs:
+        config:
+          - name: "bill"
+            id: 2
+            route_target:
+              - target: "62345:2"
+                direction: "export"
+            rd: "62345:6"
+        state: merged
+
+    - name: Merge test - new route_target
+      tags:
+        - merge12
+      awplus_vrfs:
+        config:
+          - name: "bill"
+            id: 2
+            route_target:
+              - target: "62345:5"
+                direction: "export"
+        state: merged
+
+    - name: Replace test - invalid name/id combination 1
+      tags:
+        - replace_err1
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 1
+          - name: "bob"
+            id: 2
+        state: replaced
+
+    - name: Replace test - invalid name/id combination 2
+      tags:
+        - replace_err2
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 1
+          - name: "bill"
+            id: 1
+        state: replaced
+
+    - name: Replace test - invalid name/id combination 3
+      tags:
+        - replace_err3
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 2
+        state: replaced
+
+    - name: Replace test - invalid name/id combination 4
+      tags:
+        - replace_err4
+      awplus_vrfs:
+        config:
+          - name: "bill"
+            id: 1
+        state: replaced
+
+    - name: Replace test - invalid name/id combination 5
+      tags:
+        - replace_err5
+      awplus_vrfs:
+        config:
+          - name: "fred"
+            id: 1
+        state: replaced
+
+    - name: Replace test - invalid name/id combination 6
+      tags:
+        - replace_err6
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 3
+        state: replaced
+
+    - name: Replace test - do nothing
+      tags:
+        - replace0
+      awplus_vrfs:
+        config:
+        state: replaced
+
+    - name: Replace test - change one instance only, including rd
+      tags:
+        - replace1
+      awplus_vrfs:
+        config:
+          - name: "bill"
+            id: 2
+            description: "Bill's network"
+            route_target:
+              - target: "62345:2"
+                direction: "both"
+            export_map: mape2
+            import_map: mapi2
+            max_fib_routes: 345
+            max_static_routes: 234
+            rd: "62345:5"
+            router_id: "2.2.2.3"
+        state: replaced
+
+    - name: Delete test - do nothing
+      tags:
+        - delete0
+      awplus_vrfs:
+        config:
+        state: deleted
+
+    - name: Delete test - delete one vrf
+      tags:
+        - delete1
+      awplus_vrfs:
+        config:
+          - name: "bob"
+            id: 1
+        state: deleted

@@ -25,6 +25,7 @@ class FactsArgs(object):  # pylint: disable=R0903
         'lldp_global',
         'static_lag_interfaces',
         'lldp_interfaces',
+        'vrfs',
     ]
 
     argument_spec = {
