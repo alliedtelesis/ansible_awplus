@@ -140,7 +140,7 @@ class L2_interfaces(ConfigBase):
                 have_dict = have[name]
                 diff = dict_diff(want_dict, have_dict)
                 commands.extend(_clear_config(name, want_dict, diff))
-                commands.extend(_set_config(name, want_dict, have_dict))
+                commands.extend(_set_config(name, want_dict, have_dict, self._module))
 
         return remove_duplicate_interface(commands)
 
@@ -176,7 +176,7 @@ class L2_interfaces(ConfigBase):
         for name, want_dict in iteritems(want):
             if name in have:
                 have_dict = have[name]
-                commands.extend(_set_config(name, want_dict, have_dict))
+                commands.extend(_set_config(name, want_dict, have_dict, self._module))
 
         return commands
 
@@ -202,29 +202,30 @@ class L2_interfaces(ConfigBase):
         return commands
 
 
-def _set_config(name, want, have):
+def _set_config(name, want, have, module):
     commands = []
 
     diff = dict_diff(have, want)
+    if diff.get('trunk') and diff.get('access'):
+        module.fail_json(msg='Interface should either be trunk or access')
 
-    for key, value in iteritems(diff):
-        if value is None:
-            continue
+    if diff.get('access'):
+        value = diff['access']
+        if not have.get('access'):
+            commands.append('switchport mode access')
+        if value['vlan'] != have.get('access', {}).get('vlan'):
+            commands.append('switchport access vlan {}'.format(value['vlan']))
 
-        if key == 'access':
-            if not have.get('access'):
-                commands.append('switchport mode access')
-            if value['vlan'] != have.get('access', {}).get('vlan'):
-                commands.append('switchport access vlan {}'.format(value['vlan']))
-        elif key == 'trunk':
-            if not have.get('trunk'):
-                commands.append('switchport mode trunk')
-            if value.get('native_vlan') and value.get('native_vlan') != have.get('trunk', {}).get('native_vlan'):
-                commands.append('switchport trunk native vlan {}'.format(value['native_vlan']))
-            if value.get('allowed_vlans'):
-                for vlan in value.get('allowed_vlans'):
-                    if vlan not in have.get('trunk', {}).get('allowed_vlans', []):
-                        commands.append('switchport trunk allowed vlan add {}'.format(vlan))
+    elif diff.get('trunk'):
+        value = diff['trunk']
+        if not have.get('trunk'):
+            commands.append('switchport mode trunk')
+        if value.get('allowed_vlans'):
+            for vlan in value.get('allowed_vlans'):
+                if vlan not in have.get('trunk', {}).get('allowed_vlans', []):
+                    commands.append('switchport trunk allowed vlan add {}'.format(vlan))
+        if value.get('native_vlan') and value.get('native_vlan') != have.get('trunk', {}).get('native_vlan'):
+            commands.append('switchport trunk native vlan {}'.format(value['native_vlan']))
 
     if commands:
         commands.insert(0, 'interface {}'.format(name))
