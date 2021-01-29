@@ -32,38 +32,81 @@ class TestAwplusBannerModule(TestAwplusModule):
         super(TestAwplusBannerModule, self).setUp()
 
         self.mock_get_config = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_banner.get_config"
+            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.network.Config.get_config"
         )
         self.get_config = self.mock_get_config.start()
 
         self.mock_load_config = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_banner.load_config"
+            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.network.Config.load_config"
         )
         self.load_config = self.mock_load_config.start()
 
+        self.mock_get_resource_connection_config = patch(
+            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base.get_resource_connection"
+        )
+        self.get_resource_connection_config = (
+            self.mock_get_resource_connection_config.start()
+        )
+
+        self.mock_get_resource_connection_facts = patch(
+            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.facts.facts.get_resource_connection"
+        )
+        self.get_resource_connection_facts = (
+            self.mock_get_resource_connection_facts.start()
+        )
+
+        self.mock_edit_config = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.providers.providers.CliProvider.edit_config"
+        )
+        self.edit_config = self.mock_edit_config.start()
+
+        self.mock_execute_show_command = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.banner.banner.BannerFacts.get_run_conf"
+        )
+        self.execute_show_command = self.mock_execute_show_command.start()
+
     def tearDown(self):
         super(TestAwplusBannerModule, self).tearDown()
+        self.mock_get_resource_connection_config.stop()
+        self.mock_get_resource_connection_facts.stop()
+        self.mock_edit_config.stop()
         self.mock_get_config.stop()
         self.mock_load_config.stop()
+        self.mock_execute_show_command.stop()
 
     def load_fixtures(self, commands=None):
         def load_from_file(*args, **kwargs):
-            return load_fixture("awplus_banner_show_running_config_awplus.txt")
+            return load_fixture("awplus_banner_config.cfg")
 
-        self.get_config.side_effect = load_from_file
+        self.execute_show_command.side_effect = load_from_file
 
-    def test_awplus_banner_create(self):
+    def test_awplus_banner_merged(self):
         for banner_type in ("motd", "exec"):
-            set_module_args(dict(banner=banner_type, text="test\nbanner\nstring"))
-            commands = ["banner {0} test\nbanner\nstring".format(banner_type)]
+            set_module_args(dict(config=[dict(banner=banner_type, text="test banner string")]))
+            commands = ["banner {0} test banner string".format(banner_type)]
             self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_banner_remove(self):
-        set_module_args(dict(banner="exec", state="absent"))
-        commands = ["no banner exec"]
+    def test_awplus_banner_replaced(self):
+        set_module_args(dict(config=[dict(banner='motd', text="hi")], state='replaced'))
+        commands = ["banner exec default", "banner motd hi"]
         self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_banner_nochange(self):
-        banner_text = load_fixture("awplus_banner_show_banner.txt")
-        set_module_args(dict(banner="exec", text=banner_text))
-        self.execute_module()
+    def test_awplus_banner_deleted(self):
+        set_module_args(dict(config=[dict(banner='exec')], state='deleted'))
+        commands = ["banner exec default"]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_banner_delete_no_config(self):
+        set_module_args(dict(state='deleted'))
+        commands = ["banner exec default"]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_banner_delete_idempotent(self):
+        set_module_args(dict(config=[dict(banner='motd')], state='deleted'))
+        commands = []
+        self.execute_module(changed=False, commands=commands)
+
+    def test_awplus_banner_idempotent(self):
+        for state in ("merged", "replaced"):
+            set_module_args(dict(config=[dict(banner='exec', text="hello peeps")], state=state))
+            self.execute_module(changed=False, commands=[])
