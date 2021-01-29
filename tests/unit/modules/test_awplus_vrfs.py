@@ -33,20 +33,6 @@ class TestAwplusVrfsModule(TestAwplusModule):
     def setUp(self):
         super(TestAwplusVrfsModule, self).setUp()
 
-        #self.mock_get_config = patch(
-        #    "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_vrf.get_config"
-        #)
-        #self.get_config = self.mock_get_config.start()
-
-        #self.mock_load_config = patch(
-        #    "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_vrf.load_config"
-        #)
-        #self.load_config = self.mock_load_config.start()
-
-        #self.mock_run_commands = patch(
-        #    "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_vrf.get_intf_info"
-        #)
-        #self.run_commands = self.mock_run_commands.start()
         self.mock_get_resource_connection_config = patch(
             "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base.get_resource_connection"
         )
@@ -73,22 +59,13 @@ class TestAwplusVrfsModule(TestAwplusModule):
 
     def tearDown(self):
         super(TestAwplusVrfsModule, self).tearDown()
-        #self.mock_get_config.stop()
-        #self.mock_load_config.stop()
-        #self.mock_run_commands.stop()
+
         self.mock_get_resource_connection_config.stop()
         self.mock_get_resource_connection_facts.stop()
         self.mock_edit_config.stop()
         self.mock_get_data.stop()
 
     def load_fixtures(self, commands=None, transport="cli"):
-        #self.get_config.return_value = load_fixture("awplus_vrf_config.cfg")
-        #self.load_config.return_value = None
-
-        #def load_from_file(*args, **kwargs):
-        #    return load_fixture("awplus_vrf_intf.cfg")
-
-        #self.run_commands.side_effect = load_from_file
         self.get_data.return_value = load_fixture("awplus_vrf_config.cfg")
 
     def test_awplus_vrf_name(self):
@@ -96,7 +73,7 @@ class TestAwplusVrfsModule(TestAwplusModule):
         '''
         set_module_args(
             dict(
-                config = [{"name": "test_4", "id": "3"}],
+                config=[{"name": "test_4", "id": "3"}],
                 state="merged",
             )
         )
