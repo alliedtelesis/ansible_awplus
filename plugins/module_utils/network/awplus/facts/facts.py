@@ -13,6 +13,7 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplu
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.facts.facts import (
     FactsBase,
 )
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.banner.banner import BannerFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.bgp.bgp import BgpFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l3_interfaces.l3_interfaces import L3_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l2_interfaces.l2_interfaces import L2_interfacesFacts
@@ -27,6 +28,7 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplu
 
 FACT_LEGACY_SUBSETS = {}
 FACT_RESOURCE_SUBSETS = dict(
+    banner=BannerFacts,
     bgp=BgpFacts,
     l3_interfaces=L3_interfacesFacts,
     l2_interfaces=L2_interfacesFacts,
