@@ -274,20 +274,31 @@ class Vrfs(ConfigBase):
                   to configure this VRF
         '''
         cmds = []
+        first = True
         for vrf in want:
             if 'name' not in vrf or 'id' not in vrf or vrf['name'] != vname:
                 continue
-            cmds.append("ip vrf {} {}".format(vname, vrf['id']))
+            if vname not in self.have_id_by_name:
+                if first:
+                    cmds.append("ip vrf {} {}".format(vname, vrf['id']))
+                    first = False
+
             for attr, cmd_attr in [('description', 'description'),
                                    ('router_id', 'router-id'),
                                    ('max_static_routes', 'max-static-routes'),
                                    ('import_map', 'import map'),
                                    ('export_map', 'export map'), ]:
                 if vrf.get(attr):
+                    if first:
+                        cmds.append("ip vrf {} {}".format(vname, vrf['id']))
+                        first = False
                     cmds.append(" {} {}".format(cmd_attr, vrf.get(attr)))
 
             # max_fib_routes is special case
             if vrf.get('max_fib_routes'):
+                if first:
+                    cmds.append("ip vrf {} {}".format(vname, vrf['id']))
+                    first = False
                 if vrf.get('max_fib_routes_warning'):
                     cmds.append(" max-fib-routes {} {}".format(vrf.get('max_fib_routes'), vrf.get('max_fib_routes_warning')))
                 else:
@@ -295,12 +306,18 @@ class Vrfs(ConfigBase):
 
             # rd is special case
             if do_rd and vrf.get('rd'):
+                if first:
+                    cmds.append("ip vrf {} {}".format(vname, vrf['id']))
+                    first = False
                 cmds.append(" rd {}".format(vrf.get('rd')))
 
             # route_target is a special case, it is a list
             if vrf.get('route_target'):
                 for rt in vrf.get('route_target'):
                     if rt.get('target') and rt.get('direction'):
+                        if first:
+                            cmds.append("ip vrf {} {}".format(vname, vrf['id']))
+                            first = False
                         cmds.append(" route-target {} {}".format(rt.get('direction'), rt.get('target')))
             break
         return cmds
@@ -316,7 +333,7 @@ class Vrfs(ConfigBase):
         '''
         cmds = []
         for vname in self.want_rd_by_name:
-            have_rd = self.have_rd_by_name[vname]
+            have_rd = self.have_rd_by_name[vname] if vname in self.have_rd_by_name else None
             want_rd = self.want_rd_by_name[vname]
             if want_rd and have_rd and have_rd != want_rd:
                 cmds.append("no ip vrf {}".format(vname))
