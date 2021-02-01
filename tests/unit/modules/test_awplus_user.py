@@ -34,73 +34,90 @@ class TestAwplusUserModule(TestAwplusModule):
         super(TestAwplusUserModule, self).setUp()
 
         self.mock_get_config = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_user.get_config"
+            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.network.Config.get_config"
         )
         self.get_config = self.mock_get_config.start()
 
         self.mock_load_config = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_user.load_config"
+            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.network.Config.load_config"
         )
         self.load_config = self.mock_load_config.start()
 
+        self.mock_get_resource_connection_config = patch(
+            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base.get_resource_connection"
+        )
+        self.get_resource_connection_config = self.mock_get_resource_connection_config.start()
+
+        self.mock_get_resource_connection_facts = patch(
+            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.facts.facts.get_resource_connection"
+        )
+        self.get_resource_connection_facts = self.mock_get_resource_connection_facts.start()
+
+        self.mock_edit_config = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.providers.providers.CliProvider.edit_config"
+        )
+        self.edit_config = self.mock_edit_config.start()
+
+        self.mock_execute_show_command = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.user.user.UserFacts.get_run_conf"
+        )
+        self.execute_show_command = self.mock_execute_show_command.start()
+
     def tearDown(self):
         super(TestAwplusUserModule, self).tearDown()
+        self.mock_get_resource_connection_config.stop()
+        self.mock_get_resource_connection_facts.stop()
+        self.mock_edit_config.stop()
         self.mock_get_config.stop()
         self.mock_load_config.stop()
+        self.mock_execute_show_command.stop()
 
-    def load_fixtures(self, commands=None, transport="cli"):
-        self.get_config.return_value = load_fixture("awplus_user_config.cfg")
-        self.load_config.return_value = dict(diff=None, session="session")
+    def load_fixtures(self, commands=None):
+        def load_from_file(*args, **kwargs):
+            return load_fixture("awplus_user_config.cfg")
+
+        self.execute_show_command.side_effect = load_from_file
 
     def test_awplus_user_create(self):
-        set_module_args(dict(name="test", configured_password="test"))
-        result = self.execute_module(changed=True)
-        self.assertEqual(result["commands"], ["username test password test"])
+        set_module_args(dict(config=[dict(name="test", configured_password="test")]))
+        commands = ["username test privilege 1 password test"]
+        result = self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_user_merge_idempotent(self):
+        set_module_args(dict(config=[dict(name="ansible", privilege=8)]))
+        result = self.execute_module(changed=False)
+
+    def test_awplus_user_replaced(self):
+        set_module_args(dict(config=[dict(name="test", configured_password="test")], state="replaced"))
+        commands = ["username test privilege 1 password test"]
+        result = self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_user_replaced_idempotent(self):
+        set_module_args(dict(config=[dict(name="ansible", privilege=8)], state="replaced"))
+        result = self.execute_module(changed=False)
+
+    def test_awplus_user_overridden(self):
+        set_module_args(dict(config=[dict(name="test", configured_password="test")], state="overridden"))
+        commands = ["username test privilege 1 password test",
+                    "no username ansible",
+                    "no username jin"]
+        result = self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_user_overridden_idempotent(self):
+        set_module_args(dict(config=[dict(name="ansible", privilege=8), dict(name="jin", privilege=3)], state="overridden"))
+        result = self.execute_module(changed=False)
 
     def test_awplus_user_delete(self):
-        set_module_args(dict(name="ansible", state="absent"))
-        result = self.execute_module(changed=True)
-        cmds = [
-            {
-                "command": "no username ansible",
-                "answer": "y",
-                "newline": False,
-                "prompt": "This operation will remove all username related configurations with same name",
-            }
-        ]
+        set_module_args(dict(config=[dict(name="ansible")], state="deleted"))
+        commands = ["no username ansible"]
+        result = self.execute_module(changed=True, commands=commands)
 
-        result_cmd = []
-        for i in result["commands"]:
-            result_cmd.append(i)
+    def test_awplus_user_delete_all(self):
+        set_module_args(dict(state="deleted"))
+        commands = ["no username ansible",
+                    "no username jin"]
+        result = self.execute_module(changed=True, commands=commands)
 
-        self.assertEqual(result_cmd, cmds)
-
-    def test_awplus_user_password(self):
-        set_module_args(dict(name="ansible", configured_password="test"))
-        result = self.execute_module(changed=True)
-        self.assertEqual(result["commands"], ["username ansible password test"])
-
-    def test_awplus_user_privilege(self):
-        set_module_args(dict(name="test", privilege=15))
-        result = self.execute_module(changed=True)
-        self.assertEqual(result["commands"], ["username test privilege 15"])
-
-    def test_awplus_user_privilege_invalid(self):
-        set_module_args(dict(name="ansible", privilege=25))
-        self.execute_module(failed=True)
-
-    def test_awplus_user_purge(self):
-        set_module_args(dict(purge=True, name="manager"))
-        result = self.execute_module(changed=True)
-        cmd = {
-            "command": "no username ansible",
-            "answer": "y",
-            "newline": False,
-            "prompt": "This operation will remove all username related configurations with same name",
-        }
-
-        result_cmd = []
-        for i in result["commands"]:
-            result_cmd.append(i)
-
-        self.assertEqual(result_cmd, [cmd])
+    def test_awplus_user_delete_no_user(self):
+        set_module_args(dict(config=[dict(name="intern")], state="deleted"))
+        result = self.execute_module(changed=False)
