@@ -32,16 +32,12 @@ class TestAwplusVlansModule(TestAwplusModule):
         self.mock_get_resource_connection_config = patch(
             "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base.get_resource_connection"
         )
-        self.get_resource_connection_config = (
-            self.mock_get_resource_connection_config.start()
-        )
+        self.get_resource_connection_config = self.mock_get_resource_connection_config.start()
 
         self.mock_get_resource_connection_facts = patch(
             "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.facts.facts.get_resource_connection"
         )
-        self.get_resource_connection_facts = (
-            self.mock_get_resource_connection_facts.start()
-        )
+        self.get_resource_connection_facts = self.mock_get_resource_connection_facts.start()
 
         self.mock_edit_config = patch(
             "ansible_collections.alliedtelesis.awplus.plugins.module_utils.providers.providers.CliProvider.edit_config"
@@ -49,7 +45,7 @@ class TestAwplusVlansModule(TestAwplusModule):
         self.edit_config = self.mock_edit_config.start()
 
         self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.vlans.vlans.VlansFacts.get_vlans_facts"
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.vlans.vlans.VlansFacts.get_run_conf"
         )
         self.execute_show_command = self.mock_execute_show_command.start()
 
@@ -89,11 +85,11 @@ class TestAwplusVlansModule(TestAwplusModule):
     def test_awplus_vlan_replaced(self):
         set_module_args(
             dict(
-                config=[dict(vlan_id=30, name="thirty", state="disable")],
+                config=[dict(vlan_id=30, name="thirty", state="suspend")],
                 state="replaced",
             )
         )
-        commands = ["vlan database", "vlan 30 name thirty", "vlan 30 state disable"]
+        commands = ["vlan database", "vlan 30 name thirty state disable"]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_vlan_replaced_idempotent(self):
@@ -131,4 +127,9 @@ class TestAwplusVlansModule(TestAwplusModule):
     def test_awplus_vlan_deleted(self):
         set_module_args(dict(config=[dict(vlan_id=100,)], state="deleted"))
         commands = ["vlan database", "no vlan 100"]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_vlan_deleted_all(self):
+        set_module_args(dict(state="deleted"))
+        commands = ["vlan database", "no vlan 100", "no vlan 2"]
         self.execute_module(changed=True, commands=commands)

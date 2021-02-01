@@ -25,6 +25,7 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplu
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lldp_interfaces.lldp_interfaces import Lldp_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.user.user import UserFacts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.vlans.vlans import VlansFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.vrfs.vrfs import VrfsFacts
 
 
@@ -40,6 +41,7 @@ FACT_RESOURCE_SUBSETS = dict(
     static_lag_interfaces=Static_lag_interfacesFacts,
     lldp_interfaces=Lldp_interfacesFacts,
     user=UserFacts,
+    vlans=VlansFacts,
     vrfs=VrfsFacts,
 )
 
