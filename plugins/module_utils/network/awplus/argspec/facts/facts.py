@@ -19,6 +19,7 @@ class FactsArgs(object):  # pylint: disable=R0903
         'all',
         'banner',
         'bgp',
+        'interfaces',
         'l3_interfaces',
         'l2_interfaces',
         'lacp'
