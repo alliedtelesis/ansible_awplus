@@ -30,9 +30,9 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
-    'metadata_version': '1.1',
-    'status': ['preview'],
-    'supported_by': 'network'
+  'metadata_version': '1.1',
+  'status': ['preview'],
+  'supported_by': 'network'
 }
 
 DOCUMENTATION = """
@@ -113,13 +113,13 @@ EXAMPLES = """
 # !
 
 - name: Merge a new port into a channel group
-  awplus_lag_interfaces:
+  alliedtelesis.awplus.awplus_lag_interfaces:
     config:
       - name: 33
         members:
           - member: port1.1.4
             mode: active
-    operation: merged
+    state: merged
 
 # After state:
 # -------------
@@ -178,13 +178,13 @@ EXAMPLES = """
 # !
 
 - name: Replace ports in a channel group
-  awplus_lag_interfaces:
+  alliedtelesis.awplus.awplus_lag_interfaces:
     config:
       - name: 33
         members:
           - member: port1.1.4
             mode: active
-    operation: replaced
+    state: replaced
 
 # After state:
 # -------------
@@ -237,13 +237,13 @@ EXAMPLES = """
 # !
 
 - name: Override channel group configuration
-  awplus_lag_interfaces:
+  alliedtelesis.awplus.awplus_lag_interfaces:
     config:
       - name: 33
         members:
           - member: port1.1.4
             mode: active
-    operation: overridden
+    state: overridden
 
 # After state:
 # -------------
@@ -292,10 +292,10 @@ EXAMPLES = """
 # !
 
 - name: Delete a given channel group
-  awplus_lag_interfaces:
+  alliedtelesis.awplus.awplus_lag_interfaces:
     config:
       - name: 33
-    operation: deleted
+    state: deleted
 
 # After state:
 # -------------
@@ -332,7 +332,8 @@ commands:
   description: The set of commands pushed to the remote device.
   returned: always
   type: list
-  sample: ['command 1', 'command 2', 'command 3']
+  sample: ['interface port1.0.2', 'channel-group 3 mode passive']
+
 """
 
 

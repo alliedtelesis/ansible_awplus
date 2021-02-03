@@ -181,7 +181,7 @@ EXAMPLES = """
 #  switchport mode access
 # !
 
-- name: Merge provided configuration with device
+- name: Replace device configuration with provided configuration
   alliedtelesis.awplus.awplus_l2_interfaces:
     config:
       - name: port1.0.3
@@ -266,13 +266,7 @@ EXAMPLES = """
 #  switchport mode access
 #  switchport access vlan 3
 # !
-# interface port1.0.3
-#  switchport
-#  switchport mode trunk
-#  switchport trunk allowed vlan none
-#  switchport trunk native vlan 1
-# !
-# interface port1.0.4
+# interface port1.0.3-1.0.4
 #  switchport
 #  switchport mode access
 # !
@@ -283,7 +277,6 @@ EXAMPLES = """
 
 # Before state:
 # -------------
-#
 # aw1(config-if)#show running-config interface
 # interface port1.0.1
 #  switchport
@@ -307,24 +300,14 @@ EXAMPLES = """
 #  switchport access vlan 10
 # !
 
-- name: Delete all L2 interfaces as in given arguments
+- name: Delete all L2 interface configurations
   alliedtelesis.awplus.awplus_l2_interfaces:
     state: deleted
 
 # After state:
 # -------------
-#
-# interface port1.0.1-1.0.2
-#  switchport
-#  switchport mode access
-# !
-# interface port1.0.3
-#  switchport
-#  switchport mode trunk
-#  switchport trunk allowed vlan none
-#  switchport trunk native vlan 1
-# !
-# interface port1.0.4
+# aw1(config-if)#show running-config interface
+# interface port1.0.1-1.0.4
 #  switchport
 #  switchport mode access
 # !

@@ -106,7 +106,6 @@ EXAMPLES = """
 #
 # Before state:
 # -------------
-#
 # awplus#show running-config interface
 # ...
 # interface vlan2
@@ -137,7 +136,6 @@ EXAMPLES = """
 
 # After state:
 # ------------
-#
 # awplus#show running-config interface
 # ...
 # interface vlan2
@@ -163,7 +161,6 @@ EXAMPLES = """
 #
 # Before state:
 # -------------
-#
 # awplus#show running-config interface
 # ...
 # interface vlan2
@@ -183,7 +180,7 @@ EXAMPLES = """
 #  ip address 10.38.55.3/27
 # !
 
-- name: Merge listed l3 interfaces configuration with provided configuration
+- name: Replace listed l3 interfaces configuration with provided configuration
   alliedtelesis.awplus.awplus_l3_interfaces:
     config:
       - name: vlan5
@@ -193,7 +190,6 @@ EXAMPLES = """
 
 # After state:
 # -------------
-#
 # awplus#show running-config interface
 # ...
 # interface vlan2
@@ -217,7 +213,6 @@ EXAMPLES = """
 #
 # Before state:
 # -------------
-#
 # awplus#show running-config interface
 # ...
 # interface vlan2
@@ -251,7 +246,6 @@ EXAMPLES = """
 
 # After state:
 # ------------
-#
 # awplus#show running-config interface
 # ...
 # interface vlan2
@@ -275,7 +269,6 @@ EXAMPLES = """
 #
 # Before state:
 # -------------
-#
 # awplus#show running-config interface
 # ...
 # interface vlan2
@@ -304,7 +297,6 @@ EXAMPLES = """
 
 # After state:
 # ------------
-#
 # awplus#show running-config interface
 # ...
 # interface vlan2

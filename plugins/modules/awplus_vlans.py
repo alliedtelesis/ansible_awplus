@@ -69,6 +69,7 @@ options:
   state:
     description:
     - The state the configuration should be left in
+    - Note that I(state=deleted) and I(state=overridden) will not remove the default vlan 1.
     type: str
     choices:
     - merged

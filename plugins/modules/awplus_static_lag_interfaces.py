@@ -30,9 +30,9 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
-    'metadata_version': '1.1',
-    'status': ['preview'],
-    'supported_by': 'network'
+  'metadata_version': '1.1',
+  'status': ['preview'],
+  'supported_by': 'network'
 }
 
 DOCUMENTATION = """
@@ -104,7 +104,7 @@ EXAMPLES = """
 # !
 
 - name: Merge a new port into a channel group
-  awplus_static_lag_interfaces:
+  alliedtelesis.awplus.awplus_static_lag_interfaces:
     config:
       - name: 33
         members:
@@ -169,7 +169,7 @@ EXAMPLES = """
 # !
 
 - name: Replace ports in a channel group
-  awplus_static_lag_interfaces:
+  alliedtelesis.awplus.awplus_static_lag_interfaces:
     config:
       - name: 33
         members:
@@ -228,7 +228,7 @@ EXAMPLES = """
 # !
 
 - name: Override channel group configuration
-  awplus_static_lag_interfaces:
+  alliedtelesis.awplus.awplus_static_lag_interfaces:
     config:
       - name: 33
         members:
@@ -283,7 +283,7 @@ EXAMPLES = """
 # !
 
 - name: Delete a port from a channel group
-  awplus_static_lag_interfaces:
+  alliedtelesis.awplus.awplus_static_lag_interfaces:
     config:
       - name: 33
         members:
@@ -326,17 +326,14 @@ commands:
   description: The set of commands pushed to the remote device.
   returned: always
   type: list
-  sample: ['command 1', 'command 2', 'command 3']
+  sample: ['interface port1.0.2', 'static-channel-group 3']
+
 """
 
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.static_lag_interfaces.static_lag_interfaces import (
-    Static_lag_interfacesArgs
-)
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.static_lag_interfaces.static_lag_interfaces import (
-    Static_lag_interfaces
-)
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.static_lag_interfaces.static_lag_interfaces import Static_lag_interfacesArgs
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.static_lag_interfaces.static_lag_interfaces import Static_lag_interfaces
 
 
 def main():

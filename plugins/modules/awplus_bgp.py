@@ -309,7 +309,7 @@ EXAMPLES = """
 #  exit-address-family
 # !
 
-- name: Replace provided configuration with device configuration
+- name: Replace device configuration with provided configuration
   alliedtelesis.awplus.awplus_bgp:
     config:
       bgp_as: 100
@@ -340,7 +340,7 @@ EXAMPLES = """
 # !
 
 - name: Delete LLDP attributes of given interfaces
-  alliedtelesis.awplus.awplus_lldp_interfaces:
+  alliedtelesis.awplus.awplus_bgp:
     state: deleted
 
 # After state:
