@@ -72,7 +72,6 @@ EXAMPLES = """
 #
 # Before state:
 # -------------
-#
 # awplus#show lacp sys-id
 # System Priority: 0x8000 (32768)
 # MAC Address: 001a.eb94.27bb
@@ -86,7 +85,6 @@ EXAMPLES = """
 
 # After state:
 # ------------
-#
 # aw1#show lacp sys-id
 # System Priority: 0x007b (123)
 # MAC Address: 001a.eb94.27bb
@@ -96,7 +94,6 @@ EXAMPLES = """
 #
 # Before state:
 # -------------
-#
 # aw1#show lacp sys-id
 # System Priority: 0x007b (123)
 # MAC Address: 001a.eb94.27bb
@@ -107,7 +104,6 @@ EXAMPLES = """
 
 # After state:
 # -------------
-#
 # aw1#show lacp sys-id
 # System Priority: 0x8000 (32768)
 # MAC Address: 001a.eb94.27bb

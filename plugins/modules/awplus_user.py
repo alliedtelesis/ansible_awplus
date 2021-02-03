@@ -120,7 +120,7 @@ EXAMPLES = """
     config:
       - name: guk
         configured_password: cloud
-    state: merged
+    state: replaced
 
 # After state:
 # ------------
@@ -163,7 +163,7 @@ EXAMPLES = """
 # username minnie privilege 1 password 8 $1$dV7v1SnV$Xh8G7IrfwMTIFdCHnpoFe.
 
 - name: Delete all users
-  alliedtelesis.awplus.awplus_l2_interfaces:
+  alliedtelesis.awplus.awplus_user:
     state: deleted
 
 # After state:

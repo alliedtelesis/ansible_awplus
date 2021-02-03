@@ -104,7 +104,7 @@ EXAMPLES = """
 # !
 
 - name: Merge a new port into a channel group
-  awplus_static_lag_interfaces:
+  alliedtelesis.awplus.awplus_static_lag_interfaces:
     config:
       - name: 33
         members:
@@ -169,7 +169,7 @@ EXAMPLES = """
 # !
 
 - name: Replace ports in a channel group
-  awplus_static_lag_interfaces:
+  alliedtelesis.awplus.awplus_static_lag_interfaces:
     config:
       - name: 33
         members:
@@ -228,7 +228,7 @@ EXAMPLES = """
 # !
 
 - name: Override channel group configuration
-  awplus_static_lag_interfaces:
+  alliedtelesis.awplus.awplus_static_lag_interfaces:
     config:
       - name: 33
         members:
@@ -283,7 +283,7 @@ EXAMPLES = """
 # !
 
 - name: Delete a port from a channel group
-  awplus_static_lag_interfaces:
+  alliedtelesis.awplus.awplus_static_lag_interfaces:
     config:
       - name: 33
         members:
@@ -326,7 +326,8 @@ commands:
   description: The set of commands pushed to the remote device.
   returned: always
   type: list
-  sample: ['command 1', 'command 2', 'command 3']
+  sample: ['interface port1.0.2', 'static-channel-group 3']
+
 """
 
 

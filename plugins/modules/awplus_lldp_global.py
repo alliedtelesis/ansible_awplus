@@ -227,7 +227,7 @@ commands:
   description: The set of commands pushed to the remote device.
   returned: always
   type: list
-  sample: ['command 1', 'command 2', 'command 3']
+  sample: ['lldp reinit 7', 'lldp faststart-count 7']
 """
 
 
