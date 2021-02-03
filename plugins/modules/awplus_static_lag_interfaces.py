@@ -30,9 +30,9 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
-  'metadata_version': '1.1',
-  'status': ['preview'],
-  'supported_by': 'network'
+    'metadata_version': '1.1',
+    'status': ['preview'],
+    'supported_by': 'network'
 }
 
 DOCUMENTATION = """
@@ -332,8 +332,12 @@ commands:
 
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.static_lag_interfaces.static_lag_interfaces import Static_lag_interfacesArgs
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.static_lag_interfaces.static_lag_interfaces import Static_lag_interfaces
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.static_lag_interfaces.static_lag_interfaces import (
+    Static_lag_interfacesArgs
+)
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.static_lag_interfaces.static_lag_interfaces import (
+    Static_lag_interfaces
+)
 
 
 def main():

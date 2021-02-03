@@ -72,7 +72,7 @@ EXAMPLES = """
 #
 # Before state:
 # -------------
-# awplus#show lacp sys-id 
+# awplus#show lacp sys-id
 # System Priority: 0x8000 (32768)
 # MAC Address: 001a.eb94.27bb
 
