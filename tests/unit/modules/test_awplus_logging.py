@@ -37,53 +37,83 @@ class TestAwplusLoggingModule(TestAwplusModule):
     def setUp(self):
         super(TestAwplusLoggingModule, self).setUp()
 
-        self.mock_run_commands = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_logging.run_commands"
+        self.mock_get_resource_connection_config = patch(
+            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base.get_resource_connection"
         )
-        self.run_commands = self.mock_run_commands.start()
+        self.get_resource_connection_config = self.mock_get_resource_connection_config.start()
+
+        self.mock_get_resource_connection_facts = patch(
+            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.facts.facts.get_resource_connection"
+        )
+        self.get_resource_connection_facts = self.mock_get_resource_connection_facts.start()
+
+        self.mock_edit_config = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.providers.providers.CliProvider.edit_config"
+        )
+        self.edit_config = self.mock_edit_config.start()
+
+        self.mock_execute_show_command = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.logging.logging.LoggingFacts.get_run_conf"
+        )
+        self.execute_show_command = self.mock_execute_show_command.start()
 
     def tearDown(self):
         super(TestAwplusLoggingModule, self).tearDown()
+        self.mock_get_resource_connection_config.stop()
+        self.mock_get_resource_connection_facts.stop()
+        self.mock_edit_config.stop()
+        self.mock_execute_show_command.stop()
 
-        self.mock_run_commands.stop()
-
-    def load_fixtures(self, commands=None):
+    def load_fixtures(self, commands=None, transport="cli"):
         def load_from_file(*args, **kwargs):
-            module, command = args
-            output = list()
+            return load_fixture("awplus_logging_config.cfg")
 
-            filename = str(command).replace(" ", "_")
-            output.append(load_fixture(filename))
-            return output
+        self.execute_show_command.side_effect = load_from_file
 
-        self.run_commands.side_effect = load_from_file
-
-    def test_awplus_logging_buffer_size_changed_explicit(self):
-        set_module_args(dict(dest="buffered", size=100))
-        commands = ["log buffered size 100"]
+    def test_awplus_logging_merged(self):
+        set_module_args(dict(config=[dict(dest="console", facility="cron")], state="merged"))
+        commands = ["log console facility cron"]
         self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_logging_add_host(self):
-        set_module_args(dict(dest="host", name="192.168.1.1"))
-        commands = ["log host 192.168.1.1"]
-        self.execute_module(changed=True, commands=commands)
-
-    def test_awplus_logging_host_idempotent(self):
-        set_module_args(dict(dest="console", facility="news"))
+    def test_awplus_logging_merged_idempotent(self):
+        set_module_args(dict(config=[dict(dest="buffered", size=51)], state="merged"))
         commands = []
         self.execute_module(changed=False, commands=commands)
 
-    def test_awplus_logging_delete_non_exist_host(self):
-        set_module_args(dict(dest="host", name="192.168.1.1", state="absent"))
+    def test_awplus_logging_deleted(self):
+        set_module_args(dict(config=[dict(dest="buffered", size=51)], state="deleted"))
+        commands = ["no log buffered size"]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_logging_deleted_all(self):
+        set_module_args(dict(state="deleted"))
+        commands = ["no log buffered size",
+                    "no log console level alerts facility ftp",
+                    "no log host f"]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_logging_replaced(self):
+        set_module_args(dict(config=[dict(dest="console", facility="cron")], state="replaced"))
+        commands = ["log console facility cron",
+                    "no log console level alerts facility ftp"]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_logging_replaced_idempotent(self):
+        set_module_args(dict(config=[dict(dest="console", level="alerts", facility="ftp")], state="replaced"))
         commands = []
         self.execute_module(changed=False, commands=commands)
 
-    def test_awplus_logging_delete_host(self):
-        set_module_args(dict(dest="host", name="2.3.4.5", state="absent"))
-        commands = ["no log host 2.3.4.5"]
+    def test_awplus_logging_overridden(self):
+        set_module_args(dict(config=[dict(dest="console", facility="cron")], state="overridden"))
+        commands = ["log console facility cron",
+                    "no log buffered size",
+                    "no log console level alerts facility ftp",
+                    "no log host f"]
         self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_logging_configure_disabled_monitor_destination(self):
-        set_module_args(dict(dest="monitor", state="absent"))
-        commands = ["no log monitor"]
-        self.execute_module(changed=True, commands=commands)
+    def test_awplus_logging_overridden_idempotent(self):
+        set_module_args(dict(config=[dict(dest="console", level="alerts", facility="ftp"),
+                                     dict(dest="buffered", size=51),
+                                     dict(dest="host", name="f", level="warnings")], state="overridden"))
+        commands = []
+        self.execute_module(changed=False, commands=commands)

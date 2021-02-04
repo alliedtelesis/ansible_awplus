@@ -16,15 +16,16 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.f
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.banner.banner import BannerFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.bgp.bgp import BgpFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.interfaces.interfaces import InterfacesFacts
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l3_interfaces.l3_interfaces import L3_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l2_interfaces.l2_interfaces import L2_interfacesFacts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l3_interfaces.l3_interfaces import L3_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lacp.lacp import LacpFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lag_interfaces.lag_interfaces import Lag_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lldp_global.lldp_global import Lldp_globalFacts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lldp_interfaces.lldp_interfaces import Lldp_interfacesFacts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.logging.logging import LoggingFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.static_lag_interfaces.static_lag_interfaces import (
     Static_lag_interfacesFacts,
 )
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lldp_interfaces.lldp_interfaces import Lldp_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.user.user import UserFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.vlans.vlans import VlansFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.vrfs.vrfs import VrfsFacts
@@ -35,13 +36,14 @@ FACT_RESOURCE_SUBSETS = dict(
     banner=BannerFacts,
     bgp=BgpFacts,
     interfaces=InterfacesFacts,
-    l3_interfaces=L3_interfacesFacts,
     l2_interfaces=L2_interfacesFacts,
+    l3_interfaces=L3_interfacesFacts,
     lacp=LacpFacts,
     lag_interfaces=Lag_interfacesFacts,
     lldp_global=Lldp_globalFacts,
-    static_lag_interfaces=Static_lag_interfacesFacts,
     lldp_interfaces=Lldp_interfacesFacts,
+    logging=LoggingFacts,
+    static_lag_interfaces=Static_lag_interfacesFacts,
     user=UserFacts,
     vlans=VlansFacts,
     vrfs=VrfsFacts,
