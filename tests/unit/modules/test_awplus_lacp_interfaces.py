@@ -20,29 +20,15 @@ class TestAwplusLacpInterfacesModule(TestAwplusModule):
     def setUp(self):
         super(TestAwplusLacpInterfacesModule, self).setUp()
 
-        self.mock_get_config = patch(
-            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.network.Config.get_config"
-        )
-        self.get_config = self.mock_get_config.start()
-
-        self.mock_load_config = patch(
-            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.network.Config.load_config"
-        )
-        self.load_config = self.mock_load_config.start()
-
         self.mock_get_resource_connection_config = patch(
             "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base.get_resource_connection"
         )
-        self.get_resource_connection_config = (
-            self.mock_get_resource_connection_config.start()
-        )
+        self.get_resource_connection_config = self.mock_get_resource_connection_config.start()
 
         self.mock_get_resource_connection_facts = patch(
             "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.facts.facts.get_resource_connection"
         )
-        self.get_resource_connection_facts = (
-            self.mock_get_resource_connection_facts.start()
-        )
+        self.get_resource_connection_facts = self.mock_get_resource_connection_facts.start()
 
         self.mock_edit_config = patch(
             "ansible_collections.alliedtelesis.awplus.plugins.module_utils.providers.providers.CliProvider.edit_config"
@@ -50,24 +36,31 @@ class TestAwplusLacpInterfacesModule(TestAwplusModule):
         self.edit_config = self.mock_edit_config.start()
 
         self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.facts.lacp_interfaces.lacp_interfaces.Lacp_interfacesFacts.get_device_data"
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts."
+            "lacp_interfaces.lacp_interfaces.Lacp_interfacesFacts.get_run_conf"
         )
         self.execute_show_command = self.mock_execute_show_command.start()
+
+        self.mock_execute_show_int_command = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts."
+            "lacp_interfaces.lacp_interfaces.Lacp_interfacesFacts.get_int_brief"
+        )
+        self.execute_show_int_command = self.mock_execute_show_int_command.start()
 
     def tearDown(self):
         super(TestAwplusLacpInterfacesModule, self).tearDown()
         self.mock_get_resource_connection_config.stop()
         self.mock_get_resource_connection_facts.stop()
         self.mock_edit_config.stop()
-        self.mock_get_config.stop()
-        self.mock_load_config.stop()
         self.mock_execute_show_command.stop()
+        self.mock_execute_show_int_command.stop()
 
     def load_fixtures(self, commands=None, transport="cli"):
         def load_from_file(*args, **kwargs):
             return load_fixture("awplus_lacp_interfaces_config.cfg")
 
         self.execute_show_command.side_effect = load_from_file
+        self.execute_show_int_command.return_value = ["port1.0.1", "port1.0.2", "port1.0.3", "port1.0.4", "eth1", "po1", "po2", "vlan1", "vlan2"]
 
     def test_awplus_lacp_interfaces_default(self):
         set_module_args(
@@ -139,7 +132,6 @@ class TestAwplusLacpInterfacesModule(TestAwplusModule):
         commands = [
             "interface port1.0.2",
             "no lacp port-priority",
-            "lacp timeout long",
             "interface port1.0.3",
             "lacp port-priority 2",
             "lacp timeout short",
@@ -154,5 +146,10 @@ class TestAwplusLacpInterfacesModule(TestAwplusModule):
 
     def test_awplus_lacp_interfaces_deleted(self):
         set_module_args(dict(config=[dict(name="port1.0.2",)], state="deleted"))
-        commands = ["interface port1.0.2", "no lacp port-priority", "lacp timeout long"]
+        commands = ["interface port1.0.2", "no lacp port-priority"]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_lacp_interfaces_deleted_all(self):
+        set_module_args(dict(state="deleted"))
+        commands = ["interface port1.0.2", "no lacp port-priority"]
         self.execute_module(changed=True, commands=commands)
