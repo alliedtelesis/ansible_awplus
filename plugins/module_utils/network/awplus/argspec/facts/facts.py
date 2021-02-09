@@ -28,6 +28,7 @@ class FactsArgs(object):  # pylint: disable=R0903
         'lldp_global',
         'lldp_interfaces',
         'logging',
+        'ntp',
         'static_lag_interfaces',
         'user',
         'vlans',
