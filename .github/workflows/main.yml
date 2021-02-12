@@ -78,13 +78,13 @@ jobs:
         run: |
           sudo apt-get install build-essential libssl-dev libffi-dev python-dev
           git clone https://github.com/ansible/ansible.git ${GITHUB_WORKSPACE}/ansible
-          python3 -m pip install --upgrade pip
-          python3 -m pip install setuptools
-          python3 -m pip install -r ${AWPLUS_PATH}/dev-requirements.txt
-          python3 -m pip install -r ${ANSIBLE_PATH}/requirements.txt
-          python3 -m pip install -r ${ANSIBLE_PATH}/test/units/requirements.txt
-          python3 -m pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/units.txt
-          python3 -m pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/network-integration.txt
+          pip install --upgrade pip
+          pip install setuptools
+          pip install -r ${AWPLUS_PATH}/dev-requirements.txt
+          pip install -r ${ANSIBLE_PATH}/requirements.txt
+          pip install -r ${ANSIBLE_PATH}/test/units/requirements.txt
+          pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/units.txt
+          pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/network-integration.txt
           source ${ANSIBLE_PATH}/hacking/env-setup
       - name: Check PEP 8
         run: |
