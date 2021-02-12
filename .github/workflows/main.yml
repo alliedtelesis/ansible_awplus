@@ -60,32 +60,6 @@ jobs:
         run: |
           cd ${AWPLUS_PATH}
           ${ANSIBLE_PATH}/bin/ansible-test units --python ${{ matrix.python-version }}
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      # A large chunk of the following is duplicated, since GitHub Actions doesn't
-      # yet support YAML anchors.
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          path: ansible_collections/alliedtelesis/awplus
-      - name: Set awplus and ansible env vars
-        run: |
-          echo "AWPLUS_PATH=${GITHUB_WORKSPACE}/ansible_collections/alliedtelesis/awplus/" >> $GITHUB_ENV
-          echo "ANSIBLE_PATH=${GITHUB_WORKSPACE}/ansible" >> $GITHUB_ENV
-      - name: Install ansible-test
-        run: |
-          sudo apt-get install build-essential libssl-dev libffi-dev python-dev
-          git clone https://github.com/ansible/ansible.git ${GITHUB_WORKSPACE}/ansible
-          python3 -m pip install --upgrade pip
-          python3 -m pip install -U setuptools
-          python3 -m pip install -r ${AWPLUS_PATH}/dev-requirements.txt
-          python3 -m pip install -r ${ANSIBLE_PATH}/requirements.txt
-          python3 -m pip install -r ${ANSIBLE_PATH}/test/units/requirements.txt
-          python3 -m pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/units.txt
-          python3 -m pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/network-integration.txt
-          source ${ANSIBLE_PATH}/hacking/env-setup
       - name: Check PEP 8
         run: |
           cd ${AWPLUS_PATH}
