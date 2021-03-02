@@ -1,0 +1,93 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: Smoke test banner
+      awplus_banner:
+        config:
+        state: merged
+
+    - name: Smoke test bgp
+      awplus_bgp:
+        config:
+          bgp_as: 100
+        state: merged
+
+    - name: Smoke test interfaces
+      awplus_interfaces:
+        config:
+        state: merged
+
+    - name: Smoke test l2_interfaces
+      awplus_l2_interfaces:
+        config:
+        state: merged
+
+    - name: Smoke test l3_interfaces
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+        state: merged
+
+    - name: Smoke test lacp_interfaces
+      awplus_lacp_interfaces:
+        config:
+        state: merged
+
+    - name: Smoke test lacp
+      awplus_lacp:
+        config:
+          system:
+            priority: 50
+        state: merged
+
+    - name: Smoke test lag_interfaces
+      awplus_lag_interfaces:
+        config:
+        state: merged
+
+    - name: Smoke test lldp_global
+      awplus_lldp_global:
+        config:
+          faststart_count: 3
+        state: merged
+
+    - name: Smoke test lldp_interfaces
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.1.1
+        state: merged
+
+    - name: Smoke test logging
+      awplus_logging:
+        config:
+          - dest: buffered
+        state: merged
+
+    - name: Smoke test ntp
+      awplus_ntp:
+        config:
+          server: 1.1.1.1
+        state: merged
+
+    - name: Smoke test static_lag_interfaces
+      awplus_static_lag_interfaces:
+        config:
+        state: merged
+
+    - name: Smoke test user
+      awplus_user:
+        config:
+        state: merged
+
+    - name: Smoke test vlans
+      awplus_vlans:
+        config:
+        state: merged
+
+    - name: Smoke test vrfs
+      awplus_vrfs:
+        config:
+        state: merged
