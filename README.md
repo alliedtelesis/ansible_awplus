@@ -1,22 +1,21 @@
-
-
-# Allied Telesis Alliedware Plus (AW+) Collection
+# Allied Telesis AlliedWare Plus (AW+) Collection
 
 The Ansible Allied Telesis AW+ collection includes a variety of Ansible content to help automate the management of Allied Telesis network devices.
 
+## Version compatibility
+
 This collection has been tested against AW+ 5.5.1.
 
-## Ansible version compatibility
+This collection has been tested against Ansible version: **>=2.9.10**.
 
-This collection has been tested against following Ansible versions: **>=2.9.10**.
-
-Plugins and modules within a collection may be tested with only specific Ansible versions.
+<!--
 A collection may contain metadata that identifies these versions.
 PEP440 is the schema used to describe the versions of Ansible.
-
+-->
 
 ### Supported connections
-The Allied Telesis Alliedware Plus collection supports ``network_cli`` connections.
+
+The Allied Telesis AlliedWare Plus collection supports ``network_cli`` connections.
 
 ## Included content
 
@@ -39,12 +38,12 @@ Name | Description
 alliedtelesis.awplus.awplus_banner|Manage multiline banners on Allied Telesis AW+ devices
 alliedtelesis.awplus.awplus_bgp|Configure global BGP protocol settings on Allied Telesis AW+
 alliedtelesis.awplus.awplus_command|Run arbitrary commands on an Allied Telesis AW+ device
-alliedtelesis.awplus.awplus_config)|Manage Allied Telesis AW+ configuration sections
+alliedtelesis.awplus.awplus_config|Manage Allied Telesis AW+ configuration sections
 alliedtelesis.awplus.awplus_facts|Collect facts from remote devices running Allied Telesis AW+
 alliedtelesis.awplus.awplus_interfaces|Interfaces resource module
 alliedtelesis.awplus.awplus_ipv6_ospf|OSPFv3 resource module
 alliedtelesis.awplus.awplus_l2_interfaces|L2 interfaces resource module
-alliedtelesis.awplus.awplus_l3_interfaces)|L3 interfaces resource module
+alliedtelesis.awplus.awplus_l3_interfaces|L3 interfaces resource module
 alliedtelesis.awplus.awplus_lacp|LACP resource module
 alliedtelesis.awplus.awplus_lacp_interfaces|LACP interfaces resource module
 alliedtelesis.awplus.awplus_lag_interfaces|LAG interfaces resource module
@@ -70,7 +69,7 @@ Name | Description
 
 ## Installing this collection
 
-You can install the Allied Telesis Alliedware Plus collection with the Ansible Galaxy CLI:
+You can install the Allied Telesis AlliedWare Plus collection with the Ansible Galaxy CLI:
 
     ansible-galaxy collection install alliedtelesis.awplus
 
@@ -86,10 +85,11 @@ collections:
 
 This collection includes [network resource modules](https://docs.ansible.com/ansible/latest/network/user_guide/network_resource_modules.html).
 
-### Using modules from the Allied Telesis Alliedware Plus collection in your playbooks
+### Using modules from the Allied Telesis AlliedWare Plus collection in your playbooks
 
 You can call modules by their Fully Qualified Collection Namespace (FQCN), such as `alliedtelesis.awplus.awplus_l2_interfaces`.
-The following example task replaces configuration changes in the existing configuration on an Allied Telesis AW+ network device, using the FQCN:
+
+The following task replaces configuration changes in the running configuration on an Allied Telesis AW+ network device, using the FQCN:
 
 ```yaml
 ---
@@ -103,7 +103,9 @@ The following example task replaces configuration changes in the existing config
       state: replaced
 ```
 
-**NOTE**: For Ansible 2.9, you may not see deprecation warnings when you run your playbooks with this collection. Use this documentation to track when a module is deprecated.
+**NOTE**: For Ansible 2.9, you may not see deprecation warnings when you run your playbooks with this collection.
+
+<!-- Use this documentation to track when a module is deprecated. -->
 
 ### See Also:
 
@@ -111,7 +113,7 @@ The following example task replaces configuration changes in the existing config
 
 ## Contributing to this collection
 
-We welcome community contributions to this collection. If you find problems, please open an issue or create a PR against the [Allied Telesis Alliedware Plus collection repository](https://github.com/alliedtelesis/ansible_awplus). See [Contributing to Ansible-maintained collections](https://docs.ansible.com/ansible/devel/community/contributing_maintained_collections.html#contributing-maintained-collections) for complete details.
+We welcome community contributions to this collection. If you find problems, please open an issue or create a PR against the [Allied Telesis AlliedWare Plus collection repository](https://github.com/alliedtelesis/ansible_awplus). See [Contributing to Ansible-maintained collections](https://docs.ansible.com/ansible/devel/community/contributing_maintained_collections.html#contributing-maintained-collections) for complete details.
 
 See the [Ansible Community Guide](https://docs.ansible.com/ansible/latest/community/index.html) for details on contributing to Ansible.
 
@@ -120,15 +122,15 @@ This collection follows the Ansible project's
 [Code of Conduct](https://docs.ansible.com/ansible/devel/community/code_of_conduct.html).
 Please read and familiarize yourself with this document.
 
-## Changelogs
-<!--Add a link to a changelog.md file or an external docsite to cover this information. -->
 ## Release notes
 
 Release notes are available [here](https://github.com/alliedtelesis/ansible_awplus/blob/master/CHANGELOG.rst).
 
 ## Roadmap
 
-<!-- Optional. Include the roadmap for this collection, and the proposed release/versioning strategy so users can anticipate the upgrade/update cycle. -->
+<!--
+ Optional. Include the roadmap for this collection, and the proposed release/versioning strategy so users can anticipate the upgrade/update cycle.
+-->
 
 ## More information
 
@@ -140,6 +142,6 @@ Release notes are available [here](https://github.com/alliedtelesis/ansible_awpl
 
 ## Licensing
 
-GNU General Public License v3.0 or later.
+GNU General Public License v3.0.
 
 See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.txt) to see the full text.
