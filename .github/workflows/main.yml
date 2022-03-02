@@ -54,7 +54,6 @@ jobs:
           pip install -r ${ANSIBLE_PATH}/requirements.txt
           pip install -r ${ANSIBLE_PATH}/test/units/requirements.txt
           pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/units.txt
-          pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/network-integration.txt
           source ${ANSIBLE_PATH}/hacking/env-setup
       - name: Test unit tests
         run: |
