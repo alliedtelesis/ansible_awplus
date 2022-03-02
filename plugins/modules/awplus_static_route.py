@@ -5,6 +5,7 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+from ansible.module_utils.common.validation import check_required_together
 
 __metaclass__ = type
 
@@ -214,10 +215,10 @@ def map_params_to_obj(module, required_together=None):
                     route[key] = module.params.get(key)
 
             route = dict((k, v) for k, v in route.items() if v is not None)
-            module._check_required_together(required_together, route)
+            check_required_together(required_together, route)
             obj.append(route)
     else:
-        module._check_required_together(required_together, module.params)
+        check_required_together(required_together, module.params)
         route = dict()
         for key in keys:
             if module.params.get(key) is not None:
