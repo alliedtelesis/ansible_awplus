@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
+        python-version: [3.8, 3.9]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -54,7 +54,6 @@ jobs:
           pip install -r ${ANSIBLE_PATH}/requirements.txt
           pip install -r ${ANSIBLE_PATH}/test/units/requirements.txt
           pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/units.txt
-          pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/network-integration.txt
           source ${ANSIBLE_PATH}/hacking/env-setup
       - name: Test unit tests
         run: |
@@ -73,7 +72,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.6
+          python-version: 3.8
       - name: Set awplus and ansible env vars
         run: |
           echo "AWPLUS_PATH=${GITHUB_WORKSPACE}/ansible_collections/alliedtelesis/awplus/" >> $GITHUB_ENV
@@ -88,16 +87,16 @@ jobs:
           python3 -m pip install -r ${ANSIBLE_PATH}/requirements.txt
           python3 -m pip install -r ${ANSIBLE_PATH}/test/units/requirements.txt
           python3 -m pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/units.txt
-          python3 -m pip install -r ${ANSIBLE_PATH}/test/lib/ansible_test/_data/requirements/network-integration.txt
           source ${ANSIBLE_PATH}/hacking/env-setup
       - name: Check PEP 8
         run: |
           cd ${AWPLUS_PATH}
           ${ANSIBLE_PATH}/bin/ansible-test sanity --test pep8 plugins/ tests/
-      - name: Lint Ansible Playbooks
-        uses: ansible/ansible-lint-action@master
-        with:
-          targets: playbooks
+      # Removed Feb/2022 due to current bug in ansible-lint
+      # - name: Lint Ansible Playbooks
+      #   uses: ansible/ansible-lint-action@master
+      #   with:
+      #    targets: playbooks
       - name: yamllint
         run: |
           cd ${AWPLUS_PATH}
