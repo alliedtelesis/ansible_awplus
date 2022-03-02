@@ -93,10 +93,11 @@ jobs:
         run: |
           cd ${AWPLUS_PATH}
           ${ANSIBLE_PATH}/bin/ansible-test sanity --test pep8 plugins/ tests/
-      - name: Lint Ansible Playbooks
-        uses: ansible/ansible-lint-action@master
-        with:
-          targets: playbooks
+      # Removed Feb/2022 due to current bug in ansible-lint
+      # - name: Lint Ansible Playbooks
+      #   uses: ansible/ansible-lint-action@master
+      #   with:
+      #    targets: playbooks
       - name: yamllint
         run: |
           cd ${AWPLUS_PATH}
