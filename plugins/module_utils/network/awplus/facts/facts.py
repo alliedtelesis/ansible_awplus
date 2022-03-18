@@ -31,9 +31,15 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplu
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.user.user import UserFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.vlans.vlans import VlansFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.vrfs.vrfs import VrfsFacts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.legacy.base import Default, Hardware, Config, Interfaces
 
 
-FACT_LEGACY_SUBSETS = {}
+FACT_LEGACY_SUBSETS = dict(
+    default=Default,
+    hardware=Hardware,
+    config=Config,
+    interfaces=Interfaces,
+)
 FACT_RESOURCE_SUBSETS = dict(
     banner=BannerFacts,
     bgp=BgpFacts,
