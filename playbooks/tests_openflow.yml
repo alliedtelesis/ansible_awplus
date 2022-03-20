@@ -1,0 +1,341 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags:
+        - test_init
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "bob"
+              address: "192.168.1.100"
+              protocol: "tcp"
+              l4_port: 6653
+            - name: "fred"
+              address: "192.168.1.100"
+              protocol: "tcp"
+              l4_port: 6654
+          ports:
+            - port1.6.1
+            - port1.6.2
+            - port1.6.3
+            - port1.6.4
+          native_vlan: 4090
+          inactivity_timer: 20
+          datapath_id: 123
+          fail_mode: "secure_nre"
+        state: overridden
+
+    - name: Controller merge 1 - add a new controller
+      tags:
+        - cm_1
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "andy"
+              address: "192.168.2.100"
+              protocol: tcp
+              l4_port: 6653
+        state: merged
+
+    - name: Controller merge 2 - new controller with missing parameters
+      tags:
+        - cm_2
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "andy"
+              address: "192.168.2.100"
+              l4_port: 6653
+        state: merged
+
+    - name: Controller merge 3 - controller change parameter
+      tags:
+        - cm_3
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "bob"
+              address: "192.168.2.100"
+        state: merged
+
+    - name: Controller override 1 - one new controller
+      tags:
+        - co_1
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "andy"
+              address: "192.168.2.100"
+              protocol: "tcp"
+              l4_port: 6654
+        state: overridden
+
+    - name: Controller override 2 - one existing controller
+      tags:
+        - co_2
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "bob"
+              address: "192.168.1.100"
+              protocol: "tcp"
+              l4_port: 6653
+        state: overridden
+
+    - name: Controller override 3 - one existing controller, changed parameters
+      tags:
+        - co_3
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "bob"
+              address: "192.168.2.100"
+              protocol: "tcp"
+              l4_port: 6654
+        state: overridden
+
+    - name: Controller override 4 - missing parameter
+      tags:
+        - co_4
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "bob"
+              protocol: "tcp"
+              l4_port: 6653
+        state: overridden
+
+    - name: Controller replace 1 - one new controller
+      tags:
+        - cr_1
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "andy"
+              address: "192.168.2.100"
+              protocol: "tcp"
+              l4_port: 6654
+        state: replaced
+
+    - name: Controller replace 2 - one existing controller
+      tags:
+        - cr_2
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "bob"
+              address: "192.168.1.100"
+              protocol: "tcp"
+              l4_port: 6653
+        state: replaced
+
+    - name: Controller replace 3 - one existing controller, changed parameters
+      tags:
+        - cr_3
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "bob"
+              address: "192.168.2.100"
+              protocol: "tcp"
+              l4_port: 6654
+        state: replaced
+
+    - name: Controller replace 4 - missing parameter
+      tags:
+        - cr_4
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "bob"
+              protocol: "tcp"
+              l4_port: 6653
+        state: replaced
+
+    - name: Controller delete 1 - delete existing controller
+      tags:
+        - cd_1
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "bob"
+        state: deleted
+
+    - name: Controller delete 2 - delete non-existing controller
+      tags:
+        - cd_2
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "andy"
+        state: deleted
+
+    - name: Port test - override with new port, deleting one
+      tags:
+        - p_1
+      awplus_openflow:
+        config:
+          ports:
+            - port1.6.2
+            - port1.6.3
+            - port1.6.4
+            - port1.6.5
+        state: overridden
+
+    - name: Port test - override with no ports
+      tags:
+        - p_2
+      awplus_openflow:
+        config:
+          ports:
+        state: overridden
+
+    - name: Port test - override with new port
+      tags:
+        - p_3
+      awplus_openflow:
+        config:
+          ports:
+            - port1.6.1
+            - port1.6.2
+            - port1.6.3
+            - port1.6.4
+            - port1.6.5
+        state: overridden
+
+    - name: Port test - merge with new port
+      tags:
+        - p_4
+      awplus_openflow:
+        config:
+          ports:
+            - port1.6.5
+        state: merged
+
+    - name: Port test - merge with same ports
+      tags:
+        - p_5
+      awplus_openflow:
+        config:
+          ports:
+            - port1.6.1
+            - port1.6.2
+            - port1.6.3
+            - port1.6.4
+        state: merged
+
+    - name: Port test - merge with same ports plus one
+      tags:
+        - p_6
+      awplus_openflow:
+        config:
+          ports:
+            - port1.6.1
+            - port1.6.2
+            - port1.6.3
+            - port1.6.4
+            - port1.6.5
+        state: merged
+
+    - name: Port test - merge with no ports
+      tags:
+        - p_7
+      awplus_openflow:
+        config:
+          ports:
+        state: merged
+
+    - name: Port test - delete a port
+      tags:
+        - p_8
+      awplus_openflow:
+        config:
+          ports:
+            - port1.6.1
+        state: deleted
+
+    - name: Port test - delete all ports
+      tags:
+        - p_9
+      awplus_openflow:
+        config:
+          ports:
+            - port1.6.1
+            - port1.6.2
+            - port1.6.3
+            - port1.6.4
+        state: deleted
+
+    - name: Port test - delete invalid port
+      tags:
+        - p_10
+      awplus_openflow:
+        config:
+          ports:
+            - port1.6.5
+        state: deleted
+
+    - name: Port test - delete no ports
+      tags:
+        - p_11
+      awplus_openflow:
+        config:
+          ports:
+        state: deleted
+
+    - name: Other test - merge leaves other parameters unchanged
+      tags:
+        - o_1
+      awplus_openflow:
+        config:
+          native_vlan: 4089
+        state: merged
+
+    - name: Other test - restore all to defaults
+      tags:
+        - o_2
+      awplus_openflow:
+        config:
+          controllers:
+            - name: "bob"
+              address: "192.168.1.100"
+              protocol: "tcp"
+              l4_port: 6653
+            - name: "fred"
+              address: "192.168.1.100"
+              protocol: "tcp"
+              l4_port: 6654
+          ports:
+            - port1.6.1
+            - port1.6.2
+            - port1.6.3
+            - port1.6.4
+        state: overridden
+
+    - name: Other test - replace leaves other parameters unchanged
+      tags:
+        - o_3
+      awplus_openflow:
+        config:
+          native_vlan: 4089
+        state: replaced
+
+    - name: Other test - delete restores default, value doesn't matter
+      tags:
+        - o_4
+      awplus_openflow:
+        config:
+          native_vlan: 34
+        state: deleted
+
+    - name: Other test - fail_mode secure
+      tags:
+        - o_5
+      awplus_openflow:
+        config:
+          fail_mode: "secure"
+        state: merged
