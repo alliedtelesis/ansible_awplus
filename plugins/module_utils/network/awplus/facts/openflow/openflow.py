@@ -184,12 +184,6 @@ class OpenflowFacts(object):
 
         ansible_facts['ansible_network_resources'].pop('openflow', None)
 
-        # we have all the facts in config, no need to validate
-        ##facts = {}
-        ##if objs:
-        ##    params = utils.validate_config(self.argument_spec, {'config': objs})
-        ##    facts['openflow'] = params['config']
-
         facts = {'openflow': config}
         ansible_facts['ansible_network_resources'].update(facts)
 
