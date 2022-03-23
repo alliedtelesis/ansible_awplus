@@ -16,7 +16,7 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common i
     utils,
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.bgp.bgp import BgpArgs
-
+from ansible.module_utils.connection import ConnectionError
 
 class BgpFacts(object):
     """ The awplus bgp fact class
@@ -37,7 +37,11 @@ class BgpFacts(object):
         self.generated_spec = utils.generate_dict(facts_argument_spec)
 
     def get_device_data(self, connection):
-        return connection.get('show running-config bgp')
+        try:
+            ret = connection.get('show running-config bgp')
+        except ConnectionError:
+            ret = ""
+        return ret
 
     def populate_facts(self, connection, ansible_facts, data=None):
         """ Populate the facts for bgp

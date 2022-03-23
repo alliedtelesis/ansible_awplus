@@ -254,3 +254,27 @@ def get_interface_type(interface):
         if re.search(r"(\d+\.\d+\.\d+)", interface):
             return "port"
         return "unknown"
+
+
+def get_sys_info(data):
+    """
+    Pass in the output of 'show system', return a dictionary with
+    'model' and 'serialnum'
+    """
+    for ss_line in data.splitlines():
+        s_data = ss_line.strip()
+        extra_field = False
+        match = re.search(
+            r"^Base\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$", s_data, re.M
+        )
+        if not match:
+            extra_field = True
+            match = re.search(
+                r"^Base\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$", s_data, re.M
+            )
+        if match:
+            if extra_field:
+                return {"model": match.group(3) + " " + match.group(4), "serialnum": match.group(6)}
+            else:
+                return {"model": match.group(3), "serialnum": match.group(5)}
+    return {"model": "--unknown--", "serialnum": "--unknown--"}

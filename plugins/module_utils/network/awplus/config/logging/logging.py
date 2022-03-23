@@ -46,7 +46,7 @@ class Logging(ConfigBase):
         facts, _warnings = Facts(self._module).get_facts(self.gather_subset, self.gather_network_resources)
         logging_facts = facts['ansible_network_resources'].get('logging')
         if not logging_facts:
-            return []
+            return {}
         return logging_facts
 
     def execute_module(self):

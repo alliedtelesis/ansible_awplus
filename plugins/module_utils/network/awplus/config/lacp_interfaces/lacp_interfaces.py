@@ -51,7 +51,7 @@ class Lacp_interfaces(ConfigBase):
         facts, _warnings = Facts(self._module).get_facts(self.gather_subset, self.gather_network_resources)
         lacp_interfaces_facts = facts['ansible_network_resources'].get('lacp_interfaces')
         if not lacp_interfaces_facts:
-            return []
+            return {}
         return lacp_interfaces_facts
 
     def execute_module(self):

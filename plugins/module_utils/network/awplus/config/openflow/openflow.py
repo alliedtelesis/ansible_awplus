@@ -52,7 +52,7 @@ class Openflow(ConfigBase):
         facts, _warnings = Facts(self._module).get_facts(self.gather_subset, self.gather_network_resources)
         openflow_facts = facts['ansible_network_resources'].get('openflow')
         if not openflow_facts:
-            return []
+            return {}
         return openflow_facts
 
     def execute_module(self):

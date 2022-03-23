@@ -45,7 +45,7 @@ class Lacp(ConfigBase):
         facts, _warnings = Facts(self._module).get_facts(self.gather_subset, self.gather_network_resources)
         lacp_facts = facts['ansible_network_resources'].get('lacp')
         if not lacp_facts:
-            return []
+            return {}
         return lacp_facts
 
     def execute_module(self):

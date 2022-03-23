@@ -47,7 +47,7 @@ class Lldp_global(ConfigBase):
         facts, _warnings = Facts(self._module).get_facts(self.gather_subset, self.gather_network_resources)
         lldp_global_facts = facts['ansible_network_resources'].get('lldp_global')
         if not lldp_global_facts:
-            return []
+            return {}
         return lldp_global_facts
 
     def execute_module(self):
