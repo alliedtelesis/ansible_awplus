@@ -18,6 +18,7 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common i
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.bgp.bgp import BgpArgs
 from ansible.module_utils.connection import ConnectionError
 
+
 class BgpFacts(object):
     """ The awplus bgp fact class
     """
