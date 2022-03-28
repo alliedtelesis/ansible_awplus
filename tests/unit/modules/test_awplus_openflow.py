@@ -120,6 +120,57 @@ class TestAwplusOpenFlowModule(TestAwplusModule):
         )
         self.execute_module(failed=True, changed=False)
 
+    def test_awplus_openflow_override(self):
+        """
+        All existing config is overridden with the given config.
+        """
+        set_module_args(
+            dict(
+                config=dict(
+                    controllers=[
+                        dict(name="oc2", protocol="ssl", address="192.56.8.3", l4_port=8)
+                    ],
+                    ports=["port1.0.1"],
+                ),
+                state="overridden",
+            )
+        )
+        commands = [
+            "no openflow controller test_ssl1",
+            "no openflow controller oc1",
+            "no openflow controller test_ssl",
+            "no openflow controller controller1",
+            "openflow controller oc2 ssl 192.56.8.3 8",
+            "no openflow datapath-id",
+            "no openflow native vlan",
+            "no openflow failmode",
+            "no openflow inactivity",
+        ]
+        self.execute_module(failed=False, changed=True, commands=commands)
+
+    def test_awplus_openflow_replace_controllers(self):
+        """
+        All existing controllers is overridden with the given config.
+        """
+        set_module_args(
+            dict(
+                config=dict(
+                    controllers=[
+                        dict(name="oc2", protocol="ssl", address="192.56.8.3", l4_port=8)
+                    ],
+                ),
+                state="replaced",
+            )
+        )
+        commands = [
+            "no openflow controller test_ssl1",
+            "no openflow controller oc1",
+            "no openflow controller test_ssl",
+            "no openflow controller controller1",
+            "openflow controller oc2 ssl 192.56.8.3 8",
+        ]
+        self.execute_module(failed=False, changed=True, commands=commands)
+
     def test_awplus_openflow_add_existing_port(self):
         set_module_args(dict(config=dict(ports=["port1.0.1"]), state="merged"))
         self.execute_module(changed=False)

@@ -210,7 +210,7 @@ class Openflow(ConfigBase):
 
         # Delete controllers based on parameters.
         for h_name in haves:
-            if state == "overridden" or h_name in wants:
+            if state in ("overridden", "replaced") or h_name in wants:
                 commands.append("no openflow controller {}".format(h_name))
 
         # That's it for deleted.
