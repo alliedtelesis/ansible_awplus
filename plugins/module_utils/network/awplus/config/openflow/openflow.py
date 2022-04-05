@@ -205,8 +205,6 @@ class Openflow(ConfigBase):
                     self._module.fail_json(msg="New controller protocol missing")
                 if cont_w['l4_port'] is None:
                     self._module.fail_json(msg="New controller port missing")
-            elif state == 'deleted' and w_name not in haves:
-                self._module.fail_json(msg="Can't delete no-existent controller")
 
         # Delete controllers based on parameters.
         for h_name in haves:

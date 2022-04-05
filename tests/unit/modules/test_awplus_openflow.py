@@ -118,7 +118,7 @@ class TestAwplusOpenFlowModule(TestAwplusModule):
                 state="deleted",
             )
         )
-        self.execute_module(failed=True, changed=False)
+        self.execute_module(failed=False, changed=False)
 
     def test_awplus_openflow_override(self):
         """
