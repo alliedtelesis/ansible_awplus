@@ -42,6 +42,7 @@ from ansible.module_utils.six import iteritems
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.config import NetworkConfig, dumps
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import to_list
 from ansible.plugins.cliconf import CliconfBase, enable_mode
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.utils import get_sys_info
 
 
 class Cliconf(CliconfBase):
@@ -225,7 +226,6 @@ class Cliconf(CliconfBase):
         newline=True,
         check_all=False,
     ):
-
         if not command:
             raise ValueError("must provide value of command to execute")
         if output:
@@ -251,11 +251,9 @@ class Cliconf(CliconfBase):
         if match:
             device_info["network_os_version"] = match.group(1).strip(",")
 
-        match = re.search(
-            r"Base\s+ (\S+)\s+ (\S+)\s+ (\S+)\s+ (\S+)\s+ (\S+)", data, re.M
-        )
-        if match:
-            device_info["network_os_model"] = match.group(3).strip()
+        si = get_sys_info(data)
+        if si is not None and "model" in si:
+            device_info["network_os_model"] = si["model"]
 
         found = False
         data_list = data.split("\n")

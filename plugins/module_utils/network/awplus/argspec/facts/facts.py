@@ -1,6 +1,6 @@
 #
 # -*- coding: utf-8 -*-
-# Copyright 2019 Red Hat
+# Copyright 2021 Allied Telesis
 # GNU General Public License v3.0+
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 """
@@ -29,6 +29,7 @@ class FactsArgs(object):  # pylint: disable=R0903
         'lldp_interfaces',
         'logging',
         'ntp',
+        'openflow',
         'static_lag_interfaces',
         'user',
         'vlans',

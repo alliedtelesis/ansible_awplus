@@ -49,7 +49,7 @@ class Vrfs(ConfigBase):
         facts, _warnings = Facts(self._module).get_facts(self.gather_subset, self.gather_network_resources)
         vrfs_facts = facts['ansible_network_resources'].get('vrfs')
         if not vrfs_facts:
-            return []
+            return {}
         return vrfs_facts
 
     def execute_module(self):

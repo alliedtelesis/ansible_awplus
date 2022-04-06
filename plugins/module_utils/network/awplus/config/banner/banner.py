@@ -47,7 +47,7 @@ class Banner(ConfigBase):
         facts, _warnings = Facts(self._module).get_facts(self.gather_subset, self.gather_network_resources)
         banner_facts = facts['ansible_network_resources'].get('banner')
         if not banner_facts:
-            return []
+            return {}
         return banner_facts
 
     def execute_module(self):

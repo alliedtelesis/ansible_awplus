@@ -24,6 +24,7 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.utils import (
     normalize_interface,
+    get_sys_info,
 )
 from ansible.module_utils.six import iteritems
 from ansible.module_utils.six.moves import zip
@@ -59,17 +60,9 @@ class Default(FactsBase):
             self.facts["serialnum"] = self.parse_serialnum(data)
 
     def parse_serialnum(self, data):
-        match_num = 5
-        match = re.search(
-            r"^Base\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$", data, re.M
-        )
-        if not match:
-            match_num = 6
-            match = re.search(
-                r"^Base\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$", data, re.M
-            )
-        if match:
-            return match.group(match_num)
+        si = get_sys_info(data)
+        if si is not None and "serialnum" in si:
+            return si["serialnum"]
         return "--unknown--"
 
     def platform_facts(self):

@@ -47,7 +47,7 @@ class User(ConfigBase):
         facts, _warnings = Facts(self._module).get_facts(self.gather_subset, self.gather_network_resources)
         user_facts = facts['ansible_network_resources'].get('user')
         if not user_facts:
-            return []
+            return {}
         return user_facts
 
     def execute_module(self):

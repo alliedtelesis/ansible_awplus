@@ -47,7 +47,7 @@ class Ntp(ConfigBase):
         facts, _warnings = Facts(self._module).get_facts(self.gather_subset, self.gather_network_resources)
         ntp_facts = facts['ansible_network_resources'].get('ntp')
         if not ntp_facts:
-            return []
+            return {}
         return ntp_facts
 
     def execute_module(self):

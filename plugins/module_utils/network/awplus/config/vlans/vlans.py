@@ -48,7 +48,7 @@ class Vlans(ConfigBase):
         facts, _warnings = Facts(self._module).get_facts(self.gather_subset, self.gather_network_resources)
         vlans_facts = facts['ansible_network_resources'].get('vlans')
         if not vlans_facts:
-            return []
+            return {}
         return vlans_facts
 
     def execute_module(self):

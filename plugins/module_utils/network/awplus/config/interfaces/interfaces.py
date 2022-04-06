@@ -51,7 +51,7 @@ class Interfaces(ConfigBase):
         facts, _warnings = Facts(self._module).get_facts(self.gather_subset, self.gather_network_resources)
         interfaces_facts = facts['ansible_network_resources'].get('interfaces')
         if not interfaces_facts:
-            return []
+            return {}
         return interfaces_facts
 
     def execute_module(self):

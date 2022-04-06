@@ -57,7 +57,7 @@ class L3_interfaces(ConfigBase):
         facts, _warnings = Facts(self._module).get_facts(self.gather_subset, self.gather_network_resources)
         l3_interfaces_facts = facts['ansible_network_resources'].get('l3_interfaces')
         if not l3_interfaces_facts:
-            return []
+            return {}
         return l3_interfaces_facts
 
     def execute_module(self):
