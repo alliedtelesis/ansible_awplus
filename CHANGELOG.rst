@@ -4,6 +4,27 @@ Allied Telesis Alliedware Plus (AW+) Collection Release Notes
 
 .. contents:: Topics
 
+v1.2.0
+======
+
+Minor Changes
+-------------
+
+- awplus_facts - Reinstate legacy facts
+- awplus_openflow - Reimplement as resource module
+
+Bugfixes
+--------
+
+- Fixed exceptions when no existing configuration exists for a module
+- Fixed exception when device doesn't support BGP
+- Fixed parsing serial number and model when model has embedded spaces
+
+Deleted Modules
+---------------
+
+New Modules
+-----------
 
 v1.1.0
 ======
