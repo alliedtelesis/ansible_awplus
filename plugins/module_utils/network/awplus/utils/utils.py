@@ -6,8 +6,6 @@
 
 # utils
 import re
-from ansible.module_utils.six import iteritems
-from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import is_masklen
 
 
 def remove_command_from_config_list(interface, cmd, commands):

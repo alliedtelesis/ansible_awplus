@@ -17,4 +17,8 @@ namespace: alliedtelesis
 readme: README.md
 repository: "https://github.com/alliedtelesis/ansible_awplus"
 tags: ["networking"]
+build_ignore:
+- .vscode
+- .github
+- .gitignore
 version: 1.2.0

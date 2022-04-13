@@ -94,7 +94,7 @@ commands:
     type: list
     sample:
         - hostname awplus01
-      - ip domain name test.example.com
+        - ip domain name test.example.com
 """
 
 import re

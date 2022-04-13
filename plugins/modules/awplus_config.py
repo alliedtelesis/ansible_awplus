@@ -254,7 +254,6 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import
     get_config,
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
-    get_defaults_flag,
     get_connection,
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
