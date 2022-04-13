@@ -9,7 +9,6 @@ this file validates each subset of facts and selectively
 calls the appropriate facts gathering function
 """
 
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.facts.facts import FactsArgs
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.facts.facts import (
     FactsBase,
 )

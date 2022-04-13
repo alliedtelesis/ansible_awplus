@@ -27,6 +27,7 @@ author:
     - Isaac Daly (@dalyIsaac)
 notes:
     - C(state=present) is the default for all state options.
+    - Check mode is supported.
 options:
   router:
     description:
@@ -42,8 +43,6 @@ options:
                 - A positive integer in the range 1 to 65535 used to define a routing
                   process.
     required: True
-notes:
-    - Check mode is supported.
 """
 
 

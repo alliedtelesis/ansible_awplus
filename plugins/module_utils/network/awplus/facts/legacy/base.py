@@ -15,7 +15,6 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 import re
-import sys
 
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.awplus import (
@@ -27,7 +26,6 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.utils i
     get_sys_info,
 )
 from ansible.module_utils.six import iteritems
-from ansible.module_utils.six.moves import zip
 
 
 class FactsBase(object):
@@ -112,7 +110,6 @@ class Hardware(FactsBase):
     def parse_filesystems_info(self, data):
         facts = dict()
         fs = ""
-        test = ""
         for line in data.split("\n"):
             match = re.match(r".+\s+(\w+)\s+r[w|o].+", line, re.M)
             if match:

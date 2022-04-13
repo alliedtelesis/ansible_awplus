@@ -167,7 +167,6 @@ class Banner(ConfigBase):
         else:
             for name, want_dict in iteritems(want):
                 if name in have:
-                    have_dict = have[name]
                     commands.extend(_clear_config(name))
 
         return commands

@@ -79,8 +79,8 @@ class VrfsFacts(object):
         """
         config = deepcopy(spec)
 
-        for l in conf.splitlines():
-            ls = l.strip()
+        for conf_line in conf.splitlines():
+            ls = conf_line.strip()
             if ls.startswith('ip vrf'):
                 match = re.search(r'ip vrf (\S+) (\d+)', ls)
                 if match:
