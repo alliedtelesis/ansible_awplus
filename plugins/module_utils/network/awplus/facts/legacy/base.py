@@ -198,6 +198,7 @@ class Interfaces(FactsBase):
             intf["duplex"] = self.parse_duplex(value)
             intf["operstatus"] = self.parse_operstatus(value)
             intf["type"] = self.parse_type(value)
+            intf["speed"] = self.parse_speed(value)
 
             facts[key] = utils.remove_empties(intf)
         return facts
@@ -345,6 +346,14 @@ class Interfaces(FactsBase):
 
     def parse_operstatus(self, data):
         match = re.search(r"^(?:.+) is (.+),", data, re.M)
+        if match:
+            return match.group(1)
+
+    def parse_speed(self, data):
+        match = re.search(r"current speed ([0-9]+),", data, re.M)
+        if match:
+            return match.group(1)
+        match = re.search(r"configured speed (.+),", data, re.M)
         if match:
             return match.group(1)
 
