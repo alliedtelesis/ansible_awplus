@@ -138,8 +138,7 @@ class L2_interfaces(ConfigBase):
         for name, want_dict in iteritems(want):
             if name in have:
                 have_dict = have[name]
-                diff = dict_diff(want_dict, have_dict)
-                commands.extend(_clear_config(name, want_dict, diff))
+                commands.extend(_clear_config(name, want_dict, have_dict))
                 commands.extend(_set_config(name, want_dict, have_dict, self._module))
 
         return remove_duplicate_interface(commands)
@@ -190,15 +189,11 @@ class L2_interfaces(ConfigBase):
         """
         commands = []
 
-        if not want:
-            for name, have_dict in iteritems(have):
-                commands.extend(_clear_config(name, dict(), have_dict))
-        else:
+        if want:
             for name, want_dict in iteritems(want):
                 if name in have:
                     have_dict = have[name]
-                    commands.extend(_clear_config(name, dict(), have_dict))
-
+                    commands.extend(_delete_config(name, have_dict, want_dict))
         return commands
 
 
@@ -234,21 +229,55 @@ def _set_config(name, want, have, module):
 
 
 def _clear_config(name, want, have):
+    """
+    Work out what to clear in order to get from have to want. Apart from having nothing in want, the
+    only commands generated apply to trunk mode.
+    """
     commands = []
 
     if not want:
         if have.get('trunk'):
-            commands.append('no switchport trunk')
+            commands.append('switchport mode access')
         elif have.get('access'):
             commands.append('no switchport access vlan')
-    else:
-        if have.get('trunk') and want.get('trunk'):
+    elif have.get('trunk'):
+        if not want.get('trunk'):
+            commands.append('no switchport trunk')
+        else:
             h_trunk = have['trunk']
             w_trunk = want['trunk']
             if h_trunk.get('allowed_vlans'):
-                commands.append('switchport trunk allowed vlan none')
+                if not w_trunk.get('allowed_vlans'):
+                    commands.append('switchport trunk allowed vlan none')
+                else:
+                    for vid in h_trunk['allowed_vlans']:
+                        if vid not in w_trunk['allowed_vlans']:
+                            commands.append('switchport trunk allowed vlan remove {}'.format(vid))
             if h_trunk.get('native_vlan') and not w_trunk.get('native_vlan'):
                 commands.append('no switchport trunk native vlan')
+    if commands:
+        commands.insert(0, 'interface {}'.format(name))
+    return commands
+
+
+def _delete_config(name, have, dele):
+    commands = []
+
+    if dele:
+        if have.get('trunk') and dele.get('trunk'):
+            h_trunk = have['trunk']
+            d_trunk = dele['trunk']
+            if h_trunk.get('native_vlan') == d_trunk.get('native_vlan'):
+                commands.append('no switchport trunk native vlan')
+            if h_trunk.get('allowed_vlans') and d_trunk.get('allowed_vlans'):
+                for dv in d_trunk['allowed_vlans']:
+                    if dv in h_trunk['allowed_vlans']:
+                        commands.append('switchport trunk allowed vlan remove {}'.format(dv))
+        elif have.get('access') and dele.get('access'):
+            h_access = have['access']
+            d_access = dele['access']
+            if h_access.get('vlan') == d_access.get('vlan'):
+                commands.append('no switchport access vlan')
 
     if commands:
         commands.insert(0, 'interface {}'.format(name))

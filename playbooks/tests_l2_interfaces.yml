@@ -1,0 +1,281 @@
+---
+- hosts: aw2
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags:
+        - test_init
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.1
+            access:
+              vlan: 99
+          - name: port1.0.2
+            trunk:
+              allowed_vlans: [5, 6, 7]
+              native_vlan: 22
+          - name: port1.0.3
+            trunk:
+              allowed_vlans: [5, 6]
+          - name: port1.0.4
+            trunk:
+              native_vlan: 99
+        state: overridden
+
+    - name: Override to default config
+      tags:
+        - default_config
+      awplus_l2_interfaces:
+        config:
+        state: overridden
+
+    - name: Delete one allowed VLAN from a trunk
+      tags:
+        - delete_1
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              allowed_vlans: 7
+        state: deleted
+
+    - name: Delete nothing
+      tags:
+        - delete_2
+      awplus_l2_interfaces:
+        config:
+        state: deleted
+
+    - name: Delete access VLAN
+      tags:
+        - delete_3
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.1
+            access:
+              vlan: 99
+        state: deleted
+
+    - name: Delete wrong access VLAN (do nothing)
+      tags:
+        - delete_4
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.1
+            access:
+              vlan: 22
+        state: deleted
+
+    - name: Delete non-existing allowed VLAN from a trunk (do nothing)
+      tags:
+        - delete_5
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              allowed_vlans: 8
+        state: deleted
+
+    - name: Delete native VLAN from a trunk
+      tags:
+        - delete_6
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              native_vlan: 22
+        state: deleted
+
+    - name: Delete incorrect native VLAN from a trunk (do nothing)
+      tags:
+        - delete_7
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              native_vlan: 23
+        state: deleted
+
+    - name: Add an allowed VLAN wih replace
+      tags:
+        - replace_1
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.3
+            trunk:
+              allowed_vlans: [5, 6, 7]
+        state: replaced
+
+    - name: Delete an allowed VLAN wih replace
+      tags:
+        - replace_2
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              allowed_vlans: [5, 6]
+              native_vlan: 22
+        state: replaced
+
+    - name: Add/delete an allowed VLAN wih replace
+      tags:
+        - replace_3
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              allowed_vlans: [5, 6, 8]
+              native_vlan: 22
+        state: replaced
+
+    - name: Change everything wih replace
+      tags:
+        - replace_4
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.3
+            trunk:
+              allowed_vlans: [7, 8]
+              native_vlan: 22
+        state: replaced
+
+    - name: Add/delete an allowed VLAN wih replace
+      tags:
+        - replace_5
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              allowed_vlans: 5, 6, 8
+              native_vlan: 22
+        state: replaced
+
+    - name: Replace test - do nothing
+      tags:
+        - replace_6
+      awplus_l2_interfaces:
+        config:
+        state: replaced
+
+    - name: Add a VLAN to allowed with merge
+      tags:
+        - merged_1
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.3
+            trunk:
+              allowed_vlans: 7
+        state: merged
+
+    - name: Set trunk netive VLAN with merge
+      tags:
+        - merged_2
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.3
+            trunk:
+              native_vlan: 99
+        state: merged
+
+    - name: Set access netive VLAN with merge
+      tags:
+        - merged_3
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.1
+            access:
+              vlan: 22
+        state: merged
+
+    - name: Set trunk with merge
+      tags:
+        - merged_4
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              native_vlan: 99
+              allowed_vlans: 8
+        state: merged
+
+    - name: Set trunk to same with merge
+      tags:
+        - merged_5
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              native_vlan: 22
+              allowed_vlans: 5, 6, 7
+        state: merged
+
+    - name: Part set trunk to same with merge
+      tags:
+        - merged_6
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              native_vlan: 22
+              allowed_vlans: 5, 6
+        state: merged
+
+    - name: Change trunk to access with merge
+      tags:
+        - merged_7
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            access:
+              vlan: 22
+        state: merged
+
+    - name: Change trunk to access with merge
+      tags:
+        - merged_8
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            access:
+              vlan: 99
+        state: merged
+
+    - name: Change access to trunk with merge
+      tags:
+        - merged_9
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.1
+            trunk:
+              native_vlan: 22
+              allowed_vlans: 5, 6
+        state: merged
+
+    - name: Change access to trunk with merge
+      tags:
+        - merged_10
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.1
+            trunk:
+              allowed_vlans: 5, 6
+        state: merged
+
+    - name: Change access to trunk with merge
+      tags:
+        - merged_11
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.1
+            trunk:
+              native_vlan: 99
+        state: merged
+
+    - name: Merge test - do nothing
+      tags:
+        - merged_12
+      awplus_l2_interfaces:
+        config:
+        state: merged

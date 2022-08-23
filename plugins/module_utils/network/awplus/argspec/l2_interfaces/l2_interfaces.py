@@ -40,7 +40,7 @@ class L2_interfacesArgs(object):  # pylint: disable=R0903
                 'vlan': {'required': True, 'type': 'int'}}, 'type': 'dict'},
             'name': {'required': True, 'type': 'str'},
             'trunk': {'options': {
-                'allowed_vlans': {'elements': 'str', 'type': 'list'},
+                'allowed_vlans': {'elements': 'int', 'type': 'list'},
                 'native_vlan': {'type': 'int'}}, 'type': 'dict'}}, 'type': 'list'},
         'state': {'choices': ['merged', 'replaced', 'overridden', 'deleted'], 'default': 'merged', 'type': 'str'}}
     # pylint: disable=C0301
