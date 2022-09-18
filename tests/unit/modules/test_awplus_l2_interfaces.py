@@ -141,10 +141,13 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
                 config=[dict(name="port1.0.1", access=dict(vlan=1))], state="overridden"
             )
         )
-        commands = ["interface port1.0.1",
-                    "switchport access vlan 1",
-                    "interface port1.0.2",
-                    "no switchport trunk", ]
+        commands = [
+            "interface port1.0.1",
+            "switchport access vlan 1",
+            "interface port1.0.2",
+            "switchport mode access",
+            "no switchport access vlan",
+        ]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_l2_interfaces_overridden_idempotent(self):
@@ -161,5 +164,5 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
 
     def test_awplus_l2_interfaces_deleted(self):
         set_module_args(dict(config=[dict(name="port1.0.2",)], state="deleted"))
-        commands = ["interface port1.0.2", "no switchport trunk"]
+        commands = ["interface port1.0.2", "switchport mode access", "no switchport access vlan"]
         self.execute_module(changed=True, commands=commands)

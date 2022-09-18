@@ -113,28 +113,33 @@ class L2_interfacesFacts(object):
         config["name"] = intf
 
         mode = utils.parse_conf_arg(conf, "switchport mode")
+        trunk = dict()
         if mode == "access":
             has_access = utils.parse_conf_arg(conf, "switchport access vlan")
             if has_access:
                 config["access"] = {"vlan": int(has_access)}
-
-        trunk = dict()
-        native_vlan = utils.parse_conf_arg(conf, "native vlan")
-        if native_vlan and native_vlan != "none":
-            trunk["native_vlan"] = int(native_vlan)
-        allowed_vlan = utils.parse_conf_arg(conf, "allowed vlan add")
-        if allowed_vlan:
-            vels = allowed_vlan.split(",")
-            av = []
-            for vel in vels:
-                if '-' in vel:
-                    vr = vel.split('-')
-                    if len(vr) == 2:
-                        vrlow = int(vr[0])
-                        vrhi = int(vr[1])
-                        av += [x for x in range(vrlow, vrhi + 1)]
+        else:
+            native_vlan = utils.parse_conf_arg(conf, "native vlan")
+            if native_vlan:
+                if native_vlan == "none":
+                    trunk["native_vlan"] = 0    # no native VLAN
                 else:
-                    av.append(int(vel))
-            trunk["allowed_vlans"] = av
+                    trunk["native_vlan"] = int(native_vlan)
+            else:
+                trunk["native_vlan"] = 1        # default VLAN
+            allowed_vlan = utils.parse_conf_arg(conf, "allowed vlan add")
+            if allowed_vlan:
+                vels = allowed_vlan.split(",")
+                av = []
+                for vel in vels:
+                    if '-' in vel:
+                        vr = vel.split('-')
+                        if len(vr) == 2:
+                            vrlow = int(vr[0])
+                            vrhi = int(vr[1])
+                            av += [x for x in range(vrlow, vrhi + 1)]
+                    else:
+                        av.append(int(vel))
+                trunk["allowed_vlans"] = av
         config["trunk"] = trunk
         return utils.remove_empties(config)

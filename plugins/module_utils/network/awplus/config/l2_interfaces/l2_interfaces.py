@@ -137,11 +137,8 @@ class L2_interfaces(ConfigBase):
 
         for name, want_dict in iteritems(want):
             if name in have:
-                have_dict = have[name]
-                commands.extend(_clear_config(name, want_dict, have_dict))
-                commands.extend(_set_config(name, want_dict, have_dict, self._module))
-
-        return remove_duplicate_interface(commands)
+                commands.extend(_do_replace(name, want_dict, have[name], self._module))
+        return commands
 
     @staticmethod
     def _state_overridden(self, want, have):
@@ -153,13 +150,11 @@ class L2_interfaces(ConfigBase):
         """
         commands = []
         for name, have_dict in iteritems(have):
-            p_have = {name: have_dict}
             if name in want:
-                p_want = {name: want[name]}
-                commands.extend(self._state_replaced(self, p_want, p_have))
+                commands.extend(_do_replace(name, want[name], have_dict, self._module))
             else:
-                commands.extend(self._state_deleted(self, dict(), p_have))
-
+                want_dict = {'name': name}
+                commands.extend(_do_delete(name, want_dict, have_dict))
         return commands
 
     @staticmethod
@@ -176,7 +171,6 @@ class L2_interfaces(ConfigBase):
             if name in have:
                 have_dict = have[name]
                 commands.extend(_set_config(name, want_dict, have_dict, self._module))
-
         return commands
 
     @staticmethod
@@ -189,12 +183,104 @@ class L2_interfaces(ConfigBase):
         """
         commands = []
 
-        if want:
-            for name, want_dict in iteritems(want):
-                if name in have:
-                    have_dict = have[name]
-                    commands.extend(_delete_config(name, have_dict, want_dict))
+        for name, want_dict in iteritems(want):
+            if name in have:
+                have_dict = have[name]
+                commands.extend(_do_delete(name, want_dict, have_dict))
         return commands
+
+
+def _do_delete(name, want_dict, have_dict):
+    """
+    Carry out actions for deleting the configuration for a port.
+    """
+    p_cmd = []
+
+    # Drill down to deletable components
+    w_access = want_dict.get('access')
+    w_vlan = None if w_access is None else w_access.get('vlan')
+    h_access = have_dict.get('access')
+    h_vlan = None if h_access is None else h_access.get('vlan')
+    w_trunk = want_dict.get('trunk')
+    w_native_vlan = None if w_trunk is None else w_trunk.get('native_vlan')
+    w_native_vlan_flag = w_native_vlan is not None
+    w_allowed_vlans = None if w_trunk is None else w_trunk.get('allowed_vlans')
+    h_trunk = have_dict.get('trunk')
+    h_native_vlan = None if h_trunk is None else h_trunk.get('native_vlan')
+    h_native_vlan_flag = h_native_vlan is not None
+    h_allowed_vlans = None if h_trunk is None else h_trunk.get('allowed_vlans')
+
+    # Delete requested components
+    if w_vlan and h_vlan:
+        if int(w_vlan) == int(h_vlan):
+            p_cmd.append('no switchport access vlan')
+    if w_native_vlan_flag and h_native_vlan_flag:
+        if int(w_native_vlan) == int(h_native_vlan):
+            p_cmd.append('no switchport trunk native vlan')
+    if w_allowed_vlans and h_allowed_vlans:
+        for dv in h_allowed_vlans:
+            if dv in w_allowed_vlans:
+                p_cmd.append(f'switchport trunk allowed vlan remove {dv}')
+    if not (w_vlan or w_native_vlan_flag or w_allowed_vlans) and (h_access or h_trunk):
+        p_cmd.append('switchport mode access')
+        p_cmd.append('no switchport access vlan')
+    if p_cmd:
+        p_cmd.insert(0, f'interface {name}')
+    return p_cmd
+
+
+def _do_replace(name, want_dict, have_dict, module):
+    """
+    Carry out actions for replacing entire configuration of a port. This is used for
+    both replaced and overridden operations.
+    """
+    p_cmd = []
+
+    # Drill down to deletable components
+    w_access = want_dict.get('access')
+    w_vlan = None if w_access is None else w_access.get('vlan')
+    h_access = have_dict.get('access')
+    h_vlan = None if h_access is None else h_access.get('vlan')
+    w_trunk = want_dict.get('trunk')
+    w_native_vlan = None if w_trunk is None else w_trunk.get('native_vlan')
+    w_native_vlan_flag = w_native_vlan is not None
+    w_allowed_vlans = None if w_trunk is None else w_trunk.get('allowed_vlans')
+    h_trunk = have_dict.get('trunk')
+    h_native_vlan = None if h_trunk is None else h_trunk.get('native_vlan')
+    h_native_vlan_flag = h_native_vlan is not None
+    h_allowed_vlans = [] if h_trunk is None else h_trunk.get('allowed_vlans')
+
+    # Carry out replace
+    # Check for duplicated wants
+    if w_vlan and (w_native_vlan_flag or w_allowed_vlans):
+        module.fail_json(msg='Interface should either be trunk or access')
+
+    # Mode change?
+    if (h_native_vlan_flag or h_allowed_vlans) and not (w_native_vlan_flag or w_allowed_vlans):
+        p_cmd.append('switchport mode access')
+    elif (w_native_vlan_flag or w_allowed_vlans) and not (h_native_vlan_flag or h_allowed_vlans):
+        p_cmd.append('switchport mode trunk')
+
+    # Set VLAN in access mode
+    if w_vlan and (not h_vlan or h_vlan != w_vlan):
+        p_cmd.append(f'switchport access vlan {w_vlan}')
+
+    # Set VLAN in trunk mode
+    if w_native_vlan_flag and (not h_native_vlan_flag or h_native_vlan != w_native_vlan):
+        p_cmd.append(f'switchport trunk native vlan {"none" if w_native_vlan == 0 else w_native_vlan}')
+
+    # Adjust allowed VLANs
+    if w_allowed_vlans:
+        for rv in w_allowed_vlans:
+            if rv not in h_allowed_vlans:
+                p_cmd.append(f'switchport trunk allowed vlan add {rv}')
+        for rv in h_allowed_vlans:
+            if rv not in w_allowed_vlans:
+                p_cmd.append(f'switchport trunk allowed vlan remove {rv}')
+
+    if p_cmd:
+        p_cmd.insert(0, f'interface {name}')
+    return p_cmd
 
 
 def _set_config(name, want, have, module):
@@ -219,44 +305,12 @@ def _set_config(name, want, have, module):
             for vlan in value.get('allowed_vlans'):
                 if vlan not in have.get('trunk', {}).get('allowed_vlans', []):
                     commands.append('switchport trunk allowed vlan add {}'.format(vlan))
-        if value.get('native_vlan') and value.get('native_vlan') != have.get('trunk', {}).get('native_vlan'):
-            commands.append('switchport trunk native vlan {}'.format(value['native_vlan']))
+        if value.get('native_vlan') is not None and value.get('native_vlan') != have.get('trunk', {}).get('native_vlan'):
+            commands.append(f'switchport trunk native vlan {"none" if value["native_vlan"] == 0 else value["native_vlan"]}')
 
     if commands:
         commands.insert(0, 'interface {}'.format(name))
 
-    return commands
-
-
-def _clear_config(name, want, have):
-    """
-    Work out what to clear in order to get from have to want. Apart from having nothing in want, the
-    only commands generated apply to trunk mode.
-    """
-    commands = []
-
-    if not want:
-        if have.get('trunk'):
-            commands.append('switchport mode access')
-        elif have.get('access'):
-            commands.append('no switchport access vlan')
-    elif have.get('trunk'):
-        if not want.get('trunk'):
-            commands.append('no switchport trunk')
-        else:
-            h_trunk = have['trunk']
-            w_trunk = want['trunk']
-            if h_trunk.get('allowed_vlans'):
-                if not w_trunk.get('allowed_vlans'):
-                    commands.append('switchport trunk allowed vlan none')
-                else:
-                    for vid in h_trunk['allowed_vlans']:
-                        if vid not in w_trunk['allowed_vlans']:
-                            commands.append('switchport trunk allowed vlan remove {}'.format(vid))
-            if h_trunk.get('native_vlan') and not w_trunk.get('native_vlan'):
-                commands.append('no switchport trunk native vlan')
-    if commands:
-        commands.insert(0, 'interface {}'.format(name))
     return commands
 
 
