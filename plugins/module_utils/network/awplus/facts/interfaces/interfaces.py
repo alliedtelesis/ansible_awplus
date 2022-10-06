@@ -98,7 +98,7 @@ class InterfacesFacts(object):
 
         interfaces = int_range_to_list(match.group(1), int_list)
         if not interfaces:
-            return[]
+            return []
 
         for interface in interfaces:
             if interface in int_list:
