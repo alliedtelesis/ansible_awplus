@@ -79,14 +79,14 @@ class TestAwplusOpenFlowModule(TestAwplusModule):
             )
         )
         commands = ["no openflow controller test_ssl1", "openflow controller test_ssl1 ssl 192.56.8.3 8"]
-        result = self.execute_module(changed=True, commands=commands)
+        self.execute_module(changed=True, commands=commands)
 
     def test_awplus_openflow_add_new_controller(self):
         set_module_args(
             dict(config=dict(controllers=[dict(name="oc2", protocol="tcp", address="184.5.3.2", l4_port=10)]), state="merged")
         )
         commands = ["openflow controller oc2 tcp 184.5.3.2 10"]
-        result = self.execute_module(changed=True, commands=commands)
+        self.execute_module(changed=True, commands=commands)
 
     def test_awplus_openflow_remove_existing_controller(self):
         set_module_args(
@@ -105,7 +105,7 @@ class TestAwplusOpenFlowModule(TestAwplusModule):
             )
         )
         commands = ["no openflow controller test_ssl1"]
-        result = self.execute_module(changed=True, commands=commands)
+        self.execute_module(changed=True, commands=commands)
 
     def test_awplus_openflow_remove_nonexisitng_controller(self):
         set_module_args(
@@ -183,7 +183,7 @@ class TestAwplusOpenFlowModule(TestAwplusModule):
     def test_awplus_openflow_remove_existing_port(self):
         set_module_args(dict(config=dict(ports=["port1.0.1"]), state="deleted"))
         commands = ["interface port1.0.1", "no openflow"]
-        result = self.execute_module(changed=True, commands=commands)
+        self.execute_module(changed=True, commands=commands)
 
     def test_awplus_openflow_remove_nonexisting_port(self):
         set_module_args(dict(config=dict(ports=["port1.0.2"]), state="deleted"))

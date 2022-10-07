@@ -4,6 +4,27 @@ Allied Telesis Alliedware Plus (AW+) Collection Release Notes
 
 .. contents:: Topics
 
+v1.2.1
+======
+
+Minor Changes
+-------------
+
+- awplus_facts - Add interface speed to legacy facts
+- awplus_l2_interfaces - Support native VLAN none on trunk mode
+- awplus_l2_interfaces - Add playbook tests and a playbook test runner
+
+Bugfixes
+--------
+
+- awplus_l2_interfaces - Support list of allowed VLANs correctly
+
+Deleted Modules
+---------------
+
+New Modules
+-----------
+
 v1.2.0
 ======
 
