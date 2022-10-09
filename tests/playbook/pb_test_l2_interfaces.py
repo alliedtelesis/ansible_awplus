@@ -103,15 +103,15 @@ def run_playbook(playbook, tag, debug=False):
 def parse_output(op):
     looking = True
     pop = ""
-    for l in op.splitlines():
-        ls = l.strip()
+    for outl in op.splitlines():
+        ls = outl.strip()
         if looking:
             if ls.startswith(('ok:', 'changed:')) and ls.endswith('{'):
                 pop = "{"
                 looking = False
         else:
             pop += ls
-            if l.rstrip() == '}':
+            if outl.rstrip() == '}':
                 break
     pop = pop.replace("false", "False")
     pop = pop.replace("true", "True")

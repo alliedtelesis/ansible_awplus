@@ -20,9 +20,6 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
     dict_diff,
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.facts import Facts
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.utils.utils import (
-    remove_duplicate_interface,
-)
 
 
 class L2_interfaces(ConfigBase):

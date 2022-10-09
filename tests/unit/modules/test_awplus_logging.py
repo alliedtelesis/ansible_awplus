@@ -22,8 +22,6 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-import json
-
 from ansible_collections.alliedtelesis.awplus.tests.unit.compat.mock import patch
 from ansible_collections.alliedtelesis.awplus.plugins.modules import awplus_logging
 from ansible_collections.alliedtelesis.awplus.tests.unit.utils import set_module_args

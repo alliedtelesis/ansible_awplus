@@ -20,7 +20,6 @@ __metaclass__ = type
 
 from ansible_collections.alliedtelesis.awplus.tests.unit.compat.mock import patch
 from ansible_collections.alliedtelesis.awplus.plugins.modules import awplus_facts
-from ansible.module_utils.six import assertCountEqual
 from ansible_collections.alliedtelesis.awplus.tests.unit.utils import set_module_args
 from .awplus_module import TestAwplusModule, load_fixture
 
@@ -67,7 +66,6 @@ class TestAwplusFactsModule(TestAwplusModule):
 
     def load_fixtures(self, commands=None):
         def load_from_file(*args, **kwargs):
-            module = args
             commands = kwargs["commands"]
             output = list()
 

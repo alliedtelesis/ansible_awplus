@@ -81,43 +81,43 @@ class TestAwplusUserModule(TestAwplusModule):
     def test_awplus_user_create(self):
         set_module_args(dict(config=[dict(name="test", configured_password="test")]))
         commands = ["username test privilege 1 password test"]
-        result = self.execute_module(changed=True, commands=commands)
+        self.execute_module(changed=True, commands=commands)
 
     def test_awplus_user_merge_idempotent(self):
         set_module_args(dict(config=[dict(name="ansible", privilege=8)]))
-        result = self.execute_module(changed=False)
+        self.execute_module(changed=False)
 
     def test_awplus_user_replaced(self):
         set_module_args(dict(config=[dict(name="test", configured_password="test")], state="replaced"))
         commands = ["username test privilege 1 password test"]
-        result = self.execute_module(changed=True, commands=commands)
+        self.execute_module(changed=True, commands=commands)
 
     def test_awplus_user_replaced_idempotent(self):
         set_module_args(dict(config=[dict(name="ansible", privilege=8)], state="replaced"))
-        result = self.execute_module(changed=False)
+        self.execute_module(changed=False)
 
     def test_awplus_user_overridden(self):
         set_module_args(dict(config=[dict(name="test", configured_password="test")], state="overridden"))
         commands = ["username test privilege 1 password test",
                     "no username ansible",
                     "no username jin"]
-        result = self.execute_module(changed=True, commands=commands)
+        self.execute_module(changed=True, commands=commands)
 
     def test_awplus_user_overridden_idempotent(self):
         set_module_args(dict(config=[dict(name="ansible", privilege=8), dict(name="jin", privilege=3)], state="overridden"))
-        result = self.execute_module(changed=False)
+        self.execute_module(changed=False)
 
     def test_awplus_user_delete(self):
         set_module_args(dict(config=[dict(name="ansible")], state="deleted"))
         commands = ["no username ansible"]
-        result = self.execute_module(changed=True, commands=commands)
+        self.execute_module(changed=True, commands=commands)
 
     def test_awplus_user_delete_all(self):
         set_module_args(dict(state="deleted"))
         commands = ["no username ansible",
                     "no username jin"]
-        result = self.execute_module(changed=True, commands=commands)
+        self.execute_module(changed=True, commands=commands)
 
     def test_awplus_user_delete_no_user(self):
         set_module_args(dict(config=[dict(name="intern")], state="deleted"))
-        result = self.execute_module(changed=False)
+        self.execute_module(changed=False)
