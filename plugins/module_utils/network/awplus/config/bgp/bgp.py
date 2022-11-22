@@ -141,7 +141,7 @@ class Bgp(ConfigBase):
         commands = []
 
         if want.get('router_id') and want.get('router_id') != have.get('router_id'):
-            commands.append('bgp router-id {}'.format(want['router_id']))
+            commands.append(f"bpg router-id {want['router_id']}")
 
         if want.get('log_neighbor_changes') is True and not have.get('log_neighbor_changes'):
             commands.append('bgp log-neighbor-changes')
@@ -159,7 +159,7 @@ class Bgp(ConfigBase):
             commands.extend(addrfam_commands)
 
         if not have or commands:
-            commands.insert(0, 'router bgp {}'.format(want['bgp_as']))
+            commands.insert(0, f"router bgp {want['bgp_as']}")
         return commands
 
     @staticmethod
@@ -172,9 +172,9 @@ class Bgp(ConfigBase):
         """
         commands = []
         if want:
-            commands.append('no router bgp {}'.format(want['bgp_as']))
+            commands.append(f"no router bgp {want['bgp_as']}")
         elif have:
-            commands.append('no router bgp {}'.format(have['bgp_as']))
+            commands.append(f"no router bgp {have['bgp_as']}")
         return commands
 
 
@@ -191,9 +191,9 @@ def generate_network_commands(want, have):
         w_network['prefix'] = prefix
 
         if remove_empties(w_network) not in have:
-            command = 'network {}'.format(subnet)
+            command = f"network {subnet}"
             if w_network.get('route_map'):
-                command += ' route-map {}'.format(w_network['route_map'])
+                command += f" route-map {w_network['route_map']}"
             if w_network.get('backdoor'):
                 command += ' backdoor'
             commands.append(command)
@@ -214,26 +214,26 @@ def generate_neighbor_commands(want, have):
 
     for w_neighbor, stats in iteritems(diff):
         if w_neighbor not in h_neighbors:
-            commands.append('neighbor {} remote-as {}'.format(w_neighbor, stats['remote_as']))
+            commands.append(f"neighbor {w_neighbor} remote-as {stats['remote_as']}")
         for key, value in iteritems(stats):
             if key == 'remote_as' or value is None:
                 continue
 
             if key == 'enabled':
                 if value is False and value != h_neighbors.get(w_neighbor).get('enabled', True):
-                    commands.append('neighbor {} shutdown'.format(w_neighbor))
+                    commands.append(f"no neighbor {w_neighbor} shutdown")
                 if value and value != h_neighbors.get(w_neighbor).get('enabled', True):
-                    commands.append('no neighbor {} shutdown'.format(w_neighbor))
+                    commands.append(f"no neighbor {w_neighbor} shutdown")
             elif key == 'timers':
                 if value.get('connect'):
-                    commands.append('neighbor {} timers connect {}'.format(w_neighbor, value['connect']))
+                    commands.append(f"neighbor {w_neighbor} timers connect {value['connect']}")
                 else:
                     if value.get('keepalive') is None or value.get('holdtime') is None:
                         raise ValueError('keepalive and holdtime required together')
-                    commands.append('neighbor {} timers {} {}'.format(w_neighbor, value['keepalive'], value['holdtime']))
+                    commands.append(f"neighbor {w_neighbor} timers {value['keepalive']} {value['holdtime']}")
 
             else:
-                commands.append('neighbor {} {} {}'.format(w_neighbor, key.replace('_', '-'), value))
+                f"neighbor {w_neighbor}, {key.replace('_', '-')} {value}"
 
     return commands
 
@@ -261,7 +261,7 @@ def generate_addrfam_commands(want, have):
             vrf_commands.extend(neighbor_commands)
 
         if vrf_commands or vrf not in have:
-            vrf_commands.insert(0, 'address-family ipv4 vrf {}'.format(vrf))
+            vrf_commands.insert(0, f"address-family ipv4 vrf {vrf}")
             vrf_commands.append('exit-address-family')
         commands.extend(vrf_commands)
 
@@ -277,13 +277,13 @@ def generate_redistribute_commands(want, have):
 
         w_protocol = redistribute['protocol']
         if w_protocol in h_protocols and h_protocols[w_protocol].get('route_map') and not redistribute.get('route_map'):
-            commands.append('no redistribute {}'.format(w_protocol))
+            commands.append(f"no redistribute {w_protocol}")
 
         if remove_empties(redistribute) not in have:
             if redistribute.get('route_map'):
-                commands.append('redistribute {} route-map {}'.format(redistribute['protocol'], redistribute['route_map']))
+                f"redistribute {redistribute['protocol']} route-map {redistribute['route_map']}"
             else:
-                commands.append('redistribute {}'.format(redistribute['protocol']))
+                commands.append(f"redistribute {redistribute['protocol']}")
 
     return commands
 
@@ -301,21 +301,21 @@ def generate_af_neighbor_commands(want, have):
 
     for w_neighbor, stats in iteritems(diff):
         if w_neighbor not in h_neighbors:
-            commands.append('neighbor {} remote-as {}'.format(w_neighbor, stats['remote_as']))
+            commands.append(f"neighbor {w_neighbor} remote-as {stats['remote_as']}")
         for key, value in iteritems(stats):
             if key == 'remote_as' or value is None:
                 continue
 
             if key == 'maximum_prefix':
-                commands.append('neighbor {} maximum-prefix {}'.format(w_neighbor, value))
+                commands.append(f"neighbor {w_neighbor} maximum-prefix {value}")
             elif key == 'prefix_list_in':
-                commands.append('neighbor {} prefix-list {} in'.format(w_neighbor, value))
+                commands.append(f"neighbor {w_neighbor} prefix-list {value} in")
             elif key == 'prefix_list_out':
-                commands.append('neighbor {} prefix-list {} out'.format(w_neighbor, value))
+                commands.append(f"neighbor {w_neighbor} prefix-list {value} out")
             else:
                 if value and value != h_neighbors.get(w_neighbor, {}).get(key, False):
-                    commands.append('neighbor {} {}'.format(w_neighbor, key.replace('_', '-'), value))
+                    commands.append(f"neighbor {w_neighbor}, {key.replace('_', '-'), value}")
                 elif not value and value != h_neighbors.get(w_neighbor, {}).get(key, False):
-                    commands.append('no neighbor {} {}'.format(w_neighbor, key.replace('_', '-'), value))
+                    commands.append(f"no neighbor {w_neighbor} {key.replace('_','-'), value}")
 
     return commands

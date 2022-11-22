@@ -200,13 +200,13 @@ def _set_config(name, want, have):
     commands = []
 
     if want.get('timeout') and have.get('timeout', 'long') != want.get('timeout'):
-        commands.append('lacp timeout {}'.format(want['timeout']))
+        commands.append(f"lacp timeout {want['timeout']}")
 
     if want.get('port_priority') and have.get('port_priority', 32768) != want.get('port_priority'):
-        commands.append('lacp port-priority {}'.format(want['port_priority']))
+        commands.append(f"lacp port-priority {want['port_priority']}")
 
     if commands:
-        commands.insert(0, 'interface {}'.format(name))
+        commands.insert(0, f"interface {name}")
 
     return commands
 
@@ -221,6 +221,6 @@ def _clear_config(name, want, have):
         commands.append('no lacp port-priority')
 
     if commands:
-        commands.insert(0, 'interface {}'.format(name))
+        commands.insert(0, f"interface {name}")
 
     return commands

@@ -22,7 +22,7 @@ def remove_command_from_config_list(interface, cmd, commands):
     # To delete the passed config
     if interface not in commands:
         commands.insert(0, interface)
-    commands.append("no %s" % cmd)
+    commands.append(f"no {cmd}")
     return commands
 
 
@@ -131,16 +131,12 @@ def validate_ipv4(value, module):
         address = value.split("/")
         if len(address) != 2:
             module.fail_json(
-                msg="address format is <ipv4 address>/<mask>, got invalid format {0}".format(
-                    value
-                )
+                msg=f"address format is <ipv4 address>/<mask>, got invalid format {value}"
             )
 
         if not is_masklen(address[1]):
             module.fail_json(
-                msg="invalid value for mask: {0}, mask should be in range 0-128".format(
-                    address[1]
-                )
+                msg=f"invalid value for mask: {address[1]}, mask should be in range 0-128"              
             )
 
 
@@ -151,16 +147,12 @@ def validate_ipv6(value, module):
             ipv6_addr_config_option = ["autoconfig", "dhcp", "suffix"]
             if value not in ipv6_addr_config_option:
                 module.fail_json(
-                    msg="address format is <ipv6 address>/<mask>, got invalid format {0}".format(
-                        value
-                    )
+                    msg=f"address format is <ipv6 address>/<mask>, got invalid format {value}"
                 )
         else:
             if not 0 <= int(address[1]) <= 128:
                 module.fail_json(
-                    msg="invalid value for mask: {0}, mask should be in range 0-128".format(
-                        address[1]
-                    )
+                    msg=f"invalid value for mask: {address[1]}, mask should be in range 0-128"
                 )
 
 
@@ -172,7 +164,7 @@ def validate_n_expand_ipv4(module, want):
     validate_ipv4(ip_addr_want, module)
     ip = ip_addr_want.split("/")
     if len(ip) == 2:
-        ip_addr_want = "{0} {1}".format(ip[0], to_netmask(ip[1]))
+        ip_addr_want = f"{ip[0]} {to_netmask(ip[1])}"
 
     return ip_addr_want
 

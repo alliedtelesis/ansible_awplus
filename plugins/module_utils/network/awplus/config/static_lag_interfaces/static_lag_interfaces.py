@@ -125,19 +125,19 @@ class Static_lag_interfaces(ConfigBase):
                     new_port = port not in h_b_p
                     change_port = port in h_b_p and (h_b_p[port] != w_b_p[port] or redo)
                     if new_port or change_port:
-                        commands.append("interface {}".format(port))
+                        commands.append(f"interface {port}")
                         if change_port and port not in ports_cleared:
                             commands.append("no static-channel-group")
                             ports_cleared.append(port)
                         if w_g[g]:
-                            commands.append("static-channel-group {} member-filters".format(g))
+                            commands.append(f"static-channel-group {g} member-filters")
                         else:
-                            commands.append("static-channel-group {}".format(g))
+                            commands.append(f"static-channel-group {g}")
             for port in h_b_p:
                 if h_b_p[port] == g:
                     if port not in w_b_p or (port in w_b_p and h_b_p[port] != w_b_p[port]):
                         if port not in ports_cleared:
-                            commands.append("interface {}".format(port))
+                            commands.append(f"interface {port}")
                             commands.append("no static-channel-group")
                             ports_cleared.append(port)
         return commands
@@ -159,19 +159,19 @@ class Static_lag_interfaces(ConfigBase):
                     new_port = port not in h_b_p
                     change_port = port in h_b_p and (h_b_p[port] != w_b_p[port] or redo)
                     if new_port or change_port:
-                        commands.append("interface {}".format(port))
+                        commands.append(f"interface {port}")
                         if change_port and port not in ports_cleared:
                             commands.append("no static-channel-group")
                             ports_cleared.append(port)
                         if w_g[g]:
-                            commands.append("static-channel-group {} member-filters".format(g))
+                            commands.append(f"static-channel-group {g} member-filters")
                         else:
-                            commands.append("static-channel-group {}".format(g))
+                            commands.append(f"static-channel-group {g}")
             for port in h_b_p:
                 if h_b_p[port] == g:
                     if port not in w_b_p or (port in w_b_p and h_b_p[port] != w_b_p[port]):
                         if port not in ports_cleared:
-                            commands.append("interface {}".format(port))
+                            commands.append(f"interface {port}")
                             commands.append("no static-channel-group")
                             ports_cleared.append(port)
         for g in h_g:
@@ -179,7 +179,7 @@ class Static_lag_interfaces(ConfigBase):
                 for port in h_b_p:
                     if h_b_p[port] == g and port not in w_b_p:
                         if port not in ports_cleared:
-                            commands.append("interface {}".format(port))
+                            commands.append(f"interface {port}")
                             commands.append("no static-channel-group")
                             ports_cleared.append(port)
         return commands
@@ -201,25 +201,25 @@ class Static_lag_interfaces(ConfigBase):
                     new_port = port not in h_b_p
                     change_port = port in h_b_p and (h_b_p[port] != w_b_p[port] or redo)
                     if new_port or change_port:
-                        commands.append("interface {}".format(port))
+                        commands.append(f"interface {port}")
                         if change_port and port not in ports_cleared:
                             commands.append("no static-channel-group")
                             ports_cleared.append(port)
                         if w_g[g]:
-                            commands.append("static-channel-group {} member-filters".format(g))
+                            commands.append(f"static-channel-group {g} member-filters")
                         else:
-                            commands.append("static-channel-group {}".format(g))
+                            commands.append(f"static-channel-group {g}")
             if redo:
                 for port in h_b_p:
                     if h_b_p[port] == g and port not in w_b_p:
-                        commands.append("interface {}".format(port))
+                        commands.append(f"interface {port}")
                         if port not in ports_cleared:
                             commands.append("no static-channel-group")
                             ports_cleared.append(port)
                         if w_g[g]:
-                            commands.append("static-channel-group {} member-filters".format(g))
+                            commands.append(f"static-channel-group {g} member-filters")
                         else:
-                            commands.append("static-channel-group {}".format(g))
+                            commands.append(f"static-channel-group {g}")
         return commands
 
     def _state_deleted(self, have, want):
@@ -237,7 +237,7 @@ class Static_lag_interfaces(ConfigBase):
             for port in w_b_p:
                 if w_b_p[port] == g and port in h_b_p and h_b_p[port] == g:
                     if port not in ports_cleared:
-                        commands.append("interface {}".format(port))
+                        commands.append(f"interface {port}")
                         commands.append("no static-channel-group")
                         ports_cleared.append(port)
                         clear_count += 1
@@ -245,7 +245,7 @@ class Static_lag_interfaces(ConfigBase):
                 for port in h_b_p:
                     if h_b_p[port] == g:
                         if port not in ports_cleared:
-                            commands.append("interface {}".format(port))
+                            commands.append(f"interface {port}")
                             commands.append("no static-channel-group")
                             ports_cleared.append(port)
                             clear_count += 1
@@ -313,7 +313,7 @@ class Static_lag_interfaces(ConfigBase):
         for port in h_b_p:
             group = h_b_p[port]
             if group in w_g and h_g[group] != w_g[group]:
-                cmds.append("interface {}".format(port))
+                cmds.append(f"interface {port}")
                 cmds.append("no static-channel-group")
                 p_rem.append(port)
         return p_rem, cmds

@@ -209,7 +209,7 @@ def _set_config(name, want, have):
         if key in ('receive', 'transmit'):
             if have.get(key, True) != value:
                 prefix = "" if value else "no "
-                commands.append("{0}lldp {1}".format(prefix, key))
+                commands.append(f"{prefix}lldp {key}")
 
         elif key == 'tlv_select':
             for tlv, stat in iteritems(value):
@@ -217,7 +217,7 @@ def _set_config(name, want, have):
                     continue
                 if have.get(key, {}).get(tlv, False) != stat:
                     prefix = "" if stat else "no "
-                    commands.append("{0}lldp tlv-select {1}".format(prefix, tlv.replace('_', '-')))
+                    commands.append(f"{prefix}lldp tlv-select {tlv.replace('_', '-')}")
 
         elif key == 'med_tlv_select':
             for tlv, stat in iteritems(value):
@@ -227,10 +227,10 @@ def _set_config(name, want, have):
                     else have.get(key, {}).get(tlv, False)
                 if have_stat != stat:
                     prefix = "" if stat else "no "
-                    commands.append("{0}lldp med-tlv-select {1}".format(prefix, tlv.replace('_', '-')))
+                    commands.append(f"{prefix}lldp med-tlv-select {tlv.replace('_','-')}")
 
     if commands:
-        commands.insert(0, "interface {0}".format(name))
+        commands.insert(0, f"interface {name}")
 
     return commands
 
@@ -242,19 +242,19 @@ def _clear_config(name, want, have):
             continue
 
         if key in ('receive', 'transmit') and want.get(key) is None:
-            commands.append("lldp {0}".format(key))
+            commands.append(f"lldp {key}")
         elif key == 'tlv_select':
             for tlv, stat in iteritems(value):
                 if stat:
-                    commands.append("no lldp tlv-select {0}".format(tlv.replace('_', '-')))
+                    commands.append(f"no lldp tlv-select {tlv.replace('_', '-')}")
         elif key == 'med_tlv_select':
             for tlv, stat in iteritems(value):
                 if tlv == 'inventory_management':
-                    commands.append("no lldp med-tlv-select {0}".format(tlv.replace('_', '-')))
+                    commands.append(f"no lldp med-tlv-select {tlv.replace('_', '-')}")
                 else:
-                    commands.append("lldp med-tlv-select {0}".format(tlv.replace('_', '-')))
+                    commands.append(f"lldp med-tlv-select {tlv.replace('_', '-')}")
 
     if commands:
-        commands.insert(0, "interface {0}".format(name))
+        commands.insert(0, f"interface {name}")
 
     return commands

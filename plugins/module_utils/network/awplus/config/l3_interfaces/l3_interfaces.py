@@ -114,7 +114,7 @@ class L3_interfaces(ConfigBase):
         """
         state = self._module.params['state']
         if state in ('overridden', 'merged', 'replaced') and not want:
-            self._module.fail_json(msg='value of config parameter must not be empty for state {0}'.format(state))
+            self._module.fail_json(msg=f"value of config parameter must not be empty for state {state}")
 
         if state == 'overridden':
             commands = self._state_overridden(want, have)
@@ -263,15 +263,15 @@ class L3_interfaces(ConfigBase):
                             self._module.fail_json(msg='Invalid format')
                         if not validate_ip_address(ipv4_addr[0]) or not is_masklen(ipv4_addr[1]):
                             self._module.fail_json(msg='Invalid IP address')
-                        cmd = 'ip address {0}'.format(waddr['address'])
+                        cmd = f"ip address {waddr['address']}"
                         if waddr.get('secondary'):
                             cmd += ' secondary'
                     elif waddr.get('address') == 'dhcp':
                         cmd = 'ip address dhcp'
                         if waddr.get('dhcp_client'):
-                            cmd += ' client-id vlan{0}'.format(waddr.get('dhcp_client'))
+                            cmd += f" client-id vlan{waddr.get('dhcp_client')}"
                         if waddr.get('dhcp_hostname'):
-                            cmd += ' hostname {0}'.format(waddr.get('dhcp_hostname'))
+                            cmd += f" hostname {waddr.get('dhcp_hostname')}"
                     add_command_to_config_list(interface, cmd, commands)
 
         if want.get('ipv6'):
@@ -286,7 +286,7 @@ class L3_interfaces(ConfigBase):
                         self._module.fail_json(msg='Invalid format')
                     if not validate_ip_v6_address(ipv6_addr[0]) or int(ipv6_addr[1]) > 64:
                         self._module.fail_json(msg='Invalid IP address')
-                    cmd = 'ipv6 address {0}'.format(waddr['address'])
+                    cmd = f"ipv6 address {waddr['address']}"
                     add_command_to_config_list(interface, cmd, commands)
 
         return commands
@@ -303,7 +303,7 @@ class L3_interfaces(ConfigBase):
         if have.get('ipv4') and want.get('ipv4'):
             for each in have.get('ipv4'):
                 if each.get('secondary') and not (want.get('ipv4')[count].get('secondary')):
-                    cmd = 'ip address {0} secondary'.format(each.get('address'))
+                    cmd = f"ip address {each.get('address')} secondary"
                     remove_command_from_config_list(interface, cmd, commands)
                 if each.get('dhcp_client') or each.get('dhcp_hostname'):
                     if each.get('dhcp_client') != (want.get('ipv4')[count].get('dhcp_client')):
@@ -317,5 +317,5 @@ class L3_interfaces(ConfigBase):
             remove_command_from_config_list(interface, 'ip address', commands)
         if have.get('ipv6') and not want.get('ipv6'):
             for each in have.get('ipv6'):
-                remove_command_from_config_list(interface, 'ipv6 address {0}'.format(each.get('address')), commands)
+                remove_command_from_config_list(interface, f"ipv6 address {each.get('address')}", commands)
         return commands

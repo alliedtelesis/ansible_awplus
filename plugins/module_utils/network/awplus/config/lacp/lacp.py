@@ -99,7 +99,7 @@ class Lacp(ConfigBase):
         """
         state = self._module.params['state']
         if state in ('merged') and not want:
-            self._module.fail_json(msg='value of config parameter must not be empty for state {0}'.format(state))
+            self._module.fail_json(msg=f"value of config parameter must not be empty for state {state}")
 
         if state == 'deleted':
             kwargs = {'self': self, 'want': want, 'have': have}
@@ -140,7 +140,7 @@ class Lacp(ConfigBase):
         if want != have:
             priority = want.get('system').get('priority')
             if self.is_valid_priority(priority):
-                cmd = 'lacp system-priority {0}'.format(priority)
+                cmd = f"lacp system-priority {priority}"
             else:
                 self._module.fail_json(msg='Invalid system priority')
             commands.append(cmd)

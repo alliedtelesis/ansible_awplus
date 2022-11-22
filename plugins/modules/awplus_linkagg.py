@@ -136,7 +136,7 @@ def map_obj_to_commands(updates, module):
         if state == "absent":
             if obj_in_have:
                 for member in obj_in_have["members"]:
-                    commands.append("interface {0}".format(member))
+                    commands.append(f"interface {member}")
                     commands.append("no channel-group")
 
         elif state == "present":
@@ -146,10 +146,8 @@ def map_obj_to_commands(updates, module):
 
                 if members:
                     for m in members:
-                        commands.append("interface {0}".format(m))
-                        commands.append(
-                            "channel-group {0} mode {1}".format(group, mode)
-                        )
+                        commands.append(f"interface {m}")
+                        commands.append(f"channel-group {group} mode {mode}")
                 else:
                     module.fail_json(
                         msg="member(s) is required to form a channel-group"
@@ -159,26 +157,22 @@ def map_obj_to_commands(updates, module):
                 if members:
                     if "members" not in obj_in_have.keys():
                         for m in members:
-                            commands.append("interface {0}".format(m))
-                            commands.append(
-                                "channel-group {0} mode {1}".format(group, mode)
-                            )
+                            commands.append(f"interface {m}")
+                            commands.append(f"channel-group {group} mode {mode}")
 
                     elif set(members) != set(obj_in_have["members"]):
                         missing_members = list(
                             set(members) - set(obj_in_have["members"])
                         )
                         for m in missing_members:
-                            commands.append("interface {0}".format(m))
-                            commands.append(
-                                "channel-group {0} mode {1}".format(group, mode)
-                            )
+                            commands.append(f"interface {m}")
+                            commands.append(f"channel-group {group} mode {mode}")
 
                         superfluous_members = list(
                             set(obj_in_have["members"]) - set(members)
                         )
                         for m in superfluous_members:
-                            commands.append("interface {0}".format(m))
+                            commands.append(f"interface {m}")
                             commands.append("no channel-group")
 
     if purge:
@@ -186,7 +180,7 @@ def map_obj_to_commands(updates, module):
             obj_in_want = search_obj_in_list(h["group"], want)
             if not obj_in_want:
                 for member in h["members"]:
-                    commands.append("interface {0}".format(member))
+                    commands.append(f"interface {member}")
                     commands.append("no channel-group")
 
     return commands
@@ -199,7 +193,7 @@ def parse_members(module, config, group):
         line = line.strip()
         if line.startswith("interface"):
             match_group = re.findall(
-                r"channel-group {0} mode".format(group), line, re.M
+                fr"channel-group {group} mode", line, re.M
             )
             if match_group:
                 match = re.search(r"interface (\S+)", line, re.M)
@@ -214,9 +208,9 @@ def parse_mode(module, config, group, member):
     blocks = config.strip().split("!")
 
     for block in blocks:
-        if block.startswith("\ninterface port{0}".format(member)):
+        if block.startswith(f"\nintnerface port{member}"):
             match_group = re.findall(
-                r"channel-group {0} mode (\S+)".format(group), block, re.M
+                fr"channel-group {group} mode (\S+)", block, re.M
             )
             if len(match_group) == 1:
                 mode = match_group[0]

@@ -218,25 +218,25 @@ class Ntp(ConfigBase):
 
 def _set_server(server):
     commands = []
-    commands.append('ntp server {}'.format(server))
+    commands.append(f"ntp server {server}")
     return commands
 
 
 def _set_source(source):
     commands = []
-    commands.append('ntp source {}'.format(source))
+    commands.append(f"ntp source {source}")
     return commands
 
 
 def _set_auth(want):
     commands = []
-    commands.append('ntp authentication-key {} {} {}'.format(want['key_id'], want['key_type'], want['auth_key']))
+    commands.append(f"ntp authentication-key {want['key_id']} {want['key_type']} {want['auth_key']}")
     return commands
 
 
 def _clear_server(server):
     commands = []
-    commands.append('no ntp server {}'.format(server))
+    commands.append(f"no ntp server {server}")
     return commands
 
 
@@ -248,7 +248,7 @@ def _clear_source(source):
 
 def _clear_auth(want):
     commands = []
-    commands.append('no ntp authentication-key {}'.format(want['key_id']))
+    commands.append(f"no ntp authentication-key {want['key_id']}")
     return commands
 
 

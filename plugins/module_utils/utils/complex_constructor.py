@@ -28,7 +28,7 @@ def construct_from_list(mapper_dict, module, params):
         cmd = cmd.strip()
         if i % 2 == 0:
             if key != "":
-                cmd += " {}".format(key)
+                cmd += f" {key}"
         else:
             val = get_param(key, module, params)
             if val is None:
@@ -39,9 +39,9 @@ def construct_from_list(mapper_dict, module, params):
             elif val is False:
                 continue
             elif val is True:
-                cmd += " {}".format(key)
+                cmd += f" {key}"
             else:
-                cmd += " {}".format(val)
+                cmd += f" {val}"
     return cmd
 
 

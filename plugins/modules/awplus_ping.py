@@ -157,15 +157,15 @@ def build_ping(dest, count=None, source=None, vrf=None):
     to execute. All args come from the module's unique params.
     """
     if vrf is not None:
-        cmd = "ping vrf {0} {1}".format(vrf, dest)
+        cmd = f"ping vrf {vrf} {dest}"
     else:
-        cmd = "ping {0}".format(dest)
+        cmd = f"ping {dest}"
 
     if count is not None:
-        cmd += " repeat {0}".format(str(count))
+        cmd += f" repeat {str(count)}"
 
     if source is not None:
-        cmd += " source {0}".format(source)
+        cmd += f" source {source}"
 
     return cmd
 

@@ -196,19 +196,19 @@ class Interfaces(ConfigBase):
 def _set_config(name, value):
     commands = []
     if value.get('description'):
-        commands.append('description {}'.format(value['description']))
+        commands.append(f"description {value['description']}")
     if value.get('speed'):
-        commands.append('speed {}'.format(value['speed']))
+        commands.append(f"speed {value['speed']}")
     if value.get('mtu'):
-        commands.append('mtu {}'.format(value['mtu']))
+        commands.append(f"mtu {value['mtu']}")
     if value.get('duplex'):
-        commands.append('duplex {}'.format(value['duplex']))
+        commands.append(f"duplex {value['duplex']}")
     if value.get('enabled') is True:
         commands.append('no shutdown')
     elif value.get('enabled') is False:
         commands.append('shutdown')
     if commands:
-        commands.insert(0, 'interface {}'.format(name))
+        commands.insert(0, f"interface {name}")
     return commands
 
 
@@ -225,5 +225,5 @@ def _clear_config(name, value):
     if value.get('enabled') is False:
         commands.append('no shutdown')
     if commands:
-        commands.insert(0, 'interface {}'.format(name))
+        commands.insert(0, f"interface {name}")
     return commands

@@ -123,7 +123,7 @@ def has_vrf(module, vrf):
 
 def requires_vrf(module, vrf):
     if not has_vrf(module, vrf):
-        module.fail_json(msg="vrf %s is not configured" % vrf)
+        module.fail_json(msg=f"vrf {vrf} is not configured")
 
 
 def diff_list(want, have):
@@ -152,48 +152,48 @@ def map_obj_to_commands(want, have, module):
             commands.append("ip domain-lookup")
 
         if have["domain_name"]:
-            commands.append("no ip domain-name %s" % have["domain_name"])
+            commands.append(f"no ip domain-name {have['domain_name']}")
 
         if want["domain_list"]:
             removes = same_list(want["domain_list"], have["domain_list"])
         else:
             removes = have["domain_list"]
         for item in removes:
-            commands.append("no ip domain-list %s" % item)
+            commands.append(f"no ip domain-list {item}")
 
         if want["name_servers"]:
             removes = same_list(want["name_servers"], have["name_servers"])
         else:
             removes = have["name_servers"]
         for item in removes:
-            commands.append("no ip name-server %s" % item)
+            commands.append(f"no ip name-server {item}")
 
     elif state == "present":
         if needs_update("hostname"):
-            commands.append("hostname %s" % want["hostname"])
+            commands.append(f"hostname {want['hostname']}")
 
         if needs_update("lookup_enabled"):
             cmd = "ip domain-lookup"
             if want["lookup_enabled"] is False:
-                cmd = "no %s" % cmd
+                cmd = f"no {cmd}"
             commands.append(cmd)
 
         if needs_update("domain_name"):
-            commands.append("ip domain-name %s" % want["domain_name"])
+            commands.append(f"ip domain-name {want['domain_name']}")
 
         if want["domain_list"]:
             adds, removes = diff_list(want["domain_list"], have["domain_list"])
             for item in removes:
-                commands.append("no ip domain-list %s" % item)
+                commands.append(f"no ip domain-list {item}")
             for item in adds:
-                commands.append("ip domain-list %s" % item)
+                commands.append(f"ip domain-list {item}")
 
         if want["name_servers"]:
             adds, removes = diff_list(want["name_servers"], have["name_servers"])
             for item in removes:
-                commands.append("no ip name-server %s " % item)
+                commands.append(f"no ip name-server {item}")
             for item in adds:
-                commands.append("ip name-server %s" % item)
+                commands.append(f"ip name-server {item}")
 
     return commands
 

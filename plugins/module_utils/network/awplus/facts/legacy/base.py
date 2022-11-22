@@ -71,7 +71,7 @@ class Default(FactsBase):
 
         platform_facts["system"] = device_info["network_os"]
         for item in ("model", "image", "version", "platform", "hostname"):
-            val = device_info.get("network_os_%s" % item)
+            val = device_info.get(f"network_os_{item}")
             if val:
                 platform_facts[item] = val
 
@@ -290,7 +290,7 @@ class Interfaces(FactsBase):
             if len(line) == 0:
                 continue
             elif line[0] == " ":
-                parsed[key] += "\n%s" % line
+                parsed[key] += f"\n{line}"
             else:
                 match = re.match(r"^Interface (\S+)", line)
                 if match:

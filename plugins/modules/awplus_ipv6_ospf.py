@@ -82,7 +82,7 @@ KEY_TO_COMMAND_MAP = {}
 
 def _append(cmd, state, val):
     if state == PRESENT and val is not None:
-        return cmd + " {}".format(val)
+        return cmd + f" {format(val)}"
     return cmd
 
 
@@ -94,7 +94,7 @@ def router_ospf_map(module, commands):
     process_id = params.get("process_id")
 
     if process_id:
-        cmd += " {}".format(process_id)
+        cmd += f" {process_id}"
     if state == ABSENT and len(commands) == 0:
         return "no " + cmd
     return cmd
