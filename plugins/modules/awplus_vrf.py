@@ -512,7 +512,7 @@ def check_declarative_intent_params(want, module, result):
                         continue
                     for i in w["associated_interfaces"]:
                         if get_interface_type(i) is not get_interface_type(interface):
-                            module.fail_json(                                
+                            module.fail_json(
                                 msg=f"Interface {interface} not configured on vrf {name}"
                             )
 

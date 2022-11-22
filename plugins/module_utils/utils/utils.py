@@ -136,7 +136,7 @@ def validate_ipv4(value, module):
 
         if not is_masklen(address[1]):
             module.fail_json(
-                msg=f"invalid value for mask: {address[1]}, mask should be in range 0-128"              
+                msg=f"invalid value for mask: {address[1]}, mask should be in range 0-128"
             )
 
 
