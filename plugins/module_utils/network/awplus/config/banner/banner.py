@@ -189,6 +189,6 @@ def _set_config(name, want, module):
     if not want.get('text'):
         module.fail_json('Text is required.')
 
-    commands.append(f"banner {name} {want}")
+    commands.append(f"banner {name} {want['text']}")
 
     return commands

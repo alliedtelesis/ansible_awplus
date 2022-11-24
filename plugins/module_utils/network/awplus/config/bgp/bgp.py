@@ -141,7 +141,7 @@ class Bgp(ConfigBase):
         commands = []
 
         if want.get('router_id') and want.get('router_id') != have.get('router_id'):
-            commands.append(f"bpg router-id {want['router_id']}")
+            commands.append(f"bgp router-id {want['router_id']}")
 
         if want.get('log_neighbor_changes') is True and not have.get('log_neighbor_changes'):
             commands.append('bgp log-neighbor-changes')
@@ -221,7 +221,7 @@ def generate_neighbor_commands(want, have):
 
             if key == 'enabled':
                 if value is False and value != h_neighbors.get(w_neighbor).get('enabled', True):
-                    commands.append(f"no neighbor {w_neighbor} shutdown")
+                    commands.append(f"neighbor {w_neighbor} shutdown")
                 if value and value != h_neighbors.get(w_neighbor).get('enabled', True):
                     commands.append(f"no neighbor {w_neighbor} shutdown")
             elif key == 'timers':
@@ -314,8 +314,8 @@ def generate_af_neighbor_commands(want, have):
                 commands.append(f"neighbor {w_neighbor} prefix-list {value} out")
             else:
                 if value and value != h_neighbors.get(w_neighbor, {}).get(key, False):
-                    commands.append(f"neighbor {w_neighbor}, {key.replace('_', '-'), value}")
+                    commands.append('neighbor {} {}'.format(w_neighbor, key.replace('_', '-'), value))
                 elif not value and value != h_neighbors.get(w_neighbor, {}).get(key, False):
-                    commands.append(f"no neighbor {w_neighbor} {key.replace('_','-'), value}")
+                    commands.append('no neighbor {} {}'.format(w_neighbor, key.replace('_', '-'), value))
 
     return commands

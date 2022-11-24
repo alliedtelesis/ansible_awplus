@@ -183,7 +183,7 @@ class Lldp_global(ConfigBase):
             if key in ('enabled', 'non_strict_med_tlv_order_check'):
                 command = f"lldp {lldp_command}"
             else:
-                command = f"lldp {lldp_command}, {value}"
+                command = f"lldp {lldp_command} {value}"
         else:
             command = f"no lldp {lldp_command}"
         return command

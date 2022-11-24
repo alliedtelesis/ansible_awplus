@@ -469,7 +469,7 @@ def _add_auth_msg_key(cmd, state, auth_key, msg_key, msg_key_id):
         if state == "present":
             cmd += f" {auth_key}"
     elif msg_key and msg_key_id is not None and msg_key:
-        cmd += f"message-digest-key {msg_key_id}"
+        cmd += f" message-digest-key {msg_key_id}"
         if state == "present":
             cmd += f" md5 {msg_key}"
     return cmd

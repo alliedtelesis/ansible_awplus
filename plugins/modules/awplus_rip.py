@@ -117,8 +117,8 @@ def map_obj_to_commands(want, have, module):
             if item[1]:
                 commands.extend(
                     [
-                        f"address-family ipv4 vrf {item[1]}"
-                        f"np passive-interface {item[0]}"
+                        f"address-family ipv4 vrf {item[1]}",
+                        f"no passive-interface {item[0]}"
                     ]
                 )
             else:
@@ -129,14 +129,14 @@ def map_obj_to_commands(want, have, module):
         for network in adds:
             if network[1]:
                 commands.extend(
-                    [f"address-family ipv4 vrf {network[1]}" f"network {network[0]}"]
+                    [f"address-family ipv4 vrf {network[1]}", f"network {network[0]}"]
                 )
             else:
                 commands.extend([f"network {network[0]}"])
         for network in removes:
             if network[1]:
                 commands.extend(
-                    [f"address-family ipv4 vrf {network[1]}" f"no network {network[0]}"]
+                    [f"address-family ipv4 vrf {network[1]}", f"no network {network[0]}"]
                 )
             else:
                 commands.extend([f"no network {network[0]}"])
@@ -145,7 +145,7 @@ def map_obj_to_commands(want, have, module):
         for int in adds:
             if int[1]:
                 commands.extend(
-                    [f"address-family ipv4 vrf {int[1]}" f"passive-interface {int[0]}"]
+                    [f"address-family ipv4 vrf {int[1]}", f"passive-interface {int[0]}"]
                 )
             else:
                 commands.extend([f"passive-interface {int[0]}"])
@@ -153,7 +153,7 @@ def map_obj_to_commands(want, have, module):
             if int[1]:
                 commands.extend(
                     [
-                        f"address-family ipv4 vrf {int[1]}"
+                        f"address-family ipv4 vrf {int[1]}",
                         f"no passive-interface {int[0]}"
                     ]
                 )
@@ -195,7 +195,10 @@ def map_config_to_obj(module):
 
     config = get_config(module, flags=[" router rip"])
 
-    obj = {"network": parse_network(config), "passive-int": parse_passive_int(config)}
+    obj = {
+        "network": parse_network(config),
+        "passive-int": parse_passive_int(config),
+    }
 
     return obj
 

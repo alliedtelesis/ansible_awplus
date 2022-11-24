@@ -191,7 +191,7 @@ def map_obj_to_commands(want, have, module):
         if want["name_servers"]:
             adds, removes = diff_list(want["name_servers"], have["name_servers"])
             for item in removes:
-                commands.append(f"no ip name-server {item}")
+                commands.append(f"no ip name-server {item} ")
             for item in adds:
                 commands.append(f"ip name-server {item}")
 

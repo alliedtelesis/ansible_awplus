@@ -312,12 +312,20 @@ def map_obj_to_commands(updates, module):
         if want["interfaces"] is not None:
             # handle the deletes
             for intf in set(have.get("interfaces", [])).difference(want["interfaces"]):
-                commands.extend([f"interface {intf} no ip vrf {want['name']}"])
+                commands.extend(
+                    [
+                        f"interface {intf}",
+                        f"no ip vrf {want['name']}"
+                    ]
+                )
 
             # handle the adds
             for intf in set(want["interfaces"]).difference(have.get("interfaces", [])):
                 commands.extend(
-                    commands.extend([f"interface {intf} ip vrf forwarding {want['name']}"])
+                    [
+                        f"interface {intf}",
+                        f"ip vrf forwarding {want['name']}"
+                    ]
                 )
 
     return commands

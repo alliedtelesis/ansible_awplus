@@ -233,7 +233,7 @@ class Openflow(ConfigBase):
             for p in ('address', 'protocol', 'l4_port'):
                 nc[p] = cont_w[p] if cont_w[p] is not None else cont_h[p]
             commands.append(
-                f"openflow controller {w_name} {nc['protocol']}"
+                f"openflow controller {w_name} {nc['protocol']} "
                 f"{nc['address']} {nc['l4_port']}"
             )
 

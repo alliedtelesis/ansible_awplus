@@ -186,14 +186,14 @@ class Vlans(ConfigBase):
 
 def _set_config(vlan_id, value):
     commands = []
-    name = f"name {value['name']}" if value.get('name') else ''
+    name = f" name {value['name']}" if value.get('name') else ''
     state = ''
     if value.get('state'):
         if value.get('state') == 'suspend':
             state = ' state disable'
         else:
             state = ' state enable'
-    commands.append(f"vlan {vlan_id} {name} {state}")
+    commands.append(f"vlan {vlan_id}{name}{state}")
     return commands
 
 
