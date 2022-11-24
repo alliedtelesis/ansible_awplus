@@ -40,7 +40,7 @@ class NetworkModule(AnsibleModule):
             cls = providers.get(network_os, self._name.split(".")[-1], connection_type)
 
             if not cls:
-                msg = "unable to find suitable provider for network os %s" % network_os
+                msg = f"unable to find suitable provider for network os {network_os}"
                 if self.fail_on_missing_provider:
                     self.fail_json(msg=msg)
                 else:

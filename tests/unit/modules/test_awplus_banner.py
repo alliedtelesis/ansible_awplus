@@ -83,7 +83,7 @@ class TestAwplusBannerModule(TestAwplusModule):
     def test_awplus_banner_merged(self):
         for banner_type in ("motd", "exec"):
             set_module_args(dict(config=[dict(banner=banner_type, text="test banner string")]))
-            commands = ["banner {0} test banner string".format(banner_type)]
+            commands = [f"banner {banner_type} test banner string"]
             self.execute_module(changed=True, commands=commands)
 
     def test_awplus_banner_replaced(self):
