@@ -104,7 +104,7 @@ def map_obj_to_commands(want, have, module):
         for item in removes:
             if item[1]:
                 commands.extend(
-                    [f"address-family ipv4 vrf {item[1]} no network {item[0]}"]
+                    [f"address-family ipv4 vrf {item[1]}", f"no network {item[0]}"]
                 )
             else:
                 commands.extend([f"no network {item[0]}"])

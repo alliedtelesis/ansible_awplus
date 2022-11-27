@@ -82,7 +82,7 @@ KEY_TO_COMMAND_MAP = {}
 
 def _append(cmd, state, val):
     if state == PRESENT and val is not None:
-        return cmd + f" {(val)}"
+        return cmd + f" {val}"
     return cmd
 
 

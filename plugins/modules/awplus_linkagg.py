@@ -208,7 +208,7 @@ def parse_mode(module, config, group, member):
     blocks = config.strip().split("!")
 
     for block in blocks:
-        if block.startswith(f"\nintnerface port{member}"):
+        if block.startswith(f"\ninterface port{member}"):
             match_group = re.findall(
                 fr"channel-group {group} mode (\S+)", block, re.M
             )
