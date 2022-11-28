@@ -260,8 +260,8 @@ def get_interface_type(interface):
 
 
 def add_command_to_vrf(name, cmd, commands):
-    if "ip vrf %s" % name not in commands:
-        commands.extend(["ip vrf %s" % name])
+    if f"ip vrf {name}" not in commands:
+        commands.extend([f"ip vrf {name}"])
     commands.append(cmd)
 
 
@@ -280,44 +280,52 @@ def map_obj_to_commands(updates, module):
             return want.get(x) and (want.get(x) != have.get(x))
 
         if want["state"] == "absent":
-            commands.append("no ip vrf %s" % want["name"])
+            commands.append(f"no ip vrf {want['name']}")
             continue
 
         if not have.get("state"):
-            commands.extend(["ip vrf %s" % want["name"]])
+            commands.extend([f"ip vrf {want['name']}"])
 
         if needs_update(want, have, "description"):
-            cmd = "description %s" % want["description"]
+            cmd = f"description {want['description']}"
             add_command_to_vrf(want["name"], cmd, commands)
 
         if needs_update(want, have, "rd"):
-            cmd = "rd %s" % want["rd"]
+            cmd = f"rd {want['rd']}"
             add_command_to_vrf(want["name"], cmd, commands)
 
         if needs_update(want, have, "route_import"):
             for route in want["route_import"]:
-                cmd = "route-target import %s" % route
+                cmd = f"route-target import {route}"
                 add_command_to_vrf(want["name"], cmd, commands)
 
         if needs_update(want, have, "route_export"):
             for route in want["route_export"]:
-                cmd = "route-target export %s" % route
+                cmd = f"route-target export {route}"
                 add_command_to_vrf(want["name"], cmd, commands)
 
         if needs_update(want, have, "route_both"):
             for route in want["route_both"]:
-                cmd = "route-target both %s" % route
+                cmd = f"route-target both {route}"
                 add_command_to_vrf(want["name"], cmd, commands)
 
         if want["interfaces"] is not None:
             # handle the deletes
             for intf in set(have.get("interfaces", [])).difference(want["interfaces"]):
-                commands.extend(["interface %s" % intf, "no ip vrf %s" % want["name"]])
+                commands.extend(
+                    [
+                        f"interface {intf}",
+                        f"no ip vrf {want['name']}"
+                    ]
+                )
 
             # handle the adds
             for intf in set(want["interfaces"]).difference(have.get("interfaces", [])):
                 commands.extend(
-                    ["interface %s" % intf, "ip vrf forwarding %s" % want["name"]]
+                    [
+                        f"interface {intf}",
+                        f"ip vrf forwarding {want['name']}"
+                    ]
                 )
 
     return commands
@@ -424,7 +432,7 @@ def get_param_value(key, item, module):
         value = item[key]
 
     # validate the param value (if validator func exists)
-    validator = globals().get("validate_%s" % key)
+    validator = globals().get(f"validate_{key}")
     if validator:
         validator(value, module)
 
@@ -496,7 +504,7 @@ def check_declarative_intent_params(want, module, result):
             time.sleep(module.params["delay"])
 
         name = module.params["name"]
-        rc, out, err = exec_command(module, "show run vrf | include {0}".format(name))
+        rc, out, err = exec_command(module, f"show run vrf | include {name}")
 
         if rc == 0:
             data = out.strip().split()
@@ -513,8 +521,7 @@ def check_declarative_intent_params(want, module, result):
                     for i in w["associated_interfaces"]:
                         if get_interface_type(i) is not get_interface_type(interface):
                             module.fail_json(
-                                msg="Interface %s not configured on vrf %s"
-                                % (interface, name)
+                                msg=f"Interface {interface} not configured on vrf {name}"
                             )
 
 
@@ -558,7 +565,7 @@ def main():
         want_vrfs = [x["name"] for x in want]
         have_vrfs = [x["name"] for x in have]
         for item in set(have_vrfs).difference(want_vrfs):
-            cmd = "no ip vrf %s" % item
+            cmd = f"no ip vrf {item}"
             if cmd not in commands:
                 commands.append(cmd)
 

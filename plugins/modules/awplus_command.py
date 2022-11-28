@@ -140,8 +140,8 @@ def parse_commands(module, warnings):
         for item in list(commands):
             if not item["command"].startswith("show"):
                 warnings.append(
-                    "Only show commands are supported when using check mode, not "
-                    "executing %s" % item["command"]
+                    f"Only show commands are supported when using check mode, not "
+                    f"executing {item['command']}"
                 )
                 commands.remove(item)
 

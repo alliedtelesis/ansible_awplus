@@ -190,11 +190,11 @@ class User(ConfigBase):
                 self._module.fail_json(msg='configured_password and hashed_password are mutually exclusive.')
             privilege = value['privilege'] if value['privilege'] else have.get(name, {}).get('privilege', 1)
             if value.get('configured_password'):
-                commands.append('username {} privilege {} password {}'.format(name, privilege, value['configured_password']))
+                commands.append(f"username {name} privilege {privilege} password {value['configured_password']}")
             elif value.get('hashed_password'):
-                commands.append('username {} privilege {} password 8 {}'.format(name, privilege, value['hashed_password']))
+                commands.append(f"username {name} privilege {privilege} password 8 {value['hashed_password']}")
             elif privilege != have[name]['privilege']:
-                commands.append('username {} privilege {}'.format(name, privilege))
+                commands.append(f"username {name} privilege {privilege}")
         return commands
 
     def _clear_config(self, to_delete, have):
@@ -202,5 +202,5 @@ class User(ConfigBase):
         commands = []
         for name, value in iteritems(to_delete):
             if name != 'manager' and name in have:
-                commands.append('no username {}'.format(name))
+                commands.append(f"no username {name}")
         return commands

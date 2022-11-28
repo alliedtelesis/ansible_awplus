@@ -49,11 +49,11 @@ class Cliconf(CliconfBase):
     @enable_mode
     def get_config(self, source="running", flags=None, format=None):
         if source not in ("running", "startup"):
-            raise ValueError("fetching configuration from %s is not supported" % source)
+            raise ValueError(f"fetching configuration from {source} is not supported")
 
         if format:
             raise ValueError(
-                "'format' value %s is not supported for get_config" % format
+                f"'format' value {format} is not supported for get_config"
             )
 
         if not flags:
@@ -119,14 +119,12 @@ class Cliconf(CliconfBase):
 
         if diff_match not in option_values["diff_match"]:
             raise ValueError(
-                "'match' value %s in invalid, valid values are %s"
-                % (diff_match, ", ".join(option_values["diff_match"]))
+                f"'match' value {diff_match} in invalid, valid values are {', '.join(option_values['diff_match'])}"
             )
 
         if diff_replace not in option_values["diff_replace"]:
             raise ValueError(
-                "'replace' value %s in invalid, valid values are %s"
-                % (diff_replace, ", ".join(option_values["diff_replace"]))
+                f"'replace' value {diff_replace} in invalid, valid values are {', '.join(option_values['diff_match'])}"
             )
 
         # prepare candidate configuration
@@ -229,7 +227,7 @@ class Cliconf(CliconfBase):
         if not command:
             raise ValueError("must provide value of command to execute")
         if output:
-            raise ValueError("'output' value %s is not supported for get" % output)
+            raise ValueError(f"'output' value {output} is not supported for get")
 
         return self.send_command(
             command=command,
@@ -324,7 +322,7 @@ class Cliconf(CliconfBase):
         requests = []
         if commit:
             for key, value in iteritems(banners_obj):
-                key += " %s" % multiline_delimiter
+                key += f" {multiline_delimiter}"
                 self.send_command("config terminal", sendonly=True)
                 for cmd in [key, value, multiline_delimiter]:
                     obj = {"command": cmd, "sendonly": True}
@@ -353,7 +351,7 @@ class Cliconf(CliconfBase):
             output = cmd.pop("output", None)
             if output:
                 raise ValueError(
-                    "'output' value %s is not supported for run_commands" % output
+                    f"'output' value {output} is not supported for run_commands"
                 )
 
             try:
@@ -412,14 +410,14 @@ class Cliconf(CliconfBase):
         banners = {}
         banner_cmds = re.findall(r"^banner (\w+)", config, re.M)
         for cmd in banner_cmds:
-            regex = r"banner %s \^C(.+?)(?=\^C)" % cmd
+            regex = fr"banner {cmd} \^C(.+?)(?=\^C)"
             match = re.search(regex, config, re.S)
             if match:
-                key = "banner %s" % cmd
+                key = f"banner {cmd}"
                 banners[key] = match.group(1).strip()
 
         for cmd in banner_cmds:
-            regex = r"banner %s \^C(.+?)(?=\^C)" % cmd
+            regex = fr"banner {cmd} \^C(.+?)(?=\^C)"
             match = re.search(regex, config, re.S)
             if match:
                 config = config.replace(str(match.group(1)), "")

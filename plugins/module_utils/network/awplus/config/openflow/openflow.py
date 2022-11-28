@@ -107,7 +107,7 @@ class Openflow(ConfigBase):
         state = self._module.params['state']
         if state in ("overridden", "merged", "replaced") and not want:
             self._module.fail_json(
-                msg="value of config parameter must not be empty for state {0}".format(state))
+                msg=f"value of config parameter must not be empty for state {state}")
 
         if state == 'overridden':
             commands = self._state_overridden(want, have)
@@ -209,7 +209,7 @@ class Openflow(ConfigBase):
         # Delete controllers based on parameters.
         for h_name in haves:
             if state in ("overridden", "replaced") or h_name in wants:
-                commands.append("no openflow controller {}".format(h_name))
+                commands.append(f"no openflow controller {h_name}")
 
         # That's it for deleted.
         if state == 'deleted':
@@ -219,10 +219,10 @@ class Openflow(ConfigBase):
         if state in ('overridden', 'replaced'):
             for w_name in wants:
                 cont_w = wants[w_name]
-                commands.append('openflow controller {} {} {} {}'.format(w_name,
-                                                                         cont_w['protocol'],
-                                                                         cont_w['address'],
-                                                                         cont_w['l4_port']))
+                commands.append(
+                    f"openflow controller {w_name} {cont_w['protocol']} "
+                    f"{cont_w['address']} {cont_w['l4_port']}"
+                )
             return
 
         # Merge - may need parameters from haves as well as wants.
@@ -232,8 +232,10 @@ class Openflow(ConfigBase):
             nc = {}
             for p in ('address', 'protocol', 'l4_port'):
                 nc[p] = cont_w[p] if cont_w[p] is not None else cont_h[p]
-            commands.append('openflow controller {} {} {} {}'.format(w_name, nc['protocol'],
-                                                                     nc['address'], nc['l4_port']))
+            commands.append(
+                f"openflow controller {w_name} {nc['protocol']} "
+                f"{nc['address']} {nc['l4_port']}"
+            )
 
     def _do_ports(self, want, have, state, commands):
         """
@@ -246,17 +248,17 @@ class Openflow(ConfigBase):
         if state == "overridden":
             for port in haves:
                 if port not in wants:
-                    commands.append('interface {}'.format(port))
+                    commands.append(f"interface {port}")
                     commands.append('no openflow')
         if state == "deleted":
             for port in wants:
                 if port in haves:
-                    commands.append('interface {}'.format(port))
+                    commands.append(f"interface {port}")
                     commands.append('no openflow')
             return
         for port in wants:
             if port not in haves:
-                commands.append('interface {}'.format(port))
+                commands.append(f"interface {port}")
                 commands.append('openflow')
 
     def _do_other(self, want, have, state, commands):
@@ -271,9 +273,9 @@ class Openflow(ConfigBase):
             want_val = want.get(p)
             if (state == "deleted" and want_val is not None) or \
                (state == "overridden" and want_val is None):
-                commands.append('no openflow {}'.format(parm_to_keyword[p]))
+                commands.append(f"no openflow {parm_to_keyword[p]}")
             elif want_val is not None:
-                commands.append('openflow {} {}'.format(parm_to_keyword[p], want_val))
+                commands.append(f"openflow {parm_to_keyword[p]} {want_val}")
 
         # fail_mode - has a default but commands are irregular
         want_val = want.get("fail_mode")

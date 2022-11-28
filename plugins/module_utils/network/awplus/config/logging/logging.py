@@ -252,34 +252,34 @@ class Logging(ConfigBase):
 
 def _set_size_conf(want):
     commands = []
-    commands.append('log {} size {}'.format(want['dest'], want['size']))
+    commands.append(f"log {want['dest']} size {want['size']}")
     return commands
 
 
 def _set_levfac_conf(want):
     commands = []
-    dest = ' {}'.format(want['dest']) if want['dest'] != 'facility' else ''
-    host = ' {}'.format(want['name']) if want['dest'] == 'host' else ''
-    level = ' level {}'.format(want['level']) if want.get('level') else ''
-    facility = ' facility {}'.format(want['facility']) if want.get('facility') else ''
-    command = 'log{}{}{}{}'.format(dest, host, level, facility)
+    dest = f" {want['dest']}" if want['dest'] != 'facility' else ''
+    host = f" {want['name']}" if want['dest'] == 'host' else ''
+    level = f" level {want['level']}" if want.get('level') else ''
+    facility = f" facility {want['facility']}" if want.get('facility') else ''
+    command = f"log{dest}{host}{level}{facility}"
     commands.append(command)
     return commands
 
 
 def _clear_size_conf(have):
     commands = []
-    commands.append('no log {} size'.format(have['dest']))
+    commands.append(f"no log {have['dest']} size")
     return commands
 
 
 def _clear_levfac_conf(have):
     commands = []
-    dest = ' {}'.format(have['dest'])
-    host = ' {}'.format(have['name']) if have['dest'] == 'host' else ''
-    level = ' level {}'.format(have['level']) if have.get('level') else ''
-    facility = ' facility {}'.format(have['facility']) if have.get('facility') and have['dest'] != 'facility' else ''
-    command = 'no log{}{}{}{}'.format(dest, host, level, facility)
+    dest = f" {have['dest']}"
+    host = f" {have['name']}" if have['dest'] == 'host' else ''
+    level = f" level {have['level']}" if have.get('level') else ''
+    facility = f" facility {have['facility']}" if have.get('facility') and have['dest'] != 'facility' else ''
+    command = f"no log{dest}{host}{level}{facility}"
     commands.append(command)
     return commands
 
@@ -294,7 +294,7 @@ def validate_input(want, module):
     if want['dest'] == 'facility' and not want.get('facility'):
         module.fail_json(msg='facility is required when dest = facility')
     if want.get('size') and want['dest'] not in ('buffered', 'external', 'permanent'):
-        module.fail_json(msg='size cannot be configured when dest = {}'.format(want['dest']))
+        module.fail_json(msg=f"size cannot be configured when dest = {want['dest']}")
     if want['dest'] == 'facility' and want.get('level'):
         module.fail_json(msg='level connot be configured when dest = facility')
 

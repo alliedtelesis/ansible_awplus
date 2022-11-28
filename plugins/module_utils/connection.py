@@ -125,8 +125,7 @@ class Connection(object):
         except KeyError:
             if name.startswith("_"):
                 raise AttributeError(
-                    "'%s' object has no attribute '%s'"
-                    % (self.__class__.__name__, name)
+                    f"'{self.__class__.__name__}' object has no attribute '{name}'"
                 )
             return partial(self.__rpc__, name)
 
@@ -145,8 +144,8 @@ class Connection(object):
             data = json.dumps(req, cls=AnsibleJSONEncoder)
         except TypeError as exc:
             raise ConnectionError(
-                "Failed to encode some variables as JSON for communication with ansible-connection. "
-                "The original exception was: %s" % to_text(exc)
+                f"Failed to encode some variables as JSON for communication with ansible-connection. "
+                f"The original exception was: {to_text(exc)}"
             )
 
         try:
@@ -162,13 +161,11 @@ class Connection(object):
             response = json.loads(out)
         except ValueError:
             params = [repr(arg) for arg in args] + [
-                "{0}={1!r}".format(k, v) for k, v in iteritems(kwargs)
+                f"{k}={v!r}" for k, v in iteritems(kwargs)
             ]
             params = ", ".join(params)
             raise ConnectionError(
-                "Unable to decode JSON from response to {0}({1}). Received '{2}'.".format(
-                    name, params, out
-                )
+                f"Unable to decode JSON from response to {name}({params}). Received '{out}'."
             )
 
         if response["id"] != reqid:

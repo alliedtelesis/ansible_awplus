@@ -71,7 +71,7 @@ class TestAwplusFactsModule(TestAwplusModule):
 
             for command in commands:
                 filename = str(command).split(" | ")[0].replace(" ", "_")
-                output.append(load_fixture("awplus_facts_%s" % filename))
+                output.append(load_fixture(f"awplus_facts_{filename}"))
             return output
 
         self.run_commands.side_effect = load_from_file

@@ -157,7 +157,7 @@ def map_obj_to_commands(want, have):
                 command = " ".join((command, w.get(key)))
 
         if state == "absent" and h:
-            commands.append("no %s" % command)
+            commands.append(f"no {command}")
         elif state == "present" and not h:
             commands.append(command)
 

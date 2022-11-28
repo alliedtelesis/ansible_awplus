@@ -104,10 +104,10 @@ def map_obj_to_commands(want, have, module):
         for item in removes:
             if item[1]:
                 commands.extend(
-                    ["address-family ipv4 vrf %s" % item[1], "no network %s" % item[0]]
+                    [f"address-family ipv4 vrf {item[1]}", f"no network {item[0]}"]
                 )
             else:
-                commands.extend(["no network %s" % item[0]])
+                commands.extend([f"no network {item[0]}"])
 
         if want["passive-int"]:
             removes = same_list(want["passive-int"], have["passive-int"])
@@ -117,57 +117,48 @@ def map_obj_to_commands(want, have, module):
             if item[1]:
                 commands.extend(
                     [
-                        "address-family ipv4 vrf %s" % item[1],
-                        "no passive-interface %s" % item[0],
+                        f"address-family ipv4 vrf {item[1]}",
+                        f"no passive-interface {item[0]}"
                     ]
                 )
             else:
-                commands.extend(["no passive-interface %s" % item[0]])
+                commands.extend([f"no passive-interface {item[0]}"])
 
     if state == "present":
         adds, removes = diff_list(want["network"], have["network"])
         for network in adds:
             if network[1]:
                 commands.extend(
-                    [
-                        "address-family ipv4 vrf %s" % network[1],
-                        "network %s" % network[0],
-                    ]
+                    [f"address-family ipv4 vrf {network[1]}", f"network {network[0]}"]
                 )
             else:
-                commands.extend(["network %s" % network[0]])
+                commands.extend([f"network {network[0]}"])
         for network in removes:
             if network[1]:
                 commands.extend(
-                    [
-                        "address-family ipv4 vrf %s" % network[1],
-                        "no network %s" % network[0],
-                    ]
+                    [f"address-family ipv4 vrf {network[1]}", f"no network {network[0]}"]
                 )
             else:
-                commands.extend(["no network %s" % network[0]])
+                commands.extend([f"no network {network[0]}"])
 
         adds, removes = diff_list(want["passive-int"], have["passive-int"])
         for int in adds:
             if int[1]:
                 commands.extend(
-                    [
-                        "address-family ipv4 vrf %s" % int[1],
-                        "passive-interface %s" % int[0],
-                    ]
+                    [f"address-family ipv4 vrf {int[1]}", f"passive-interface {int[0]}"]
                 )
             else:
-                commands.extend(["passive-interface %s" % int[0]])
+                commands.extend([f"passive-interface {int[0]}"])
         for int in removes:
             if int[1]:
                 commands.extend(
                     [
-                        "address-family ipv4 vrf %s" % int[1],
-                        "no passive-interface %s" % int[0],
+                        f"address-family ipv4 vrf {int[1]}",
+                        f"no passive-interface {int[0]}"
                     ]
                 )
             else:
-                commands.extend(["no passive-interface %s" % int[0]])
+                commands.extend([f"no passive-interface {int[0]}"])
 
     return commands
 

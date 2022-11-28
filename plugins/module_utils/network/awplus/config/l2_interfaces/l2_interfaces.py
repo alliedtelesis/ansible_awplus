@@ -292,7 +292,7 @@ def _set_config(name, want, have, module):
         if not have.get('access'):
             commands.append('switchport mode access')
         if value['vlan'] != have.get('access', {}).get('vlan'):
-            commands.append('switchport access vlan {}'.format(value['vlan']))
+            commands.append(f"switchport access vlan {value['vlan']}")
 
     elif diff.get('trunk'):
         value = diff['trunk']
@@ -301,12 +301,12 @@ def _set_config(name, want, have, module):
         if value.get('allowed_vlans'):
             for vlan in value.get('allowed_vlans'):
                 if vlan not in have.get('trunk', {}).get('allowed_vlans', []):
-                    commands.append('switchport trunk allowed vlan add {}'.format(vlan))
+                    commands.append(f"switchport trunk allowed vlan add {vlan}")
         if value.get('native_vlan') is not None and value.get('native_vlan') != have.get('trunk', {}).get('native_vlan'):
             commands.append(f'switchport trunk native vlan {"none" if value["native_vlan"] == 0 else value["native_vlan"]}')
 
     if commands:
-        commands.insert(0, 'interface {}'.format(name))
+        commands.insert(0, f"interface {name}")
 
     return commands
 
@@ -323,7 +323,7 @@ def _delete_config(name, have, dele):
             if h_trunk.get('allowed_vlans') and d_trunk.get('allowed_vlans'):
                 for dv in d_trunk['allowed_vlans']:
                     if dv in h_trunk['allowed_vlans']:
-                        commands.append('switchport trunk allowed vlan remove {}'.format(dv))
+                        commands.append(f"switchport trunk allowed vlan remove {dv}")
         elif have.get('access') and dele.get('access'):
             h_access = have['access']
             d_access = dele['access']
@@ -331,6 +331,6 @@ def _delete_config(name, have, dele):
                 commands.append('no switchport access vlan')
 
     if commands:
-        commands.insert(0, 'interface {}'.format(name))
+        commands.insert(0, f"interface {name}")
 
     return commands

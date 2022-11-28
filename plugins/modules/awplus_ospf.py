@@ -389,7 +389,7 @@ from ansible.module_utils.basic import AnsibleModule
 
 def _append(cmd, state, val):
     if state == PRESENT and val is not None:
-        return cmd + " {}".format(val)
+        return cmd + f" {val}"
     return cmd
 
 
@@ -453,7 +453,7 @@ def area_range_map(module):
     area_id = module.params["area"]["area_id"]
     ip_addr = range_params["ip_addr"]
     advertise = range_params.get("advertise")
-    cmd = "area {} range {}".format(area_id, ip_addr)
+    cmd = f"area {area_id} range {ip_addr}"
     if state == "absent":
         return "no " + cmd
     if advertise:
@@ -467,11 +467,11 @@ def _add_auth_msg_key(cmd, state, auth_key, msg_key, msg_key_id):
     if auth_key:
         cmd += " authentication-key"
         if state == "present":
-            cmd += " {}".format(auth_key)
+            cmd += f" {auth_key}"
     elif msg_key and msg_key_id is not None and msg_key:
-        cmd += " message-digest-key {}".format(msg_key_id)
+        cmd += f" message-digest-key {msg_key_id}"
         if state == "present":
-            cmd += " md5 {}".format(msg_key)
+            cmd += f" md5 {msg_key}"
     return cmd
 
 
@@ -480,7 +480,7 @@ def area_virtual_link_map(module):
     area_id = get_param("area.area_id", module, module.params)
     ip_addr = params["ip_addr"]
 
-    cmd = "area {} virtual-link {}".format(area_id, ip_addr)
+    cmd = f"area {area_id} virtual-link {ip_addr}"
 
     auth_key = params.get("auth_key")
     msg_key = params.get("msg_key_password")
@@ -517,7 +517,7 @@ def area_virtual_link_map(module):
     elif authentication:
         cmd += " authentication"
         if authentication_type and state == "present":
-            cmd += " {}".format(authentication_type)
+            cmd += f" {authentication_type}"
         cmd = _add_auth_msg_key(cmd, state, auth_key, msg_key, msg_key_id)
     elif auth_key or (msg_key and msg_key_id is not None and msg_key):
         cmd = _add_auth_msg_key(cmd, state, auth_key, msg_key, msg_key_id)
@@ -537,11 +537,11 @@ def router_ospf_map(module, commands):
     vrf_instance = params.get("vrf_instance")
 
     if process_id:
-        cmd += " {}".format(process_id)
+        cmd += f" {process_id}"
     if state == ABSENT and len(commands) == 0:
         return "no " + cmd
     elif vrf_instance:
-        cmd += " {}".format(vrf_instance)
+        cmd += f" {vrf_instance}"
     return cmd
 
 
@@ -554,9 +554,9 @@ def passive_interface_map(module):
     ip_addr = params.get("ip_addr")
 
     if interface_name is not None:
-        cmd += " {}".format(interface_name)
+        cmd += f" {interface_name}"
     if ip_addr is not None:
-        cmd += " {}".format(ip_addr)
+        cmd += f" {ip_addr}"
 
     if state == ABSENT:
         cmd = "no " + cmd
@@ -570,12 +570,12 @@ def summary_address_map(module):
     not_advertise = params.get("not_advertise")
     tag = params.get("tag")
 
-    cmd = "summary-address {}".format(ip_addr)
+    cmd = f"summary-address {ip_addr}"
 
     if not_advertise is True:
         cmd += " not-advertise"
     elif tag is not None:
-        cmd += " tag {}".format(tag)
+        cmd += f" tag {tag}"
 
     state = params[STATE]
     if state == ABSENT:
@@ -613,19 +613,19 @@ def redistribute_map(module):
     if metric:
         cmd += " metric"
         if state == PRESENT:
-            cmd += " {}".format(metric)
+            cmd += f" {metric}"
     if metric_type:
         cmd += " metric-type"
         if state == PRESENT:
-            cmd += " {}".format(metric_type)
+            cmd += f" {metric_type}"
     if route_map_name:
         cmd += " route-map"
         if state == PRESENT:
-            cmd += " {}".format(route_map_name)
+            cmd += f" {route_map_name}"
     if tag:
         cmd += " tag"
         if state == PRESENT:
-            cmd += " {}".format(tag)
+            cmd += f" {tag}"
 
     if state == ABSENT:
         return "no " + cmd

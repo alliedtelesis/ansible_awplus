@@ -12,7 +12,7 @@ def remove_command_from_config_list(interface, cmd, commands):
     # To delete the passed config
     if interface not in commands:
         commands.insert(0, interface)
-    commands.append('no %s' % cmd)
+    commands.append(f"no {cmd}")
     return commands
 
 
@@ -100,8 +100,8 @@ def get_port_dict(want, have):
             else:
                 raise ValueError('Invalid Input - range end must be greater than range start')
                 # self._module.fail_json("Invalid Input - range end must be greater than range start")
-            start = 'port{}.{}.{}'.format(port.group(1), port.group(2), port.group(3))
-            end = 'port{}.{}.{}'.format(port.group(4), port.group(5), port.group(6))
+            start = f"port{port.group(1)}.{port.group(2)}.{port.group(3)}"
+            end = f"port{port.group(4)}.{port.group(5)}.{port.group(6)}"
     start_exists = False
     end_exists = False
     for intf in have:  # check if port exists

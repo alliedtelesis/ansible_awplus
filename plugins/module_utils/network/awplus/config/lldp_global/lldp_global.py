@@ -181,11 +181,11 @@ class Lldp_global(ConfigBase):
         command = ''
         if value:
             if key in ('enabled', 'non_strict_med_tlv_order_check'):
-                command = 'lldp {0}'.format(lldp_command)
+                command = f"lldp {lldp_command}"
             else:
-                command = 'lldp {0} {1}'.format(lldp_command, value)
+                command = f"lldp {lldp_command} {value}"
         else:
-            command = 'no lldp {0}'.format(lldp_command)
+            command = f"no lldp {lldp_command}"
         return command
 
     def is_valid_tx(self, timer, delay):
@@ -197,9 +197,9 @@ class Lldp_global(ConfigBase):
         if want.get('timer'):
             delay = want.get('tx_delay') if want.get('tx_delay') else have.get('tx_delay')
             if not self.is_valid_tx(want.get('timer'), delay):
-                self._module.fail_json(msg='Tx Timer Interval cannot be less than 4 times the Tx Delay (Tx Delay is {})'.format(delay))
+                self._module.fail_json(msg=f"Tx Timer Interval cannot be less than 4 times the Tx Delay (Tx Delay is {delay})")
         elif want.get('tx_delay'):
             timer = have.get('timer')
             if not self.is_valid_tx(timer, want.get('tx_delay')):
-                self._module.fail_json(msg='Tx Delay Interval cannot be more than (Tx Time Interval / 4)(Tx Time Interval is: {})'.format(timer))
+                self._module.fail_json(msg=f"Tx Delay Interval cannot be more than (Tx Time Interval / 4)(Tx Time Interval is: {timer}")
         return True

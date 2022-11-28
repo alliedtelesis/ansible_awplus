@@ -183,7 +183,7 @@ class Lag_interfaces(ConfigBase):
 
         # Now have list of ports to delete, do it.
         for port in delete_ports:
-            cmds.append("interface {}".format(port))
+            cmds.append(f"interface {port}")
             cmds.append("no channel-group")
         return cmds
 
@@ -242,8 +242,8 @@ class Lag_interfaces(ConfigBase):
                 if h and ((not w and not merge) or (w and h_group != w_group)):
                     pcmds.append("no channel-group")
                 if w and (not h or h_mode != w_mode or h_group != w_group):
-                    pcmds.append("channel-group {} mode {}".format(w_group, w_mode))
+                    pcmds.append(f"channel-group {w_group} mode {w_mode}")
                 if len(pcmds) > 0:
-                    cmds.append("interface {}".format(port_name))
+                    cmds.append(f"interface {port_name}")
                     cmds.extend(pcmds)
         return cmds
