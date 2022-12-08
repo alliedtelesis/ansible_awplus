@@ -81,8 +81,9 @@ class UserFacts(object):
         :returns: The generated config
         """
         config = deepcopy(spec)
-        user = re.compile(r'^username (?P<username>\S+) privilege (?P<privilege>\d+).*')
+        user = re.compile(r'^username (?P<username>\S+) privilege (?P<privilege>\d+) password 8 (?P<hashed_password>\S+).*')
         match = user.match(conf)
         config['name'] = match.group('username')
         config['privilege'] = match.group('privilege')
+        config['hashed_password'] = match.group('hashed_password')
         return utils.remove_empties(config)

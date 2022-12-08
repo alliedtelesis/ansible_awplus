@@ -10,6 +10,8 @@ is compared to the provided configuration (as dict) and the command set
 necessary to bring the current configuration to it's desired end-state is
 created
 """
+from passlib.hash import sha256_crypt
+
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base import (
     ConfigBase,
 )
@@ -189,13 +191,37 @@ class User(ConfigBase):
             if value.get('configured_password') and value.get('hashed_password'):
                 self._module.fail_json(msg='configured_password and hashed_password are mutually exclusive.')
             privilege = value['privilege'] if value['privilege'] else have.get(name, {}).get('privilege', 1)
-            if value.get('configured_password'):
-                commands.append(f"username {name} privilege {privilege} password {value['configured_password']}")
-            elif value.get('hashed_password'):
-                commands.append(f"username {name} privilege {privilege} password 8 {value['hashed_password']}")
+            if not have.get(name):
+                if value.get('configured_password'):
+                    commands.append(f"username {name} privilege {privilege} password {value['configured_password']}")
+                elif value.get('hashed_password'):
+                    commands.append(f"username {name} privilege {privilege} password 8 {value['hashed_password']}")
+            elif self._compare_hashes(have, value, name) is False:
+                commands.append(f"username {name} password {value['configured_password']}")
             elif privilege != have[name]['privilege']:
                 commands.append(f"username {name} privilege {privilege}")
         return commands
+
+    def _compare_hashes(self, have, value, name):
+        # compare hashes from want (name, value) and have
+        same_hashes = None
+        want_hashed = ""
+        have_hashed = ""
+        if have.get(name) and value['configured_password'] is not None:
+            have_hashed = have.get(name)['hashed_password']
+            have_salt = self._get_salt(have_hashed)
+            want_hashed = sha256_crypt.using(rounds=5000, salt=have_salt).hash(value['configured_password'])
+        same_hashes = (want_hashed == have_hashed)
+        return same_hashes
+
+    def _get_salt(self, have_hashed):
+        # get the salt string from an incoming sha256_crypt hash
+        salt_string = ""
+        for i in range(3, len(have_hashed)):
+            if have_hashed[i] == "$":
+                break
+            salt_string += have_hashed[i]
+        return salt_string
 
     def _clear_config(self, to_delete, have):
         # clear config
