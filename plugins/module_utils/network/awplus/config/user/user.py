@@ -193,35 +193,25 @@ class User(ConfigBase):
             privilege = value['privilege'] if value['privilege'] else have.get(name, {}).get('privilege', 1)
             if not have.get(name):
                 if value.get('configured_password'):
-                    commands.append(f"username {name} privilege {privilege} password {value['configured_password']}")
+                    hashed_password = sha256_crypt.using(rounds=5000).hash(value['configured_password'])
+                    commands.append(f"username {name} privilege {privilege} password 8 {hashed_password}")
                 elif value.get('hashed_password'):
                     commands.append(f"username {name} privilege {privilege} password 8 {value['hashed_password']}")
-            elif self._compare_hashes(have, value, name) is False:
-                commands.append(f"username {name} password {value['configured_password']}")
+            elif self._compare_hashes(have, value, name) is False: 
+                hashed_password = sha256_crypt.using(rounds=5000).hash(value['configured_password'])
+                commands.append(f"username {name} password 8 {hashed_password}")
             elif privilege != have[name]['privilege']:
                 commands.append(f"username {name} privilege {privilege}")
         return commands
 
     def _compare_hashes(self, have, value, name):
         # compare hashes from want (name, value) and have
-        same_hashes = None
-        want_hashed = ""
-        have_hashed = ""
+        # result is true when passwords match
+        result = True
         if have.get(name) and value['configured_password'] is not None:
             have_hashed = have.get(name)['hashed_password']
-            have_salt = self._get_salt(have_hashed)
-            want_hashed = sha256_crypt.using(rounds=5000, salt=have_salt).hash(value['configured_password'])
-        same_hashes = (want_hashed == have_hashed)
-        return same_hashes
-
-    def _get_salt(self, have_hashed):
-        # get the salt string from an incoming sha256_crypt hash
-        salt_string = ""
-        for i in range(3, len(have_hashed)):
-            if have_hashed[i] == "$":
-                break
-            salt_string += have_hashed[i]
-        return salt_string
+            result = sha256_crypt.verify(value['configured_password'],have_hashed)
+        return result
 
     def _clear_config(self, to_delete, have):
         # clear config
