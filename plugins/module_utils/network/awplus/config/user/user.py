@@ -186,23 +186,31 @@ class User(ConfigBase):
         # set config
         commands = []
         for name, value in iteritems(want):
+            command = ""
             if name not in have and (not value.get('configured_password') and not value.get('hashed_password')):
                 self._module.fail_json(msg='Password is required.')
             if value.get('configured_password') and value.get('hashed_password'):
                 self._module.fail_json(msg='configured_password and hashed_password are mutually exclusive.')
             privilege = value['privilege'] if value['privilege'] else have.get(name, {}).get('privilege', 1)
-            if not have.get(name):
+            command += f"username {name}"
+            if not have.get(name) or privilege != have.get(name)['privilege']:
+                command += f" privilege {privilege}"
+            if not have.get(name) or self._compare_hashes(have, value, name) is False:
                 if value.get('configured_password'):
-                    hashed_password = sha256_crypt.using(rounds=5000).hash(value['configured_password'])
-                    commands.append(f"username {name} privilege {privilege} password 8 {hashed_password}")
+                    hashed_password = self.encrypt(value['configured_password'])
+                    command += f" password 8 {hashed_password}"
                 elif value.get('hashed_password'):
-                    commands.append(f"username {name} privilege {privilege} password 8 {value['hashed_password']}")
-            elif self._compare_hashes(have, value, name) is False: 
-                hashed_password = sha256_crypt.using(rounds=5000).hash(value['configured_password'])
-                commands.append(f"username {name} password 8 {hashed_password}")
-            elif privilege != have[name]['privilege']:
-                commands.append(f"username {name} privilege {privilege}")
+                    command += f" password 8 {value['hashed_password']}"
+            if not(command == f"username {name}"):
+                commands.append(command)
         return commands
+
+    def encrypt(self, password):
+        """ Encrypts the given password to sha256_crypt
+        Refer to https://passlib.readthedocs.io/en/stable/lib/passlib.hash.sha256_crypt.html
+        for full documentation
+        """
+        return sha256_crypt.using(rounds=5000).hash(password)
 
     def _compare_hashes(self, have, value, name):
         # compare hashes from want (name, value) and have
@@ -210,7 +218,9 @@ class User(ConfigBase):
         result = True
         if have.get(name) and value['configured_password'] is not None:
             have_hashed = have.get(name)['hashed_password']
-            result = sha256_crypt.verify(value['configured_password'],have_hashed)
+            result = sha256_crypt.verify(value['configured_password'], have_hashed)
+        elif not (have.get(name)['hashed_password'] == value['hashed_password']):
+            result = False
         return result
 
     def _clear_config(self, to_delete, have):
