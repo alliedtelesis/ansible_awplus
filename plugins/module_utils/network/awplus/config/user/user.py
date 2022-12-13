@@ -201,7 +201,7 @@ class User(ConfigBase):
                     command += f" password 8 {hashed_password}"
                 elif value.get('hashed_password'):
                     command += f" password 8 {value['hashed_password']}"
-            if not(command == f"username {name}"):
+            if not (command == f"username {name}"):
                 commands.append(command)
         return commands
 
