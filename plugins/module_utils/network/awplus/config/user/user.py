@@ -195,7 +195,7 @@ class User(ConfigBase):
             command += f"username {name}"
             if not have.get(name) or privilege != have.get(name)['privilege']:
                 command += f" privilege {privilege}"
-            if not have.get(name) or self._compare_hashes(have, value, name) is False:
+            if not have.get(name) or not self._compare_hashes(have, value, name):
                 if value.get('configured_password'):
                     hashed_password = self.encrypt(value['configured_password'])
                     command += f" password 8 {hashed_password}"
