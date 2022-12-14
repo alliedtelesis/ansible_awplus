@@ -17,6 +17,7 @@
 
 # Make coding more python3-ish
 from __future__ import absolute_import, division, print_function
+from passlib.hash import sha256_crypt
 
 __metaclass__ = type
 
@@ -63,6 +64,11 @@ class TestAwplusUserModule(TestAwplusModule):
         )
         self.execute_show_command = self.mock_execute_show_command.start()
 
+        self.mock_encrypt = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.user.user.User.encrypt"
+        )
+        self.encrypt_password = self.mock_encrypt.start()
+
     def tearDown(self):
         super(TestAwplusUserModule, self).tearDown()
         self.mock_get_resource_connection_config.stop()
@@ -71,6 +77,7 @@ class TestAwplusUserModule(TestAwplusModule):
         self.mock_get_config.stop()
         self.mock_load_config.stop()
         self.mock_execute_show_command.stop()
+        self.mock_encrypt.stop()
 
     def load_fixtures(self, commands=None):
         def load_from_file(*args, **kwargs):
@@ -78,9 +85,15 @@ class TestAwplusUserModule(TestAwplusModule):
 
         self.execute_show_command.side_effect = load_from_file
 
+    def load_encryptions(self, commands=None):
+        def load_from_file(*args, **kwargs):
+            return load_fixture("awplus_user_password_config.cfg")
+        self.encrypt_password.side_effect = load_from_file
+
     def test_awplus_user_create(self):
         set_module_args(dict(config=[dict(name="test", configured_password="test")]))
-        commands = ["username test privilege 1 password test"]
+        hash = sha256_crypt.using(rounds=5000, salt='testsalt').hash('test')
+        commands = [f"username test privilege 1 password 8 {hash}"]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_user_merge_idempotent(self):
@@ -89,7 +102,8 @@ class TestAwplusUserModule(TestAwplusModule):
 
     def test_awplus_user_replaced(self):
         set_module_args(dict(config=[dict(name="test", configured_password="test")], state="replaced"))
-        commands = ["username test privilege 1 password test"]
+        hash = sha256_crypt.using(rounds=5000, salt='testsalt').hash('test')
+        commands = [f"username test privilege 1 password 8 {hash}"]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_user_replaced_idempotent(self):
@@ -98,7 +112,8 @@ class TestAwplusUserModule(TestAwplusModule):
 
     def test_awplus_user_overridden(self):
         set_module_args(dict(config=[dict(name="test", configured_password="test")], state="overridden"))
-        commands = ["username test privilege 1 password test",
+        hash = sha256_crypt.using(rounds=5000, salt='testsalt').hash('test')
+        commands = [f"username test privilege 1 password 8 {hash}",
                     "no username ansible",
                     "no username jin"]
         self.execute_module(changed=True, commands=commands)

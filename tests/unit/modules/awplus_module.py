@@ -56,7 +56,7 @@ class TestAwplusModule(ModuleTestCase):
         self, failed=False, changed=False, commands=None, sort=True, defaults=False
     ):
         self.load_fixtures(commands)
-
+        self.load_encryptions()
         if failed:
             result = self.failed()
             self.assertTrue(result["failed"], result)
@@ -89,4 +89,7 @@ class TestAwplusModule(ModuleTestCase):
         return result
 
     def load_fixtures(self, commands=None):
+        pass
+
+    def load_encryptions(self, commands=None):
         pass
