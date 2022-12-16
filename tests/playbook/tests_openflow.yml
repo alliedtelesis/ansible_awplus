@@ -22,18 +22,30 @@
               address: "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
               protocol: "tcp"
               l4_port: 6655
+          native_vlan: 4090
+          inactivity_timer: 20
+          datapath_id: 123
+          fail_mode: "secure_nre"
           ports:
             - port1.6.1
             - port1.6.2
             - port1.6.3
             - port1.6.4
-          native_vlan: 4090
-          inactivity_timer: 20
-          datapath_id: 123
-          fail_mode: "secure_nre"
+          
         state: overridden
-# 1. add new controller to test_init, 2. add the controller with missing parameter, 3. change ipv6 address, 4. change from ipv4 to ipv6
-  #  peer certificate, trustpoint, changing protocol
+    # - name: All tests - add init ports
+    #   tags:
+    #     - test_init
+    #   awplus_openflow:
+    #     config:
+    #       ports:
+    #         - port1.6.1
+    #         - port1.6.2
+    #         - port1.6.3
+    #         - port1.6.4
+    #     state: merged
+
+
     - name: Controller merge 1 - add a new controller
       tags:
         - cm_1
@@ -294,7 +306,7 @@
 
     - name: IPv6 test - change IPv6 address parameter
       tags:
-        - ip6_1
+        - ip_1
       awplus_openflow:
         config:
           controllers:
@@ -324,7 +336,7 @@
               address: "2001:0db8:85a3:0000:0000:8a2e:0370:7340"
               l4_port: 6656
         state: merged
-
+    
     - name: IPv6 test - change from IPv4 to IPv6
       tags:
         - ip6_4
@@ -333,6 +345,8 @@
           controllers:
             - name: "bob"
               address: "2001:0db8:85a3:0000:0000:8a2e:0370:7386"
+              # protocol: "tcp"
+              # l4_port: 6659
         state: merged
 
     - name: IPv6 test - replace with new address
@@ -432,3 +446,4 @@
               protocol: "ssl"
               l4_port: 6659
         state: merged
+
