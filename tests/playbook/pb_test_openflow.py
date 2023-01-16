@@ -64,8 +64,6 @@ tests = {
 
 def run_playbook(playbook, tag, debug=False):
     result = subprocess.run(['ansible-playbook', '-v', f'-t {tag}', f'{pb_dir}/{playbook}'], stdout=subprocess.PIPE)
-    # with open("output.txt", "a") as f:
-    #     f.write(f"{result}\n\n\n")
     if debug:
         print(result.stdout.decode('utf-8'))
     return result.stdout.decode('utf-8')
@@ -76,61 +74,33 @@ def parse_output(op, tag='test_init'):
     with open("output2.txt", "a") as f:
         f.write(f"{op}\n\n")
     pop = ""
-    # with open("output.txt", "a") as f:
-    #     f.write(f"{op}\n\n\n")
     for outl in op.splitlines():
         ls = outl.strip()
         if looking:
-            # with open("output.txt", "a") as f:
-            #     f.write(f"ls: {ls}\n\n\n")
-            #  and ls.endswith('{')
             if ls.startswith(('ok:', 'changed:')):
                 pop = "{"
-                # with open("output.txt", "a") as f:
-                #     f.write(f"here {ls[-1]}\n\n\n")
                 looking = False
         else:
             if ls.startswith('changed:'):
                 pop += ls
-                # with open("output.txt", "a") as f:
-                #     f.write(f"ls {ls}\n\n")
                 if outl.rstrip() == '}':
                     break
 
     
     pop = pop.replace("false", "False")
     pop = pop.replace("true", "True")
-    # with open("output.txt", "a") as f:
-    #     f.write(f"pop after {pop}\n\n")
     pop = pop.replace('{changed: [aw2] => ', '')
     try:
         pop = ast.literal_eval(pop)
     except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError):
         return []
-    with open("output.txt", "a") as f:
-        f.write(f"test: {tag} commands {pop.get('commands')}\n\n")
     return pop.get('commands')
 
 
 def check_list(list1, list2, debug=False):
-    if len(list1) != len(list2):
-        if debug:
-            print(list1, list2)
-        return False
-    for i in range(len(list1)):
-        if list1[i] not in list2:
-            return False
-
-
-
-
-
-        # if list1[i] != list2[i]:
-        #     if debug:
-        #         print(list1, list2)
-        #     return False
-    return True
-
+    if debug:
+        print(list1, list2)
+    return sorted(list1) == sorted(list2)
 
 def run_a_test(test_name, debug=False):
     if test_name not in tests:

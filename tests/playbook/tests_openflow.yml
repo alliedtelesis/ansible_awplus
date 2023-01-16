@@ -33,19 +33,7 @@
             - port1.6.4
           
         state: overridden
-    # - name: All tests - add init ports
-    #   tags:
-    #     - test_init
-    #   awplus_openflow:
-    #     config:
-    #       ports:
-    #         - port1.6.1
-    #         - port1.6.2
-    #         - port1.6.3
-    #         - port1.6.4
-    #     state: merged
-
-
+    
     - name: Controller merge 1 - add a new controller
       tags:
         - cm_1
@@ -306,7 +294,7 @@
 
     - name: IPv6 test - change IPv6 address parameter
       tags:
-        - ip_1
+        - ip6_1
       awplus_openflow:
         config:
           controllers:
@@ -345,8 +333,6 @@
           controllers:
             - name: "bob"
               address: "2001:0db8:85a3:0000:0000:8a2e:0370:7386"
-              # protocol: "tcp"
-              # l4_port: 6659
         state: merged
 
     - name: IPv6 test - replace with new address
