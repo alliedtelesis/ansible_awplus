@@ -432,4 +432,3 @@
               protocol: "ssl"
               l4_port: 6659
         state: merged
-
