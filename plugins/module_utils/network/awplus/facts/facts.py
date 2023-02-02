@@ -12,6 +12,7 @@ calls the appropriate facts gathering function
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.facts.facts import (
     FactsBase,
 )
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.acl.acl import AclFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.banner.banner import BannerFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.bgp.bgp import BgpFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.interfaces.interfaces import InterfacesFacts
@@ -41,6 +42,7 @@ FACT_LEGACY_SUBSETS = dict(
     interfaces=Interfaces,
 )
 FACT_RESOURCE_SUBSETS = dict(
+    acl=AclFacts,
     banner=BannerFacts,
     bgp=BgpFacts,
     interfaces=InterfacesFacts,
