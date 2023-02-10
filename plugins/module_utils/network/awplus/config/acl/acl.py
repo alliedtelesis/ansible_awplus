@@ -17,6 +17,9 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
     to_list,
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.facts import Facts
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import (
+    utils,
+)
 
 
 class Acl(ConfigBase):
@@ -46,8 +49,6 @@ class Acl(ConfigBase):
         acl_facts = facts['ansible_network_resources'].get('acl')
         if not acl_facts:
             return []
-        # with open("output.txt", "a") as f:
-        #     f.write(f"\nansible_facts {acl_facts}")
         return acl_facts
 
     def execute_module(self):
@@ -59,12 +60,9 @@ class Acl(ConfigBase):
         result = {'changed': False}
         warnings = list()
         commands = list()
-        with open("output.txt", "w") as f:
-            f.write(f"")
 
         existing_acl_facts = self.get_acl_facts()
-        # with open("output.txt", "a") as f:
-        #     f.write(f"\nansible_facts: {existing_acl_facts}")
+
         commands.extend(self.set_config(existing_acl_facts))
         if commands:
             if not self._module.check_mode:
@@ -73,8 +71,6 @@ class Acl(ConfigBase):
         result['commands'] = commands
 
         changed_acl_facts = self.get_acl_facts()
-
-       
 
         result['before'] = existing_acl_facts
         if result['changed']:
@@ -92,48 +88,50 @@ class Acl(ConfigBase):
                   to the desired configuration
         """
         want = self._module.params['config']
-        # with open("output.txt", "a") as f:
-        #     f.write(f"\nwant {want}")
         have = existing_acl_facts
-        # with open("output.txt", "a") as f:
-        # #     f.write(f"\nhave {have}")
         resp = self.set_state(want, have)
         return to_list(resp)
-    
+
     def check_parameters(self, state, want):
-        
-        # want_acl = want[0].get('acls')[0]
-        # want_ace = want_acl.get('aces')[0]
-        # acl_type = want_acl.get('acl_type')
-        for item in want:
-            w_acls = item.get('acls')
-            for w_acl in w_acls:
-                w_aces = w_acl.get('aces') if w_acl.get('aces') is not None else []
-                acl_type = w_acl.get('acl_type')
-                for w_ace in w_aces:
-                    # with open("output.txt", "a") as f:
-                    #     f.write(f"\n {w_aces}")
-                    if w_ace.get('action') is None:
-                        self._module.fail_json(
-                            msg=f"Missing aces parameter 'action' for state {state}"
-                        )
-                    if w_ace.get('source_addr') is None:
-                        self._module.fail_json(
-                            msg=f"Missing aces parameter 'source_addr' for state {state}"
-                        )
-                    if w_ace.get('destination_addr') is None and acl_type != 'standard':
-                        self._module.fail_json(
-                            msg=f"Missing aces parameter 'destination_addr' for state {state}"
-                        )
-                    if w_ace.get('protocols') is None and acl_type != 'standard':
-                        self._module.fail_json(
-                            msg=f"Missing aces parameter 'protocols' for state {state}"
-                        )
-                    if w_acl.get('name') is None:
-                        self._module.fail_json(
-                            msg=f"Missing acl parameter 'name' for state {state}"
-                        )
-        
+        """ Checks the incoming configuration and issues error
+            messages based on the selected state
+
+        :param state: the selected state
+        :param want: the desired configuration as a dictionary
+        :rtype: A bool
+        :returns: True if the incoming configuration is empty, False otherwise
+        """
+        result = True  # remains true until user passes empty data
+
+        if not (want is None or want[0].get('acls') is None):
+            ace_1 = want[0].get('acls')[0].get('aces')
+            if state in ('merged', 'replaced', 'overridden') or state == 'deleted' and ace_1:
+                for item in want:
+                    w_acls = item.get('acls')
+                    for w_acl in w_acls:
+                        # check if required parameters are given depending on the state
+                        w_aces = w_acl.get('aces') if w_acl.get('aces') is not None else []
+                        acl_type = w_acl.get('acl_type')
+                        for w_ace in w_aces:
+                            if w_ace.get('action') is None:
+                                self._module.fail_json(
+                                    msg=f"Missing aces parameter 'action' for state {state}"
+                                )
+                            if w_ace.get('source_addr') is None:
+                                self._module.fail_json(
+                                    msg=f"Missing aces parameter 'source_addr' for state {state}"
+                                )
+                            if w_ace.get('destination_addr') is None and acl_type != 'standard':
+                                self._module.fail_json(
+                                    msg=f"Missing aces parameter 'destination_addr' for state {state}"
+                                )
+                            if w_ace.get('protocols') is None and acl_type != 'standard':
+                                self._module.fail_json(
+                                    msg=f"Missing aces parameter 'protocols' for state {state}"
+                                )
+        else:
+            result = False
+        return result
 
     def set_state(self, want, have):
         """ Select the appropriate function based on the state provided
@@ -145,31 +143,22 @@ class Acl(ConfigBase):
                   to the desired configuration
         """
         state = self._module.params['state']
-        # with open("output.txt", "a") as f:
-        #     f.write(f"\n{want}")
-        if state in ('merged', 'replaced', 'overridden'):
-            self.check_parameters(state, want)
+        commands = []
+        result = self.check_parameters(state, want)
 
-        
-            
+        if result:
+            if state == 'overridden':
+                commands = self._state_overridden(want, have)
+            elif state == 'deleted':
+                commands = self._state_deleted(want, have)
+            elif state == 'merged':
+                commands = self._state_merged(want, have)
+            elif state == 'replaced':
+                commands = self._state_replaced(want, have)
 
-
-        # with open("output.txt", "a") as f:
-        #     f.write(f"{want_acl}\nace{want_ace}")
-           
-        # if 
-        #     self._module.fail_json(
-        #         msg=f"value of config parameter must not be empty for state {state}")
-
-        
-        if state == 'overridden':
-            commands = self._state_overridden(want, have)
-        elif state == 'deleted':
-            commands = self._state_deleted(want, have)
-        elif state == 'merged':
-            commands = self._state_merged(want, have)
-        elif state == 'replaced':
-            commands = self._state_replaced(want, have)
+        # removing excess spaces from commands
+        for index, command in enumerate(commands):
+            commands[index] = (" ".join(command.split())).strip()
         return commands
 
     def _state_replaced(self, want, have):
@@ -184,47 +173,56 @@ class Acl(ConfigBase):
         for w_acls in want:
             for w_acl in w_acls.get('acls'):
                 w_aces = w_acl.get('aces')
-                with open("output.txt", "a") as f:
-                    f.write(f"\nw_ace{w_aces}\n")
+                w_acl_type = w_acl.get('acl_type').lower()
                 for thing in h_acls:
                     if w_acl.get('name') == thing.get('name'):
-                        commands.append(f"access-list {thing.get('name')}")
-                        for h_ace in thing.get('ace'):
-                            
+                        w_afi = w_acls.get('afi').lower()
+                        # hardware acls have a differant command layout
+                        if w_acl_type == 'hardware' and w_acl.get('name').isnumeric():
+                            if len(w_aces) > 1:
+                                self._module.fail_json(msg="only one ace allowed for numbered hardware acls")
+                            ace = w_aces[0]
+                            w_name = w_acl.get('name')
+                            w_action = ace.get('action').lower()
+                            w_protocols = ace.get('protocols').lower()
+                            w_icmp_type = ace.get('ICMP_type_number')
+                            w_source = ace.get('source_addr')
+                            w_destination = ace.get('destination_addr')
                             commands.append(
-                                f"no {h_ace.get('action')} {'' if h_ace.get('protocols') is None else h_ace.get('protocols')} "
-                                f"{h_ace.get('source_addr')} {'' if h_ace.get('destination_addr') is None else h_ace.get('destination_addr')}"
+                                f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list {w_name} "
+                                f"{w_action} {w_protocols} {w_source} {w_destination} "
+                                f"{'icmp-type ' + str(w_icmp_type) if w_icmp_type is not None else ''}"
                             )
-                        for ace in w_aces:
+                        else:
+                            w_name = w_acl.get('name')
                             commands.append(
-                                f"{ace.get('action')} {'' if ace.get('protocols') is None else ace.get('protocols')} "
-                                f"{ace.get('source_addr')} {'' if ace.get('destination_addr')is None else ace.get('destination_addr')}"
+                                f"{'' if w_afi == 'ipv4' else 'ipv6'} "
+                                f"access-list {w_acl_type if not w_name.isnumeric() else ''} "
+                                f"{thing.get('name')}"
                             )
-        # with open("output.txt", "a") as f:
-        #     f.write(f"\n{commands}")
+                            for h_ace in thing.get('ace'):
+                                h_action = h_ace.get('action').lower()
+                                h_protocols = h_ace.get('protocols')
+                                h_dest_addr = h_ace.get('destination_addr')
+                                h_source = h_ace.get('source_addr')
+                                h_icmp_type = h_ace.get('ICMP_type_number')
+                                commands.append(
+                                    f"no {h_action} {'' if h_protocols is None else h_protocols.lower()} "
+                                    f"{h_source} {'' if h_dest_addr is None else h_dest_addr.lower()} "
+                                    f"{'icmp-type ' + str(h_icmp_type) if h_icmp_type is not None else ''}"
+                                )
+                            for ace in w_aces:
+                                w_ace_action = ace.get('action').lower()
+                                w_protocols = ace.get('protocols')
+                                w_icmp_type = ace.get('ICMP_type_number')
+                                w_destination = ace.get('destination_addr')
+                                w_source = ace.get('source_addr')
+                                commands.append(
+                                    f"{w_ace_action} {'' if w_protocols is None else w_protocols.lower()} "
+                                    f"{w_source} {'' if w_destination is None else w_destination} "
+                                    f"{'icmp-type ' + str(w_icmp_type) if w_icmp_type is not None else ''}"
+                                )
         return commands
-
-
-        for thing in h_acls:
-            if w_acls.get('name') == thing.get('name'):
-                # with open("output.txt", "a") as f:
-                #     f.write(f"\n{w_acls}")
-                commands.append(f"access-list {thing.get('name')}")
-                # with open("output.txt", "a") as f:
-                #     f.write(f"\n{thing.get('ace')}")
-                for h_ace in thing.get('ace'):
-                    
-                    commands.append(
-                        f"no {h_ace.get('action')} {h_ace.get('protocols')} "
-                        f"{h_ace.get('source_addr')} {h_ace.get('destination_addr')}"
-                    )
-                for ace in w_aces:
-                    # with open("output.txt", "a") as f:
-                        # f.write(f"\n{ace}")
-                    commands.append(
-                        f"{ace.get('action')} {ace.get('protocols')} "
-                        f"{ace.get('source_addr')} {ace.get('destination_addr')}"
-                    )
 
     def _state_overridden(self, want, have):
         """ The command generator when state is overridden
@@ -238,54 +236,56 @@ class Acl(ConfigBase):
 
         # removing existing acls
         for h_acl in h_acls:
-            h_acl_type = h_acl.get('type')
-            if h_acl.get('name').isnumeric(): #numbered acl
-                commands.append(f"no access-list {h_acl.get('name')}")
+            h_acl_type = h_acl.get('type').lower()
+            h_afi = h_acl.get('afi').lower()
+            h_name = h_acl.get('name')
+            if not h_name.isnumeric():
+                cmd_type = h_acl_type
             else:
-                h_afi = h_acl.get('afi')
-                with open("output.txt", "a") as f:
-                    f.write(f"\nh_acl {h_acl_type} {h_afi}")
-                
-                # cmd_type = 'hardware' if h_acl_type == 'Hardware' else 'extended'
-                if h_afi == 'IPv4' or h_acl_type == 'Standard':
-                    cmd_type = h_acl_type
-                else:
-                    cmd_type = ''
-                commands.append(f"no {'' if h_afi == 'IPv4' else 'IPv6'} access-list {cmd_type} {h_acl.get('name')}")
-        
-        # adding new
+                cmd_type = ''
+            commands.append(f"no {'' if h_afi == 'ipv4' else 'ipv6'} access-list {cmd_type} {h_name}")
+
+        # adding new acls
         for item in want:
             w_acls = item.get('acls')
-            w_afi = item.get('afi')
+            w_afi = item.get('afi').lower()
             for w_acl in w_acls:
-                # with open("output.txt", "a") as f:
-                #     f.write(f"\n{commands}")
+                w_acl_type = w_acl.get('acl_type').lower()
                 w_aces = w_acl.get('aces')
-                if w_acl.get('acl_type') == 'hardware':
+
+                if w_acl_type == 'hardware' and w_acl.get('name').isnumeric():
+                    w_name = w_acl.get('name')
+                    w_action = w_aces[0].get('action').lower()
+                    w_protocol = w_aces[0].get('protocols').lower()
+                    w_dest_addr = w_aces[0].get('destination_addr')
+                    w_source = w_aces[0].get('source_addr')
+                    w_icmp_type = w_aces[0].get('ICMP_type_number')
                     if len(w_aces) > 1:
-                        self._module.fail_json(msg="only one ace allowed for hardware acls")
-                    with open("output.txt", "a") as f:
-                        f.write(f"\nthe one {w_aces}")
+                        self._module.fail_json(msg="only one ace allowed for numbered hardware acls")
                     commands.append(
-                        f"{'' if w_afi == 'IPv4' else 'IPv6'} access-list {w_acl.get('name')} {w_aces[0].get('action')} {w_aces[0].get('protocols')} "
-                        f"{w_aces[0].get('source_addr')} {w_aces[0].get('destination_addr')}"
+                        f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list {w_name} "
+                        f"{w_action} {w_protocol} {w_source} {w_dest_addr} "
+                        f"{'icmp-type ' + str(w_icmp_type) if w_icmp_type is not None else ''}"
                     )
-                else:    
+                else:
+                    w_name = w_acl.get('name')
                     commands.append(
-                        f"{'' if w_afi == 'IPv4' else 'IPv6'} access-list {'extended' if not w_acl.get('name').isnumeric() else ''} {w_acl.get('name')}"
+                        f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list "
+                        f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
                     )
-                
                     for ace in w_aces:
+                        w_action = ace.get('action').lower()
+                        w_protocol = ace.get('protocols')
+                        w_destination = ace.get('destination_addr')
+                        w_source = ace.get('source_addr')
+                        w_icmp_type = ace.get('ICMP_type_number')
                         commands.append(
-                            f"{ace.get('action')} {'' if ace.get('protocols') is None else ace.get('protocols')} "
-                            f"{ace.get('source_addr')} {'' if ace.get('destination_addr') is None else ace.get('destination_addr')}"
+                            f"{w_action} {'' if w_protocol is None else w_protocol} "
+                            f"{w_source} {'' if w_destination is None else w_destination} "
+                            f"{'icmp-type ' + str(w_icmp_type) if w_icmp_type is not None else ''}"
                         )
-        with open("output.txt", "a") as f:
-            f.write(f"\n{commands}")
-
-
         return commands
-    
+
     def _state_merged(self, want, have):
         """ The command generator when state is merged
 
@@ -295,96 +295,104 @@ class Acl(ConfigBase):
         """
         commands = []
         h_acls = have["acls"]
-        # w_acls = want[0]['acls'][0]
-        # w_aces = w_acls.get('aces')
-        
-
 
         for item in want:
             w_acls = item.get('acls')
-            w_afi = item.get('afi')
-            
+            w_afi = item.get('afi').lower()
+
             for w_acl in w_acls:
                 existing_acl = False
                 w_aces = w_acl.get('aces')
-                
-                # with open("output.txt", "a") as f:
-                #     f.write(f"\n {w_acl}")
-                w_acl_type = w_acl.get('acl_type')
-                if not w_acl.get('name').isnumeric() and w_acl_type not in ('hardware', 'standard'):
-                    cmd_type = 'extended'
-                elif w_acl_type == 'hardware':
-                    cmd_type = 'hardware'
-                else:
-                    cmd_type = ''
-                with open("output.txt", "a") as f:
-                            f.write(f"\n {w_acl}")
-                for h_count, thing in enumerate(h_acls):
-                    # with open("output.txt", "a") as f:
-                    #     f.write(f"\n {thing}")
+                w_acl_type = w_acl.get('acl_type').lower()
+                for h_acl in h_acls:
                     cmd = []
-                    
-                    if w_acl.get('name') == thing.get('name'): #an ace exists within the acl so modify the aces
+                    if w_acl.get('name') == h_acl.get('name'):  # an ace exists within the acl so modify the aces
                         existing_acl = True
-                        
-                        h_aces = thing.get('ace') if thing.get('ace') is not None else []
-                        cmd.append(f"{'' if w_afi == 'IPv4' else 'IPv6'} access-list {cmd_type} {thing.get('name')}")
-                        for ace in w_aces:
-                            test = dict(ace) #need to rename test to something better ---------------------------------------------------------------
-                            with open("output.txt", "a") as f:
-                                f.write(f"\n here{w_acl_type}")
-                            if "ace_ID" in test:
-                                test.pop("ace_ID")
-                            else:
-                                self._module.fail_json(msg="'ace_ID' is required when merging aces")
-                            if test not in h_aces:
-                                cmd.append(
-                                    f"{ace.get('ace_ID')} {ace.get('action')} "
-                                    f"{'' if ace.get('protocols') is None else ace.get('protocols')} {ace.get('source_addr')} {'' if ace.get('destination_addr') is None else ace.get('destination_addr')}"
-                                )
-                    if len(cmd) > 1: # only add command if needed
+                        w_acl_type = w_acl.get('acl_type').lower()
+                        h_aces = h_acl.get('ace') if h_acl.get('ace') is not None else []
+
+                        if w_acl_type == 'hardware' and w_acl.get('name').isnumeric():
+                            w_name = w_acl.get('name')
+                            w_action = w_aces[0].get('action').lower()
+                            w_protocol = w_aces[0].get('protocols').lower()
+                            w_icmp_type = w_aces[0].get('ICMP_type_number')
+                            w_source = w_aces[0].get('source_addr')
+                            w_destination = w_aces[0].get('destination_addr')
+                            # need to check that user only adds one ace for a numbered hardware acl
+                            if len(w_aces) > 1:
+                                self._module.fail_json(msg="only one ace allowed for numbered hardware acls")
+                            commands.append(
+                                f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list {w_name} "
+                                f"{w_action} {w_protocol} {w_source} {w_destination} "
+                                f"{'icmp-type ' + str(w_icmp_type) if w_icmp_type is not None else ''}"
+                            )
+
+                        else:
+                            w_name = w_acl.get('name')
+                            cmd.append(
+                                f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list "
+                                f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
+                            )
+                            for ace in w_aces:
+                                ace_dict = dict(ace)
+                                ace_dict = utils.remove_empties(ace_dict)
+                                ace_ID = ace.get('ace_ID')
+                                w_action = ace.get('action').lower()
+                                w_protocol = ace.get('protocols').lower()
+                                w_destination = ace.get('destination_addr')
+                                w_source = ace.get('source_addr')
+                                w_icmp_type = ace.get('ICMP_type_number')
+                                if "ace_ID" in ace_dict:
+                                    ace_dict.pop("ace_ID")  # need version of ace without ace_ID
+
+                                else:
+                                    self._module.fail_json(msg="'ace_ID' is required when merging aces")
+                                if ace_dict not in h_aces:
+                                    cmd.append(
+                                        f"{ace_ID} {w_action} {'' if w_protocol is None else w_protocol} "
+                                        f"{w_source} {'' if w_destination is None else w_destination} "
+                                        f"{'icmp-type ' + str(w_icmp_type) if w_icmp_type is not None else ''}"
+                                    )
+                    if len(cmd) > 1:  # only add command if needed
                         commands.extend(cmd)
-                if not existing_acl:
-                    commands.append(f"{'' if w_afi == 'IPv4' else 'IPv6'} access-list {cmd_type} {w_acl.get('name')}")
-                    for ace in w_aces:
+
+                if not existing_acl:  # add a new acl if nothing exists
+                    w_acl_type = w_acl.get('acl_type').lower()
+                    w_name = w_acl.get('name')
+                    if w_acl_type == 'hardware' and w_name.isnumeric():
+                        # need to check that user only adds one ace for a numbered hardware acl
+                        if len(w_aces) > 1:
+                            self._module.fail_json(msg="only one ace allowed for numbered hardware acls")
+
+                        w_action = w_aces[0].get('action').lower()
+                        w_protocol = w_aces[0].get('protocols').lower()
+                        w_destination = w_aces[0].get('destination_addr')
+                        w_source = w_aces[0].get('source_addr')
+                        w_icmp_type = w_aces[0].get('ICMP_type_number')
                         commands.append(
-                            f"{ace.get('action')} {'' if ace.get('protocols') is None else ace.get('protocols')} "
-                            f"{ace.get('source_addr')} {'' if ace.get('destination_addr') is None else ace.get('destination_addr')}"
+                            f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list {w_name} "
+                            f"{w_action} {w_protocol} {w_source} {w_destination} "
+                            f"{'icmp-type ' + str(w_icmp_type) if w_icmp_type is not None else ''}"
                         )
-        with open("output.txt", "a") as f:
-            f.write(f"\ncommands {commands}")
-        return commands
-        commands = []
-        h_acls = have["acls"]
-        w_acls = want[0]['acls'][0]
-        w_aces = w_acls.get('aces')
-        existing_acl = False
-        for thing in h_acls:
-            if w_acls.get('name') == thing.get('name'): #an ace exists within the acl so modify the aces
-                existing_acl = True
-                h_aces = thing.get('ace') if thing.get('ace') is not None else []
-                w_aces = w_acls.get('aces')
-                for ace in w_aces:
-                    test = dict(ace) #need to rename test to something better ---------------------------------------------------------------
-                    if "ace_ID" in test:
-                        test.pop("ace_ID")
                     else:
-                        self._module.fail_json(msg="'ace_ID' is required when merging aces")
-                    if test not in h_aces:
+
                         commands.append(
-                            f"{ace.get('ace_ID')} {ace.get('action')} "
-                            f"{ace.get('protocols')} {ace.get('source_addr')} {ace.get('destination_addr')}"
+                            f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list "
+                            f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
                         )
-                    if len(commands) != 0 and f"access-list {thing.get('name')}" not in commands:
-                        commands.insert(0, f"access-list {thing.get('name')}")
-        if not existing_acl:
-            commands.append(f"access-list {w_acls.get('name')}")
-            for ace in w_aces:
-                commands.append(
-                    f"{ace.get('action')} {ace.get('protocols')} "
-                    f"{ace.get('source_addr')} {ace.get('destination_addr')}"
-                )
-    
+                        for ace in w_aces:
+                            w_action = ace.get('action')
+                            w_protocol = ace.get('protocols')
+                            w_destination = ace.get('destination_addr')
+                            w_source = ace.get('source_addr')
+                            w_icmp_type = ace.get('ICMP_type_number')
+                            commands.append(
+                                f"{w_action} {'' if w_protocol is None else w_protocol} "
+                                f"{w_source} {'' if w_destination is None else w_destination} "
+                                f"{'icmp-type ' + str(w_icmp_type) if w_icmp_type is not None else ''}"
+                            )
+        return commands
+
     def _state_deleted(self, want, have):
         """ The command generator when state is deleted
 
@@ -393,136 +401,42 @@ class Acl(ConfigBase):
                   of the provided objects
         """
         commands = []
-        # thing = self._module.params
         h_acls = have["acls"]
-        # w_acls = want[0]['acls'][0]
-        # w_aces = w_acls.get('aces')[0] if w_acls.get('aces') is not None else []
-        # with open("output.txt", "a") as f:
-        #     f.write(f"\nwant {want}\nh_acls {h_acls}")
         for item in want:
-            # with open("output.txt", "a") as f:
-            #     f.write(f"\nitem {item}")
             w_acls = item.get('acls')
             w_afi = item.get('afi')
-            # with open("output.txt", "a") as f:
-            #     f.write(f"\nafi {w_afi}")
+
             for w_acl in w_acls:
                 w_aces = w_acl.get('aces')
                 for thing in h_acls:
                     if w_acl.get('name') == thing.get('name'):
-                        if w_aces is None: #delete the acl if no ace is provided
+                        w_acl_type = w_acl.get('acl_type').lower()
+                        w_name = w_acl.get('name')
+                        if w_aces is None or w_acl_type == 'hardware':  # delete the acl if no ace is provided
                             commands.append(
-                                f"{'' if w_afi == 'IPv4' else 'IPv6'} no access-list {'extended' if not w_acl.get('name').isnumeric() else ''} {thing.get('name')}"
+                                f"no {'' if w_afi == 'IPv4' else 'IPv6'} access-list "
+                                f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
                             )
-                        else: #delete the specified ace entry only
-                            self.check_parameters('deleted', want)
-                            commands.append(f"{'' if w_afi == 'IPv4' else 'IPv6'} access-list {'extended' if not w_acl.get('name').isnumeric() else ''} {thing.get('name')}")
+                        else:  # delete the specified ace entry only
+                            cmd = []
+                            cmd.append(
+                                f"{'' if w_afi == 'IPv4' else 'IPv6'} access-list "
+                                f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
+                            )
                             for w_ace in w_aces:
+                                w_action = w_ace.get('action')
+                                w_protocol = w_ace.get('protocols')
+                                w_destination = w_ace.get('destination_addr')
+                                w_source = w_ace.get('source_addr')
+                                w_icmp_type = w_ace.get('ICMP_type_number')
                                 for h_ace in thing.get('ace'):
+                                    w_ace = utils.remove_empties(w_ace)
                                     if h_ace == w_ace:
-                                        commands.append(
-                                            f"no {w_ace.get('action')} {w_ace.get('protocols')} {w_ace.get('source_addr')} {w_ace.get('destination_addr')}"
+                                        cmd.append(
+                                            f"no {w_action} {'' if w_protocol is None else w_protocol} "
+                                            f"{w_source} {'' if w_destination is None else w_destination} "
+                                            f"{'icmp-type ' + str(w_icmp_type) if w_icmp_type is not None else ''}"
                                         )
-            # with open("output.txt", "a") as f:
-            #     f.write(f"\nthing {thing.get('ace')[0]}\n {w_aces}\n")
-
-
-
-
-
-        # for h_acl in h_acls:
-        #     h_acl_type = h_acl.get('type')
-        #     if h_acl.get('name').isnumeric(): #numbered acl
-        #         commands.append(f"no access-list {h_acl.get('name')}")
-        #     else:
-        #         h_afi = h_acl.get('afi')
-        #         with open("output.txt", "a") as f:
-        #             f.write(f"\nh_acl {h_acl_type} {h_afi}")
-                
-        #         # cmd_type = 'hardware' if h_acl_type == 'Hardware' else 'extended'
-        #         if h_afi == 'IPv4' or h_acl_type == 'Standard':
-        #             cmd_type = h_acl_type
-        #         else:
-        #             cmd_type = ''
-        #         commands.append(f"no {'' if h_afi == 'IPv4' else 'IPv6'} access-list {cmd_type} {h_acl.get('name')}")
-
-
-        with open("output.txt", "a") as f:
-            f.write(f"\n{commands}")
+                            if len(cmd) > 1:
+                                commands.extend(cmd)
         return commands
-
-
-# eagles what kind of love have you got
-
-
-#         commands = []
-#         h_acls = have["acls"]
-#         w_acls = want[0]['acls'][0]
-#         w_aces = w_acls.get('aces')
-#         existing_acl = False
-#         with open("output.txt", "a") as f:
-#             f.write(f"\n{w_aces}")
-#         for thing in h_acls:
-#             if w_acls.get('name') == thing.get('name'): #an ace exists within the acl so modify the ace
-#                 existing_acl = True
-#                 h_aces = thing.get('ace')[0] if thing.get('ace') is not None else []
-#                 w_aces = w_acls.get('aces')
-
-#                 test = dict(w_acls.get('aces')[0])
-#                 if "ace_ID" in test:
-#                     test.pop("ace_ID")
-#                 else:
-#                     self._module.fail_json(msg="'ace_ID' is required when merging aces")
-#                 with open("output.txt", "a") as f:
-#                             f.write(f"\nhere") 
-#                 if test != h_aces: #checks if want ace and have ace match and generates the required commands to modify it
-#                     with open("output.txt", "a") as f:
-#                         f.write(f"\n{test}")
-#                     commands.append(f"access-list {thing.get('name')}")
-#                     # with open("output.txt", "a") as f:
-#                     #         f.write(f"\nhere") 
-#                     for ace in w_aces:
-#                         # with open("output.txt", "a") as f:
-#                         #     f.write(f"ace {ace}\n h_aces{h_aces}\n")
-#                         commands.append(
-#                             f"{ace.get('ace_ID')} {ace.get('action')} "
-#                             f"{ace.get('protocols')} {ace.get('source_addr')} {ace.get('destination_addr')}"
-#                         )
-#                         with open("output.txt", "a") as f:
-#                             f.write(f"\nhere") 
-#         if not existing_acl:
-#             ace = w_aces[0]
-#             commands.append(
-#                 f"access-list {w_acls.get('name')} {ace.get('action')} "
-#                 f"{ace.get('protocols')} {ace.get('source_addr')} {ace.get('destination_addr')}"
-#             )
-#         #     with open("output.txt", "a") as f:
-#         #         f.write(f"\n {w_aces}")
-#         with open("output.txt", "a") as f:
-#             f.write(f"\n {commands}")
-#         return []
-
-
-
-
-# awplus#show access-list 
-# Standard IP access list 72
-#     4 deny   168.152.66.0 0.0.0.255
-# Extended IP access list 102
-#     4 permit ip 172.144.44.0 0.0.0.255 any
-# Extended IP access list 103
-#     4 permit ip 196.148.88.0 0.0.0.255 any
-#     8 deny   ip 198.146.98.0 0.0.0.255 any
-# Extended IP access list 104
-#     8 permit ip 196.144.88.0 0.0.0.255 any
-# Extended IP access list 2001
-# Named Extended IP access list test
-#     4 permit ip 192.143.87.0/24 192.142.50.0/24
-# Named Extended IP access list test2
-#     4 permit icmp 148.148.48.0/24 152.152.52.0/24
-#     8 deny   icmp 142.141.40.0/24 132.131.30.0/24 icmp-type 8
-# Named Extended IPv6 access list a-list
-#     4 deny   icmp 2001:db8::/64 2001:db8::f/64
-#     8 deny   icmp 2001:db8::/64 2001:db8::d/64 icmp-type 8
-# Hardware IP access list 3000
-#     4 permit ip 192.121.1.1/24 any

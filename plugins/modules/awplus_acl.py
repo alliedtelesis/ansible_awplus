@@ -42,6 +42,8 @@ version_added: '2.13.6'
 short_description: 'Manages the ACL configuration'
 description: 'This module manages the ACL configuration of Alliedware Plus devices.'
 author: "Ben Hoelker"
+notes:
+- Tested against AlliedWare Plus on SBx908NG.
 options:
   config:
     description:
@@ -53,6 +55,7 @@ options:
         description:
           - Configures the Lists of ACLs
         type: list
+        elements: dict
         suboptions:
           aces:
             description:
@@ -68,10 +71,10 @@ options:
                 description:
                   - Defines which protocol (IP/TCP/UDP or ICMP) the user wants to target.
                 choices:
-                  - TCP
-                  - UDP
-                  - ICMP
-                  - IP
+                  - tcp
+                  - udp
+                  - icmp
+                  - ip
               action:
                 description:
                   - User can chose to permit/deny a packet.
@@ -99,22 +102,26 @@ options:
               ICMP_type_number:
                 description:
                   - Specifies the ICMP type.
-                type: int 
+                type: int
           acl_type:
             description:
               - "Defines what mode to use: extended or standard."
             choices:
               - extended
               - standard
+              - hardware
+            required: True
           name:
             description:
               - defines the name of the ACL.
               - Can either be named or numbered.
             type: str
+            required: True
       afi:
         description:
           - defines whether IPv4 or IPv6 is used
         choices: ["IPv4", "IPv6"]
+        required: True
   state:
     description:
       - The state the configuration should be left in
