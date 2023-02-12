@@ -245,7 +245,7 @@ def _do_replace(name, want_dict, have_dict, module):
     h_trunk = have_dict.get('trunk')
     h_native_vlan = None if h_trunk is None else h_trunk.get('native_vlan')
     h_native_vlan_flag = h_native_vlan is not None
-    h_allowed_vlans = [] if h_trunk is None else h_trunk.get('allowed_vlans')
+    h_allowed_vlans = [] if h_trunk is None or 'allowed_vlans' not in h_trunk else h_trunk.get('allowed_vlans')
 
     # Carry out replace
     # Check for duplicated wants
