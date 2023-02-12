@@ -34,12 +34,17 @@
               acl_type: extended
             - aces:
               - source_addr: 196.144.88.0 0.0.0.255
+                source_port_protocol:
+                  - eq: 20
                 destination_addr: any
+                destination_port_protocol:
+                  - range:
+                      - start_port: 2
+                        end_port: 5
                 action: permit
-                protocols: ip
+                protocols: tcp
               name: '104'
               acl_type: extended
-
 
             - aces:
               - source_addr: 192.192.92.0/24

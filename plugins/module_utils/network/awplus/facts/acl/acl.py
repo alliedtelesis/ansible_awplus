@@ -49,6 +49,8 @@ class AclFacts(object):
         :rtype: dictionary
         :returns: facts
         """
+        with open("output.txt", "w") as f:
+            f.write("")
         if not data:
             # typically data is populated from the current device configuration
             # data = connection.get('show running-config | section ^interface')
@@ -90,7 +92,11 @@ class AclFacts(object):
         wild_card_mask_dest = ''
         wild_card_mask_source = ''
         dest = ''
+        dest_port = ''
+        dest_port_type = ''
         source = ''
+        source_port = ''
+        source_port_type = ''
         ICMP_num = ''
         line = ' '.join(line.split())
 
@@ -103,6 +109,52 @@ class AclFacts(object):
                 values = acl_match[0]
                 action = values[1]
                 source = values[2] + ' ' + values[3] if len(values) == 4 else values[2]
+        elif re.search(r'tcp|udp', line):
+            with open("output.txt", "a") as f:
+                f.write(f"\n{line}\n")
+            acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
+            # ('16', 'deny', 'tcp', '10.40.42.0/24', 'range', '8', '10', '10.50.50.0/24', 'range', '12', '14')
+            if not acl_match:
+                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
+                # ('20', 'deny', 'tcp', '10.40.42.0/24', 'range', '8', '10', '10.50.50.0/24', 'lt', '12'
+                # ('12', 'deny', 'tcp', '10.40.42.0/24', 'eq', '10', '10.50.50.0/24', 'range', '12', '14')
+            if not acl_match:
+                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
+                # ('8', 'deny', 'udp', '10.40.42.0/24', 'eq', '10', '10.50.50.0/24', 'eq', '12')
+            if not acl_match:
+                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
+            if not acl_match:
+                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
+                # ('20', 'deny', 'tcp', '10.50.50.0/24', 'eq', '12', 'any')
+                # ('12', 'deny', 'tcp', 'any', '10.50.50.0/24', 'eq', '12')
+            if not acl_match:
+                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+)', line)
+                # ('16', 'deny', 'tcp', 'any', 'any')
+
+            # with open("output.txt", "a") as f:
+            #     f.write(f"{acl_match}\n")
+            
+            values = acl_match[0]
+            action = values[1]
+            protocol = values[2]
+            source = values[3]
+            if len(values) == 5:
+                dest = values[4]
+            if len(values) == 7:
+                if values[4] not in ('eq', 'lt', 'gt', 'ne'):
+                    dest = values[4]
+                else:
+                    dest = values[6]
+                    source_port_type = values[4]
+                    source_port = values[5]
+            if len(values) == 8:
+                pass
+
+                # dest = values[4] if values[4] not in ('eq', 'lt', 'gt', 'ne') else values[6]
+                # source_port_type = values[4] if values[4] in ('eq', 'lt', 'gt', 'ne') else
+            with open("output.txt", "a") as f:
+                f.write(f"{(action, protocol, source, source_port_type, source_port, dest)} {len(values)}\n")
+        
         else:
             acl_match = None
 
@@ -193,3 +245,31 @@ class AclFacts(object):
             acl["ace"] = ace_list
             acls.append(acl)
         return acls
+
+
+
+# awplus#show access-list
+# Standard IP access list 72
+#     4 deny   any
+# Extended IP access list 104
+#     4 permit ip 196.144.88.0 0.0.0.255 any
+# Extended IP access list 2001
+#     4 deny   ip 170.42.45.0 0.0.0.255 any
+#     8 permit ip 141.143.42.0 0.0.0.255 any
+#    12 permit ip 181.185.85.0 0.0.0.255 any
+#    16 deny   ip 10.201.20.0 0.0.0.255 any
+# Named Extended IP access list test
+#     4 deny   icmp 192.143.87.0/24 192.142.50.0/24 icmp-type 8
+#     8 deny   tcp 10.40.42.0/24 eq 10 10.50.50.0/24 eq 12
+#    12 deny   tcp any 10.50.50.0/24 eq 12
+#    16 deny   tcp any any
+#    20 deny   tcp 10.50.50.0/24 eq 12 any
+# Named Extended IPv6 access list ipv6_test
+#     4 deny   icmp 2001:db8::/64 2001:db8::f/64
+# Hardware IP access list 3000
+#     4 deny icmp 192.192.92.0/24 197.197.97.0/24 icmp-type 8
+# Hardware IP access list hardware_acl
+#     4 permit ip 192.192.92.0/24 any
+#     8 deny ip 198.192.92.0/24 any
+#    12 deny tcp 10.40.42.0/24 eq 10 10.50.50.0/24 range 12 14
+#    16 deny tcp 10.40.42.0/24 range 8 10 10.50.50.0/24 range 12 14

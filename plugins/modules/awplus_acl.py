@@ -86,19 +86,79 @@ options:
                   - Source address in the form of an IPv4 address.
                   - Putting 'any', will match any source IP address.
                 type: str
-              source_port:
+              source_port_protocol:
                 description:
-                  - Defines the source port.
-                type: int
+                  - Defines the protocols for the source port.
+                type: list
+                suboptions:
+                  eq:
+                    description:
+                      - Matches port numbers that are equal to the specified port.
+                    type: int
+                  lt:
+                    description:
+                      - Matches port numbers that are less than the specified port.
+                    type: int
+                  gt:
+                    description:
+                      - Matches port numbers that are greater than the specified port.
+                    type: int
+                  ne:
+                    description:
+                      - Matches port numbers that are not equal to the specified port.
+                    type: int
+                  range:
+                    description:
+                      - Matches a range of port numbers.
+                    type: list
+                    suboptions:
+                      start_port:
+                        description:
+                          - The starting port.
+                        type: int
+                      end_port:
+                        description:
+                          - The end port.
+                        type: int
               destination_addr:
                 description:
                   - Destination address in the form of an IPv4 address.
                   - Putting 'any', will match any destination IP address.
                 type: str
-              destination_port:
+              destination_port_protocol:
                 description:
-                  - Defines the distination port.
-                type: int
+                  - Defines the protocols for the distination port.
+                type: list
+                suboptions:
+                  eq:
+                    description:
+                      - Matches port numbers that are equal to the specified port.
+                    type: int
+                  lt:
+                    description:
+                      - Matches port numbers that are less than the specified port.
+                    type: int
+                  gt:
+                    description:
+                      - Matches port numbers that are greater than the specified port.
+                    type: int
+                  ne:
+                    description:
+                      - Matches port numbers that are not equal to the specified port.
+                    type: int
+                  range:
+                    description:
+                      - Matches a range of port numbers.
+                    type: list
+                    suboptions:
+                      start_port:
+                        description:
+                          - The starting port.
+                        type: int
+                      end_port:
+                        description:
+                          - The end port.
+                        type: int
               ICMP_type_number:
                 description:
                   - Specifies the ICMP type.
