@@ -22,6 +22,7 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common i
 )
 import re
 
+
 class Acl(ConfigBase):
     """
     The awplus_acl class
@@ -60,8 +61,7 @@ class Acl(ConfigBase):
         result = {'changed': False}
         warnings = list()
         commands = list()
-        with open("output.txt", "w") as f:
-            f.write("")
+
         existing_acl_facts = self.get_acl_facts()
 
         commands.extend(self.set_config(existing_acl_facts))
@@ -103,8 +103,7 @@ class Acl(ConfigBase):
         :returns: True if the incoming configuration is empty, False otherwise
         """
         result = True  # remains true until user passes empty data
-        with open("output.txt", "a") as f:
-            f.write(f'{want}\n')
+
         if not (want is None or want[0].get('acls') is None):
             ace_1 = want[0].get('acls')[0].get('aces')
             if state in ('merged', 'replaced', 'overridden') or state == 'deleted' and ace_1:
@@ -168,16 +167,15 @@ class Acl(ConfigBase):
         if protocol in ('tcp', 'udp'):
             source_protocol = ace.get('source_port_protocol')
             dest_protocol = ace.get('destination_port_protocol')
-            if not source_protocol is None:
+            if source_protocol is not None:
 
                 source_type = list(source_protocol[0].keys())[0]
                 source_port = None
 
                 if source_type == 'range':
                     if acl_type == 'hardware':
-
+                        # Only adds range filter if wanted acl is declared 'hardware'
                         source_range_conf = source_protocol[0].get('range')
-
                         if source_range_conf is not None and len(source_range_conf[0]) > 1:
                             start_port = source_range_conf[0].get('start')
                             end_port = source_range_conf[0].get('end')
@@ -185,43 +183,39 @@ class Acl(ConfigBase):
                 else:
                     source_port = source_protocol[0].get(f'{source_type}')
 
+                # Checks that filter created is valid (no None in filter)
                 if re.search(r'None', str(source_port) + str(source_type)):
                     source_filter = ''
                 else:
                     source_filter = f"{source_type} {source_port}"
-            if not dest_protocol is None:
+            if dest_protocol is not None:
 
                 dest_type = list(dest_protocol[0].keys())[0]
                 dest_port = None
-                # with open("output.txt", "a") as f:
-                #     f.write(f"{dest_type}\n\n")
+
                 if dest_type == 'range':
                     if acl_type == 'hardware':
-
+                        # Only adds range filter if wanted acl is declared 'hardware'
                         dest_range_conf = dest_protocol[0].get('range')
-                        with open("output.txt", "a") as f:
-                            f.write(f"{dest_range_conf}\n\n")
                         if dest_range_conf is not None and len(dest_range_conf[0]) > 1:
                             start_port = dest_range_conf[0].get('start')
                             end_port = dest_range_conf[0].get('end')
                             dest_port = f"{start_port} {end_port}"
-                            with open("output.txt", "a") as f:
-                                f.write(f"{start_port}  {end_port}\n\n")
                 else:
                     dest_port = dest_protocol[0].get(f'{dest_type}')
 
+                # Checks that filter created is valid (no None in filter)
                 if re.search(r'None', str(dest_port) + str(dest_type)):
                     dest_filter = ''
                 else:
                     dest_filter = f"{dest_type} {dest_port}"
 
+        # Generate ace command
         command.append(
             f"{action} {'' if protocol is None else protocol} "
             f"{source} {source_filter} {'' if destination is None else destination} {dest_filter}"
             f"{'icmp-type ' + str(icmp_type) if icmp_type is not None else ''}"
         )
-        # with open("output.txt", "a") as f:
-        #     f.write(f"ace_cmd {command}\n\n")
         return command[0]
 
     def set_state(self, want, have):
@@ -250,8 +244,6 @@ class Acl(ConfigBase):
         # removing excess spaces from commands
         for index, command in enumerate(commands):
             commands[index] = (" ".join(command.split())).strip()
-        with open("output.txt", "a") as f:
-            f.write(f'{commands}\n')
         return commands
 
     def _state_replaced(self, want, have):
@@ -286,15 +278,12 @@ class Acl(ConfigBase):
                                 f"{h_acl.get('name')}"
                             )
                             for h_ace in h_acl.get('ace'):
-                                # with open("output.txt", "a") as f:
-                                #     f.write(f"have {h_ace}\nthing {h_acl}\n")
                                 ace_cmd = self.generate_ace_commands(h_ace, h_acl.get('type').lower())
                                 commands.append(f'no {ace_cmd}')
                             for ace in w_aces:
                                 ace_cmd = self.generate_ace_commands(ace, w_acl_type)
                                 commands.append(ace_cmd)
-        with open("output.txt", "a") as f:
-            f.write(f'{commands}')
+
         return commands
 
     def _state_overridden(self, want, have):
@@ -398,6 +387,7 @@ class Acl(ConfigBase):
                                 if ace_dict not in h_aces:
                                     ace_cmd = self.generate_ace_commands(ace, w_acl_type)
                                     cmd.append(f'{ace_ID} {ace_cmd}')
+
                     if len(cmd) > 1:  # only add command if needed
                         commands.extend(cmd)
 
@@ -438,8 +428,8 @@ class Acl(ConfigBase):
 
             for w_acl in w_acls:
                 w_aces = w_acl.get('aces')
-                for thing in h_acls:
-                    if w_acl.get('name') == thing.get('name'):
+                for h_acl in h_acls:
+                    if w_acl.get('name') == h_acl.get('name'):
                         w_acl_type = w_acl.get('acl_type').lower()
                         w_name = w_acl.get('name')
                         if w_aces is None or w_acl_type == 'hardware':  # delete the acl if no ace is provided
@@ -454,12 +444,12 @@ class Acl(ConfigBase):
                                 f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
                             )
                             for w_ace in w_aces:
-                                for h_ace in thing.get('ace'):
+                                for h_ace in h_acl.get('ace'):
                                     w_ace = utils.remove_empties(w_ace)
                                     if h_ace == w_ace:
                                         ace_cmd = self.generate_ace_commands(w_ace, w_acl_type)
                                         cmd.append(f"no {ace_cmd}")
 
-                            if len(cmd) > 1:
+                            if len(cmd) > 1:  # only add command if needed
                                 commands.extend(cmd)
         return commands
