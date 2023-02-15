@@ -77,10 +77,14 @@ options:
                   - ip
               action:
                 description:
-                  - User can chose to permit/deny a packet.
+                  - Action to do with matched packets.
                 choices:
                   - permit
                   - deny
+                  - copy-to-cpu
+                  - copy-to-mirror
+                  - send-to-mirror
+                  - send-to-cpu
               source_addr:
                 description:
                   - Source address in the form of an IPv4 address.
@@ -90,6 +94,7 @@ options:
                 description:
                   - Defines the protocols for the source port.
                 type: list
+                elements: dict
                 suboptions:
                   eq:
                     description:
@@ -111,12 +116,13 @@ options:
                     description:
                       - Matches a range of port numbers.
                     type: list
+                    elements: dict
                     suboptions:
-                      start_port:
+                      start:
                         description:
                           - The starting port.
                         type: int
-                      end_port:
+                      end:
                         description:
                           - The end port.
                         type: int
@@ -129,6 +135,7 @@ options:
                 description:
                   - Defines the protocols for the distination port.
                 type: list
+                elements: dict
                 suboptions:
                   eq:
                     description:
@@ -151,11 +158,11 @@ options:
                       - Matches a range of port numbers.
                     type: list
                     suboptions:
-                      start_port:
+                      start:
                         description:
                           - The starting port.
                         type: int
-                      end_port:
+                      end:
                         description:
                           - The end port.
                         type: int

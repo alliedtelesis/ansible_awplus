@@ -49,8 +49,8 @@ class AclFacts(object):
         :rtype: dictionary
         :returns: facts
         """
-        with open("output.txt", "w") as f:
-            f.write("")
+        # with open("output.txt", "w") as f:
+        #     f.write("")
         if not data:
             # typically data is populated from the current device configuration
             # data = connection.get('show running-config | section ^interface')
@@ -94,9 +94,15 @@ class AclFacts(object):
         dest = ''
         dest_port = ''
         dest_port_type = ''
+        dest_port_start = ''
+        dest_port_end = ''
+        dest_port_protocol = dict()
         source = ''
         source_port = ''
         source_port_type = ''
+        source_port_start = ''
+        source_port_end = ''
+        source_port_protocol = dict()
         ICMP_num = ''
         line = ' '.join(line.split())
 
@@ -110,50 +116,105 @@ class AclFacts(object):
                 action = values[1]
                 source = values[2] + ' ' + values[3] if len(values) == 4 else values[2]
         elif re.search(r'tcp|udp', line):
-            with open("output.txt", "a") as f:
-                f.write(f"\n{line}\n")
-            acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
-            # ('16', 'deny', 'tcp', '10.40.42.0/24', 'range', '8', '10', '10.50.50.0/24', 'range', '12', '14')
-            if not acl_match:
-                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
-                # ('20', 'deny', 'tcp', '10.40.42.0/24', 'range', '8', '10', '10.50.50.0/24', 'lt', '12'
-                # ('12', 'deny', 'tcp', '10.40.42.0/24', 'eq', '10', '10.50.50.0/24', 'range', '12', '14')
-            if not acl_match:
-                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
-                # ('8', 'deny', 'udp', '10.40.42.0/24', 'eq', '10', '10.50.50.0/24', 'eq', '12')
-            if not acl_match:
-                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
-            if not acl_match:
-                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
-                # ('20', 'deny', 'tcp', '10.50.50.0/24', 'eq', '12', 'any')
-                # ('12', 'deny', 'tcp', 'any', '10.50.50.0/24', 'eq', '12')
-            if not acl_match:
-                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+)', line)
-                # ('16', 'deny', 'tcp', 'any', 'any')
 
+            values = line.split(' ')  # Split the ace by the spaces
             # with open("output.txt", "a") as f:
-            #     f.write(f"{acl_match}\n")
-            
-            values = acl_match[0]
+            #     f.write(f"line {test_line}\n")
+            # if acl_match:
             action = values[1]
             protocol = values[2]
             source = values[3]
-            if len(values) == 5:
-                dest = values[4]
-            if len(values) == 7:
-                if values[4] not in ('eq', 'lt', 'gt', 'ne'):
-                    dest = values[4]
+            port_index = []
+            # get relevant port information
+            for index in range(len(values)):
+                if values[index] in ('eq', 'lt', 'gt', 'ne'):
+                    port_index.append((values[index], values[index + 1], index))
+                if values[index] == 'range':
+                    port_index.append((values[index], values[index + 1], values[index + 2], index))
+
+            if len(port_index) != 0:
+                if len(port_index) == 2:
+                    dest = values[port_index[-1][-1] - 1]
+                    dest_port_type = port_index[-1][0]
+
+                    if dest_port_type == 'range':
+                        dest_port_start = port_index[-1][1]
+                        dest_port_end = port_index[-1][2]
+                        dest_port_protocol[f'{dest_port_type}'] = {'start': dest_port_start, 'end': dest_port_end}
+                    else:
+                        dest_port = port_index[-1][1]
+                        dest_port_protocol[f'{dest_port_type}'] = int(dest_port)
+                    # source = values[port_index[0][-1] - 1]
+                    source_port_type = port_index[0][0]
+                    if source_port_type == 'range':
+                        source_port_start = port_index[0][1]
+                        source_port_end = port_index[0][2]
+                        source_port_protocol[f'{source_port_type}'] = {'start': source_port_start, 'end': source_port_end}
+                    else:
+                        source_port = port_index[0][1]
+                        source_port_protocol[f'{source_port_type}'] = int(source_port)
+
                 else:
-                    dest = values[6]
-                    source_port_type = values[4]
-                    source_port = values[5]
-            if len(values) == 8:
-                pass
+                    if values[-1] == port_index[0][1]:
+                        dest = values[port_index[-1][-1] - 1]
+                        dest_port_type = port_index[0][0]
+                        if dest_port_type == 'range':
+                            dest_port_start = port_index[0][1]
+                            dest_port_end = port_index[0][2]
+                            dest_port_protocol[f'{dest_port_type}'] = {'start': dest_port_start, 'end': dest_port_end}
+                        else:
+                            dest_port = port_index[0][1]
+                            dest_port_protocol[f'{dest_port_type}'] = int(dest_port)
+                    else:
+                        source_port_type = port_index[0][0]
+                        dest = values[-1]
+                        if source_port_type == 'range':
+                            source_port_start = port_index[0][1]
+                            source_port_end = port_index[0][2]
+                            source_port_protocol[f'{source_port_type}'] = {'start': source_port_start, 'end': source_port_end}
+                        else:
+                            source_port = port_index[0][1]
+                            source_port_protocol[f'{source_port_type}'] = int(source_port)
+
+                        #         f.write(f"{source} {source_port_type} {source_port} {source_port_start} {source_port_end} {dest} {dest_port_type} {dest_port} {dest_port_start} {dest_port_end}\n\n")
+                                # f.write(f"{source}\n\n")
+
+                    # HERE
+
+                            # with open("output.txt", "a") as f:
+                            #     f.write(f"2 {values}\n")
+            # with open("output.txt", "a") as f:
+            #     f.write(f"{port_type_index}    {line}\n\n")
+
+
+
+
+
+
+
+            # if len(values) == 5:
+            #     dest = values[4]
+            # if len(values) == 7:
+            #     with open("output.txt", "a") as f:
+            #         f.write(f"\n{line}\n")
+            #     if values[4] not in ('eq', 'lt', 'gt', 'ne'):
+            #         dest = values[4]
+            #     else:
+            #         dest = values[6]
+            #         source_port_type = values[4]
+            #         source_port = values[5]
+            #     if values[-2] in ('eq', 'lt', 'gt', 'ne'):
+            #         dest_port = values[7]
+            #         dest_port_type = values[6]
+            #     with open("output.txt", "a") as f:
+            #         f.write(f"{(action, protocol, source, source_port_type, source_port, dest)} {len(values)}\n")
+            # if len(values) == 8:
+            #     pass
 
                 # dest = values[4] if values[4] not in ('eq', 'lt', 'gt', 'ne') else values[6]
                 # source_port_type = values[4] if values[4] in ('eq', 'lt', 'gt', 'ne') else
-            with open("output.txt", "a") as f:
-                f.write(f"{(action, protocol, source, source_port_type, source_port, dest)} {len(values)}\n")
+            # with open("output.txt", "a") as f:
+            #     f.write(f"{(action, protocol, source, source_port_type, source_port, dest)} {len(values)}\n")
         
         else:
             acl_match = None
@@ -190,14 +251,22 @@ class AclFacts(object):
                     wild_card_mask_source = ' ' + values[4] if len(acl_match[0]) != 5 else ''
 
         # map parameters to ace dictonary
+        # with open("output.txt", "a") as f:
+        #     f.write(f"{source_port_protocol} {dest_port_protocol}\n")
         ace["source_addr"] = source + wild_card_mask_source
+        if source_port_protocol != {}:
+            ace["source_port_protocol"] = [source_port_protocol]
         if dest != '':
             ace["destination_addr"] = dest + wild_card_mask_dest
+        if dest_port_protocol != {}:
+            ace["destination_port_protocol"] =  [dest_port_protocol]
         ace["action"] = action
         if protocol != '':
             ace["protocols"] = protocol
         if ICMP_num != '':
             ace["ICMP_type_number"] = int(ICMP_num)
+        # with open("output.txt", "a") as f:
+        #     f.write(f"{ace}\n\n")
         return ace
 
     def render_acl_config(self, data):
@@ -273,3 +342,27 @@ class AclFacts(object):
 #     8 deny ip 198.192.92.0/24 any
 #    12 deny tcp 10.40.42.0/24 eq 10 10.50.50.0/24 range 12 14
 #    16 deny tcp 10.40.42.0/24 range 8 10 10.50.50.0/24 range 12 14
+
+
+
+
+#  # with open("output.txt", "a") as f:
+#             #     f.write(f"\n{line}\n")
+#             acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
+#             # ('16', 'deny', 'tcp', '10.40.42.0/24', 'range', '8', '10', '10.50.50.0/24', 'range', '12', '14')
+#             if not acl_match:
+#                 acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
+#                 # ('20', 'deny', 'tcp', '10.40.42.0/24', 'range', '8', '10', '10.50.50.0/24', 'lt', '12'
+#                 # ('12', 'deny', 'tcp', '10.40.42.0/24', 'eq', '10', '10.50.50.0/24', 'range', '12', '14')
+#             if not acl_match:
+#                 acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
+#                 # ('8', 'deny', 'udp', '10.40.42.0/24', 'eq', '10', '10.50.50.0/24', 'eq', '12')
+#             if not acl_match:
+#                 acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
+#             if not acl_match:
+#                 acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
+#                 # ('20', 'deny', 'tcp', '10.50.50.0/24', 'eq', '12', 'any')
+#                 # ('12', 'deny', 'tcp', 'any', '10.50.50.0/24', 'eq', '12')
+#             if not acl_match:
+#                 acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+)', line)
+#                 # ('16', 'deny', 'tcp', 'any', 'any')
