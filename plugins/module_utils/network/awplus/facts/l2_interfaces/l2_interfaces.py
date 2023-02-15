@@ -112,6 +112,8 @@ class L2_interfacesFacts(object):
         config = deepcopy(self.generated_spec)
         config["name"] = intf
 
+        stackport = re.search("stackport", conf)
+
         mode = utils.parse_conf_arg(conf, "switchport mode")
         trunk = dict()
         if mode == "access":
@@ -125,6 +127,8 @@ class L2_interfacesFacts(object):
                     trunk["native_vlan"] = 0    # no native VLAN
                 else:
                     trunk["native_vlan"] = int(native_vlan)
+            elif stackport:
+                trunk["native_vlan"] = None     # assign native VLAN to None when port is a stackport
             else:
                 trunk["native_vlan"] = 1        # default VLAN
             allowed_vlan = utils.parse_conf_arg(conf, "allowed vlan add")
