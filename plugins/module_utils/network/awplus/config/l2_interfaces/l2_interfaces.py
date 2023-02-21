@@ -20,6 +20,7 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
     dict_diff,
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.facts import Facts
+import re
 
 
 class L2_interfaces(ConfigBase):
@@ -108,22 +109,23 @@ class L2_interfaces(ConfigBase):
         want = param_list_to_dict(want) if want else dict()
         have = param_list_to_dict(have) if have else dict()
 
+        connection = self._connection
         if state == 'overridden':
-            kwargs = {'self': self, 'want': want, 'have': have}
+            kwargs = {'self': self, 'want': want, 'have': have, 'connection': connection}
             commands = self._state_overridden(**kwargs)
         elif state == 'deleted':
-            kwargs = {'self': self, 'want': want, 'have': have}
+            kwargs = {'self': self, 'want': want, 'have': have, 'connection': connection}
             commands = self._state_deleted(**kwargs)
         elif state == 'merged':
-            kwargs = {'self': self, 'want': want, 'have': have}
+            kwargs = {'self': self, 'want': want, 'have': have, 'connection': connection}
             commands = self._state_merged(**kwargs)
         elif state == 'replaced':
-            kwargs = {'self': self, 'want': want, 'have': have}
+            kwargs = {'self': self, 'want': want, 'have': have, 'connection': connection}
             commands = self._state_replaced(**kwargs)
         return commands
 
     @staticmethod
-    def _state_replaced(self, want, have):
+    def _state_replaced(self, want, have, connection):
         """ The command generator when state is replaced
 
         :rtype: A list
@@ -134,11 +136,12 @@ class L2_interfaces(ConfigBase):
 
         for name, want_dict in iteritems(want):
             if name in have:
-                commands.extend(_do_replace(name, want_dict, have[name], self._module))
+                if not check_stackports(connection, name):
+                    commands.extend(_do_replace(name, want_dict, have[name], self._module))
         return commands
 
     @staticmethod
-    def _state_overridden(self, want, have):
+    def _state_overridden(self, want, have, connection):
         """ The command generator when state is overridden
 
         :rtype: A list
@@ -148,14 +151,15 @@ class L2_interfaces(ConfigBase):
         commands = []
         for name, have_dict in iteritems(have):
             if name in want:
-                commands.extend(_do_replace(name, want[name], have_dict, self._module))
+                if not check_stackports(connection, name):
+                    commands.extend(_do_replace(name, want[name], have_dict, self._module))
             else:
                 want_dict = {'name': name}
-                commands.extend(_do_delete(name, want_dict, have_dict))
+                commands.extend(_do_delete(name, want_dict, have_dict, connection))
         return commands
 
     @staticmethod
-    def _state_merged(self, want, have):
+    def _state_merged(self, want, have, connection):
         """ The command generator when state is merged
 
         :rtype: A list
@@ -166,12 +170,13 @@ class L2_interfaces(ConfigBase):
 
         for name, want_dict in iteritems(want):
             if name in have:
-                have_dict = have[name]
-                commands.extend(_set_config(name, want_dict, have_dict, self._module))
+                if not check_stackports(connection, name):
+                    have_dict = have[name]
+                    commands.extend(_set_config(name, want_dict, have_dict, self._module))
         return commands
 
     @staticmethod
-    def _state_deleted(self, want, have):
+    def _state_deleted(self, want, have, connection):
         """ The command generator when state is deleted
 
         :rtype: A list
@@ -179,20 +184,32 @@ class L2_interfaces(ConfigBase):
                   of the provided objects
         """
         commands = []
-
         for name, want_dict in iteritems(want):
             if name in have:
                 have_dict = have[name]
-                commands.extend(_do_delete(name, want_dict, have_dict))
+                commands.extend(_do_delete(name, want_dict, have_dict, connection))
         return commands
 
 
-def _do_delete(name, want_dict, have_dict):
+def check_stackports(connection, name):
+    """ Checks whether a port is a stackport.
+
+        :param want: the device connection
+        :param name: the name of the interface
+        :rtype: bool
+        :returns: True if the interface is configured as
+                  a stacking port, False otherwise
+    """
+
+    port_conf = connection.get(f"show running-config interface {name}")
+    return True if re.search(r'stackport', port_conf) else False
+
+
+def _do_delete(name, want_dict, have_dict, connection):
     """
     Carry out actions for deleting the configuration for a port.
     """
     p_cmd = []
-
     # Drill down to deletable components
     w_access = want_dict.get('access')
     w_vlan = None if w_access is None else w_access.get('vlan')
@@ -209,18 +226,22 @@ def _do_delete(name, want_dict, have_dict):
 
     # Delete requested components
     if w_vlan and h_vlan:
-        if int(w_vlan) == int(h_vlan):
-            p_cmd.append('no switchport access vlan')
+        if not check_stackports(connection, name):
+            if int(w_vlan) == int(h_vlan):
+                p_cmd.append('no switchport access vlan')
     if w_native_vlan_flag and h_native_vlan_flag:
-        if int(w_native_vlan) == int(h_native_vlan):
-            p_cmd.append('no switchport trunk native vlan')
+        if not check_stackports(connection, name):
+            if int(w_native_vlan) == int(h_native_vlan):
+                p_cmd.append('no switchport trunk native vlan')
     if w_allowed_vlans and h_allowed_vlans:
         for dv in h_allowed_vlans:
             if dv in w_allowed_vlans:
-                p_cmd.append(f'switchport trunk allowed vlan remove {dv}')
+                if not check_stackports(connection, name):
+                    p_cmd.append(f'switchport trunk allowed vlan remove {dv}')
     if not (w_vlan or w_native_vlan_flag or w_allowed_vlans) and (h_access or h_trunk):
-        p_cmd.append('switchport mode access')
-        p_cmd.append('no switchport access vlan')
+        if not check_stackports(connection, name):
+            p_cmd.append('switchport mode access')
+            p_cmd.append('no switchport access vlan')
     if p_cmd:
         p_cmd.insert(0, f'interface {name}')
     return p_cmd
@@ -251,7 +272,6 @@ def _do_replace(name, want_dict, have_dict, module):
     # Check for duplicated wants
     if w_vlan and (w_native_vlan_flag or w_allowed_vlans):
         module.fail_json(msg='Interface should either be trunk or access')
-
     # Mode change?
     if (h_native_vlan_flag or h_allowed_vlans) and not (w_native_vlan_flag or w_allowed_vlans):
         p_cmd.append('switchport mode access')
