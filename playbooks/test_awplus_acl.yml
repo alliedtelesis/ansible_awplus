@@ -10,8 +10,6 @@
         config:
           - acls:
             - aces:
-              - source_addr: any
-                action: deny
               name: '72'
               acl_type: standard
             
@@ -71,8 +69,8 @@
                   - eq: 50
                 action: deny
                 protocols: tcp
-              - source_addr: 192.143.87.0/24
-                destination_addr: 192.142.50.0/24
+              - source_addr: 196.143.87.0/24
+                destination_addr: 196.142.50.0/24
                 protocols: icmp
                 action: deny
                 ICMP_type_number: 8
@@ -268,7 +266,7 @@
             afi: IPv4
         state: merged
 
-    - name: Merged test - merging multiple  aces
+    - name: Merged test - merging multiple aces
       tags: m_4
       alliedtelesis.awplus.awplus_acl:
         config:
@@ -337,9 +335,8 @@
                 destination_addr: 179.179.79.0 0.0.0.255
                 action: permit
                 protocols: ip
-                ace_ID: 4
               name: '153'
-              acl_type: hardware
+              acl_type: extended
             - aces:
               - source_addr: 199.199.99.0 0.0.0.255
                 destination_addr: 152.152.53.0 0.0.0.255
@@ -378,7 +375,6 @@
                 action: deny
                 protocols: icmp
                 ICMP_type_number: 8
-                ace_ID: 4            
               name: '3001'
               acl_type: hardware
             afi: IPv4
@@ -463,8 +459,19 @@
             afi: IPv4
         state: merged
 
-    - name: Merged test - merge IP config with extra parameters
+    - name: Merged test - merge new acl with empty ace
       tags: m_12
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              name: '77'
+              acl_type: standard
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merge config with extra parameters 1
+      tags: m_ep_1
       alliedtelesis.awplus.awplus_acl:
         config:
           - acls:
@@ -481,6 +488,23 @@
               acl_type: hardware
               name: hardware_acl
             afi: IPv4
+
+    - name: Merged test - merge config with extra parameters 2
+      tags: m_ep_2
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.143.87.0/24
+                destination_addr: 198.143.87.0/24
+                action: deny
+                protocols: ip
+                ICMP_type_number: 8
+                ace_ID: 4
+              name: test
+              acl_type: extended
+            afi: IPv4
+        state: merged
 
     - name: Merged test - merge tcp/udp configs 1
       tags: m_tcp_udp_1
@@ -749,7 +773,7 @@
             afi: IPv4
         state:  replaced
     
-    - name: Replaced test - replace ace in named hardware acl
+    - name: Replaced test - replace ace in named udp hardware acl
       tags: r_7
       alliedtelesis.awplus.awplus_acl:
         config:
@@ -771,7 +795,7 @@
             afi: IPv4
         state:  replaced
     
-    - name: Replaced test - replace ace in named hardware acl
+    - name: Replaced test - replace ICMP ace in named acl
       tags: r_8
       alliedtelesis.awplus.awplus_acl:
         config:
@@ -787,15 +811,50 @@
               name: test
             afi: IPv4
         state:  replaced
+
+    - name: Replaced test - replace existing acl with empty ace
+      tags: r_9
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              acl_type: extended
+              name: test
+            afi: IPv4
+        state:  replaced
     
-    - name: Overidden test - overwrite with empty config
-      tags: o_1
+    - name: Replaced test - replace new acl with empty ace
+      tags: r_10
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              acl_type: extended
+              name: newacltest
+            afi: IPv4
+        state:  replaced
+
+    - name: Overidden test - overwrite with empty config 1
+      tags: o_ec_1
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            afi: IPv4
+        state:  overridden
+
+    - name: Overidden test - overwrite with empty config 2
+      tags: o_ec_2
       alliedtelesis.awplus.awplus_acl:
         config:
         state:  overridden
 
+    - name: Overidden test - overwrite with empty config 3
+      tags: o_ec_3
+      alliedtelesis.awplus.awplus_acl:
+        state:  overridden
+
     - name: Overidden test - overwrite existing acl
-      tags: o_2
+      tags: o_1
       alliedtelesis.awplus.awplus_acl:
         config:
           - acls:
@@ -810,7 +869,7 @@
         state:  overridden
     
     - name: Overidden test - overwrite with new acl
-      tags: o_3
+      tags: o_2
       alliedtelesis.awplus.awplus_acl:
         config:
           - acls:
@@ -825,7 +884,7 @@
         state:  overridden
     
     - name: Overidden test - overwrite acl with missing parameter
-      tags: o_4
+      tags: o_3
       alliedtelesis.awplus.awplus_acl:
         config:
           - acls:
@@ -840,7 +899,17 @@
       tags: d_1
       alliedtelesis.awplus.awplus_acl:
         config:
-        state: deleted
+          - acls:
+            - aces:
+                - source_addr: 192.182.44.0 0.0.0.255
+                  destination_addr: any
+                  action: permit
+                  protocols: ip
+                  ace_ID: 8
+              acl_type: extended
+              name: '104'
+            afi: IPv4
+        state: merged
     
     - name: Deleted test - delete an ace of an existing acl
       tags: d_2
@@ -856,7 +925,6 @@
                     - eq: 50
                   action: deny
                   protocols: tcp
-              
               name: 'test'
               acl_type: extended
             afi: IPv4
@@ -924,8 +992,6 @@
               name: 'test'
               acl_type: extended
             - aces:
-              - action: deny
-                source_addr: any
               name: '72'
               acl_type: standard
             afi: IPv4
@@ -938,6 +1004,31 @@
               name: 'ipv6_test'
               acl_type: extended
             afi: IPv6
+        state: deleted
+
+    - name: Deleted test - delete an empty acl
+      tags: d_7
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              name: '72'
+              acl_type: standard
+            afi: IPv4
+        state: deleted
+
+    - name: Deleted test - delete an empty acl but provide an ace
+      tags: d_8
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+                - source_addr: any
+                  protocols: ip
+                  action: deny
+              name: '72'
+              acl_type: standard
+            afi: IPv4
         state: deleted
 
     

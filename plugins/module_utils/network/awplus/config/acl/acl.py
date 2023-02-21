@@ -1,6 +1,6 @@
 #
 # -*- coding: utf-8 -*-
-# Copyright 2021 Allied Telesis
+# Copyright 2023 Allied Telesis
 # GNU General Public License v3.0+
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 """
@@ -103,7 +103,6 @@ class Acl(ConfigBase):
         :returns: True if the incoming configuration is empty, False otherwise
         """
         result = True  # remains true until user passes empty data
-
         if not (want is None or want[0].get('acls') is None):
             ace_1 = want[0].get('acls')[0].get('aces')
             if state in ('merged', 'replaced', 'overridden') or state == 'deleted' and ace_1:
@@ -133,7 +132,7 @@ class Acl(ConfigBase):
                                 self._module.fail_json(
                                     msg=f"Missing aces parameter 'protocols' for state {state}"
                                 )
-                            if acl_name.isnumeric() and ace_protocol in ('tcp', 'udp'):
+                            if acl_name.isnumeric() and ace_protocol in ('tcp', 'udp') and acl_type != 'hardware':
                                 self._module.fail_json(
                                     msg=f"Numbered acls are not supported for protocol: {ace_protocol}"
                                 )
@@ -156,7 +155,7 @@ class Acl(ConfigBase):
         :rtype: A list
         :returns: the ace command necessary for the ACl command
         """
-        action = ace.get('action').lower()
+        action = ace.get('action')
         protocol = ace.get('protocols')
         destination = ace.get('destination_addr')
         source = ace.get('source_addr')
@@ -211,10 +210,11 @@ class Acl(ConfigBase):
                     dest_filter = f"{dest_type} {dest_port}"
 
         # Generate ace command
+
         command.append(
             f"{action} {'' if protocol is None else protocol} "
             f"{source} {source_filter} {'' if destination is None else destination} {dest_filter}"
-            f"{'icmp-type ' + str(icmp_type) if icmp_type is not None else ''}"
+            f"{'icmp-type ' + str(icmp_type) if icmp_type is not None and protocol == 'icmp' else ''}"
         )
         return command[0]
 
@@ -231,7 +231,7 @@ class Acl(ConfigBase):
         commands = []
         result = self.check_parameters(state, want)
 
-        if result:
+        if state in ('overridden') or result:
             if state == 'overridden':
                 commands = self._state_overridden(want, have)
             elif state == 'deleted':
@@ -240,7 +240,6 @@ class Acl(ConfigBase):
                 commands = self._state_merged(want, have)
             elif state == 'replaced':
                 commands = self._state_replaced(want, have)
-
         # removing excess spaces from commands
         for index, command in enumerate(commands):
             commands[index] = (" ".join(command.split())).strip()
@@ -254,7 +253,7 @@ class Acl(ConfigBase):
                   to the desired configuration
         """
         commands = []
-        h_acls = have["acls"]
+        h_acls = have.get("acls") if have != [] else []
         for w_acls in want:
             for w_acl in w_acls.get('acls'):
                 w_aces = w_acl.get('aces')
@@ -277,13 +276,15 @@ class Acl(ConfigBase):
                                 f"access-list {w_acl_type if not w_name.isnumeric() else ''} "
                                 f"{h_acl.get('name')}"
                             )
-                            for h_ace in h_acl.get('ace'):
-                                ace_cmd = self.generate_ace_commands(h_ace, h_acl.get('type').lower())
-                                commands.append(f'no {ace_cmd}')
-                            for ace in w_aces:
-                                ace_cmd = self.generate_ace_commands(ace, w_acl_type)
-                                commands.append(ace_cmd)
-
+                            h_aces = h_acl.get('ace')
+                            if h_aces is not None:
+                                for h_ace in h_aces:
+                                    ace_cmd = self.generate_ace_commands(h_ace, h_acl.get('type').lower())
+                                    commands.append(f'no {ace_cmd}')
+                            if w_aces is not None:
+                                for ace in w_aces:
+                                    ace_cmd = self.generate_ace_commands(ace, w_acl_type)
+                                    commands.append(ace_cmd)
         return commands
 
     def _state_overridden(self, want, have):
@@ -294,8 +295,7 @@ class Acl(ConfigBase):
                   to the desired configuration
         """
         commands = []
-        h_acls = have["acls"] if have != [] else []
-
+        h_acls = have.get("acls") if have != [] else []
         # removing existing acls
         for h_acl in h_acls:
             h_acl_type = h_acl.get('type').lower()
@@ -306,33 +306,35 @@ class Acl(ConfigBase):
             else:
                 cmd_type = ''
             commands.append(f"no {'' if h_afi == 'ipv4' else 'ipv6'} access-list {cmd_type} {h_name}")
-
         # adding new acls
-        for item in want:
-            w_acls = item.get('acls')
-            w_afi = item.get('afi').lower()
-            for w_acl in w_acls:
-                w_acl_type = w_acl.get('acl_type').lower()
-                w_aces = w_acl.get('aces')
+        if want is not None:
+            for item in want:
+                w_acls = item.get('acls')
+                w_afi = item.get('afi').lower()
+                if w_acls is not None:
+                    for w_acl in w_acls:
+                        w_acl_type = w_acl.get('acl_type').lower()
+                        w_aces = w_acl.get('aces')
 
-                if w_acl_type == 'hardware' and w_acl.get('name').isnumeric():
-                    w_name = w_acl.get('name')
+                        if w_acl_type == 'hardware' and w_acl.get('name').isnumeric():
+                            w_name = w_acl.get('name')
 
-                    if len(w_aces) > 1:
-                        self._module.fail_json(msg="only one ace allowed for numbered hardware acls")
+                            if len(w_aces) > 1:
+                                self._module.fail_json(msg="only one ace allowed for numbered hardware acls")
 
-                    cmd = self.generate_ace_commands(w_aces[0], w_acl_type)
-                    commands.append(f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list {w_name} {cmd}")
-                else:
-                    w_name = w_acl.get('name')
+                            cmd = self.generate_ace_commands(w_aces[0], w_acl_type)
+                            commands.append(f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list {w_name} {cmd}")
+                        else:
+                            w_name = w_acl.get('name')
 
-                    commands.append(
-                        f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list "
-                        f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
-                    )
-                    for ace in w_aces:
-                        ace_cmd = self.generate_ace_commands(ace, w_acl_type)
-                        commands.append(ace_cmd)
+                            commands.append(
+                                f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list "
+                                f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
+                            )
+                            if w_aces is not None:
+                                for ace in w_aces:
+                                    ace_cmd = self.generate_ace_commands(ace, w_acl_type)
+                                    commands.append(ace_cmd)
 
         return commands
 
@@ -344,8 +346,7 @@ class Acl(ConfigBase):
                   the current configuration
         """
         commands = []
-        h_acls = have["acls"]
-
+        h_acls = have.get("acls") if have != [] else []
         for item in want:
             w_acls = item.get('acls')
             w_afi = item.get('afi').lower()
@@ -375,18 +376,19 @@ class Acl(ConfigBase):
                                 f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list "
                                 f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
                             )
-                            for ace in w_aces:
-                                ace_dict = dict(ace)
-                                ace_dict = utils.remove_empties(ace_dict)
-                                ace_ID = ace.get('ace_ID')
-                                if "ace_ID" in ace_dict:
-                                    ace_dict.pop("ace_ID")  # need version of ace without ace_ID
+                            if w_aces is not None:
+                                for ace in w_aces:
+                                    ace_dict = dict(ace)
+                                    ace_dict = utils.remove_empties(ace_dict)
+                                    ace_ID = ace.get('ace_ID')
+                                    if "ace_ID" in ace_dict:
+                                        ace_dict.pop("ace_ID")  # need version of ace without ace_ID
 
-                                else:
-                                    self._module.fail_json(msg="'ace_ID' is required when merging aces")
-                                if ace_dict not in h_aces:
-                                    ace_cmd = self.generate_ace_commands(ace, w_acl_type)
-                                    cmd.append(f'{ace_ID} {ace_cmd}')
+                                    else:
+                                        self._module.fail_json(msg="'ace_ID' is required when merging aces")
+                                    if ace_dict not in h_aces:
+                                        ace_cmd = self.generate_ace_commands(ace, w_acl_type)
+                                        cmd.append(f'{ace_ID} {ace_cmd}')
 
                     if len(cmd) > 1:  # only add command if needed
                         commands.extend(cmd)
@@ -407,10 +409,10 @@ class Acl(ConfigBase):
                             f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list "
                             f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
                         )
-                        for ace in w_aces:
-                            ace_cmd = self.generate_ace_commands(ace, w_acl_type)
-                            commands.append(ace_cmd)
-
+                        if w_aces is not None:
+                            for ace in w_aces:
+                                ace_cmd = self.generate_ace_commands(ace, w_acl_type)
+                                commands.append(ace_cmd)
         return commands
 
     def _state_deleted(self, want, have):
@@ -421,7 +423,7 @@ class Acl(ConfigBase):
                   of the provided objects
         """
         commands = []
-        h_acls = have["acls"]
+        h_acls = have.get("acls") if have != [] else []
         for item in want:
             w_acls = item.get('acls')
             w_afi = item.get('afi')
@@ -444,12 +446,15 @@ class Acl(ConfigBase):
                                 f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
                             )
                             for w_ace in w_aces:
-                                for h_ace in h_acl.get('ace'):
-                                    w_ace = utils.remove_empties(w_ace)
-                                    if h_ace == w_ace:
-                                        ace_cmd = self.generate_ace_commands(w_ace, w_acl_type)
-                                        cmd.append(f"no {ace_cmd}")
+                                h_aces = h_acl.get('ace')
+                                if h_aces is not None:
+                                    for h_ace in h_acl.get('ace'):
 
+                                        w_ace = utils.remove_empties(w_ace)
+                                        if h_ace == w_ace:
+                                            ace_cmd = self.generate_ace_commands(w_ace, w_acl_type)
+                                            cmd.append(f"no {ace_cmd}")
                             if len(cmd) > 1:  # only add command if needed
                                 commands.extend(cmd)
+
         return commands

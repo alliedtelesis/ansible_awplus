@@ -1,6 +1,6 @@
 #
 # -*- coding: utf-8 -*-
-# Copyright 2021 Allied Telesis
+# Copyright 2023 Allied Telesis
 # GNU General Public License v3.0+
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 """
@@ -49,22 +49,9 @@ class AclFacts(object):
         :rtype: dictionary
         :returns: facts
         """
-        # with open("output.txt", "w") as f:
-        #     f.write("")
         if not data:
             # typically data is populated from the current device configuration
-            # data = connection.get('show running-config | section ^interface')
-            # using mock data instead
-            data = ("resource rsrc_a\n"
-                    "  a_bool true\n"
-                    "  a_string choice_a\n"
-                    "  resource here\n"
-                    "resource rscrc_b\n"
-                    "  key is property01 value is value end\n"
-                    "  an_int 10\n")
-
-        # get required information
-        data = self.get_acl_conf(connection)
+            data = self.get_acl_conf(connection)
 
         # render config
         config = self.generated_spec
@@ -80,13 +67,10 @@ class AclFacts(object):
         return ansible_facts
 
     def render_tcp_udp_config(self, values):
-        # with open("output.txt", "a") as f:
-        #     f.write(f"line {test_line}\n")
-        # if acl_match:
         dest_port_protocol = dict()
         source_port_protocol = dict()
         port_index = []
-
+        dest = ''
         # get relevant port information
         for index in range(len(values)):
             if values[index] in ('eq', 'lt', 'gt', 'ne'):
@@ -97,8 +81,6 @@ class AclFacts(object):
         if len(port_index) != 0:
             dest = values[port_index[-1][-1] - 1]
             if len(port_index) == 2:
-
-                # dest = values[port_index[-1][-1] - 1]
                 dest_port_type = port_index[-1][0]
                 if dest_port_type == 'range':
                     dest_port_start = port_index[-1][1]
@@ -119,7 +101,6 @@ class AclFacts(object):
 
             else:
                 if values[-1] == port_index[0][1]:
-                    # dest = values[port_index[-1][-1] - 1]
                     dest_port_type = port_index[0][0]
                     if dest_port_type == 'range':
                         dest_port_start = port_index[0][1]
@@ -232,25 +213,39 @@ class AclFacts(object):
         :rtype: list
         :returns: list of acls
         """
-        acls_unsorted = []
-        acls = []
-        data = data.split("\n")
-        acl = dict()
-        for count, line in enumerate(data):
-            # look if line is a new acl
-            if re.search(r'(Standard|Extended|Named|Hardware)', line):
-                ace_count = count + 1 if len(data) > 2 else 0
+        acl_list = []
+        acl_facts = []
+
+        # order list into form [[acl_name, [ace1, ace2], [acl_name, [ace1, ace2]]]]
+        result = re.split(r'Hardware|Standard|Extended|Named', data)
+        if result:
+            for item in result:
                 ace_list = []
-                if line is not data[-1]:
-                    # add all aces under acl name to a list
-                    while (re.search(r'(   )', data[ace_count])):
-                        ace_list.append(data[ace_count])
-                        if ace_count == len(data) - 1:
-                            break
-                        else:
-                            ace_count += 1
-                acls_unsorted.append((line, ace_list))
-        for item in acls_unsorted:
+                name = ''
+                item = item.split('\n')
+
+                for line in item:
+                    if re.search(r'access list', line):
+                        name = line
+                    elif re.search(r'(   )', line):
+                        ace_list.append(line)
+                if name != '':
+                    acl_list.append([name, ace_list])
+
+        # update ACL names so that acl type is also included
+        result = data.split('\n')
+        acls_names = []
+        for item in result:
+            if re.search(r'access list', item):
+                acls_names.append(item)
+
+        for count, item in enumerate(acl_list):
+            for acl_name in acls_names:
+                if re.search(item[0], acl_name):
+                    acl_list[count][0] = acl_name
+
+        # render each acl
+        for item in acl_list:
             ace_list = []
             type_name = item[0]
             ace = item[1]
@@ -267,5 +262,5 @@ class AclFacts(object):
                 ace_list.append(self.render_ace_config(entry, acl['type']))
 
             acl["ace"] = ace_list
-            acls.append(acl)
-        return acls
+            acl_facts.append(acl)
+        return acl_facts

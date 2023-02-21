@@ -87,7 +87,7 @@ options:
                   - send-to-cpu
               source_addr:
                 description:
-                  - Source address in the form of an IPv4 address.
+                  - Source address in the form of an IPv4/IPv6 address.
                   - Putting 'any', will match any source IP address.
                 type: str
               source_port_protocol:
@@ -128,7 +128,7 @@ options:
                         type: int
               destination_addr:
                 description:
-                  - Destination address in the form of an IPv4 address.
+                  - Destination address in the form of an IPv4/IPv6 address.
                   - Putting 'any', will match any destination IP address.
                 type: str
               destination_port_protocol:
@@ -172,7 +172,7 @@ options:
                 type: int
           acl_type:
             description:
-              - "Defines what mode to use: extended or standard."
+              - "Defines what mode to use: extended, standard or hardware."
             choices:
               - extended
               - standard
@@ -187,7 +187,9 @@ options:
       afi:
         description:
           - defines whether IPv4 or IPv6 is used
-        choices: ["IPv4", "IPv6"]
+        choices:
+          - IPv4
+          - IPv6
         required: True
   state:
     description:
@@ -209,18 +211,21 @@ EXAMPLES = """
 # awplus#show access-list
 # Extended IP access list 102
 #     4 permit ip 172.144.44.0 0.0.0.255 any
+# Extended IP access list 2001
+#     4 permit ip 192.182.99.0 0.0.0.255 any
 
 - name: Merged Example
     alliedtelesis.awplus.awplus_acl:
     config:
       - acls:
         - aces:
-            - source_addr: 192.182.44.0 0.0.0.255
+          - source_addr: 192.182.44.0 0.0.0.255
             destination_addr: any
             action: permit
-            protocols: IP
-            acl_type: extended
-            name: '102'
+            protocols: ip
+            ace_ID: 8
+          acl_type: extended
+          name: '102'
         afi: IPv4
     state: merged
 
@@ -231,6 +236,8 @@ EXAMPLES = """
 # Extended IP access list 102
 #     4 permit ip 172.144.44.0 0.0.0.255 any
 #     8 permit ip 192.182.44.0 0.0.0.255 any
+# Extended IP access list 2001
+#     4 permit ip 192.182.99.0 0.0.0.255 any
 
 
 # Using Replaced
@@ -242,27 +249,31 @@ EXAMPLES = """
 # Extended IP access list 102
 #     4 permit ip 172.144.44.0 0.0.0.255 any
 #     8 permit ip 192.182.44.0 0.0.0.255 any
+# Extended IP access list 2001
+#     4 permit ip 192.182.99.0 0.0.0.255 any
 
 - name: Replaced Example
       alliedtelesis.awplus.awplus_acl:
         config:
           - acls:
             - aces:
-              - source_addr: 192.182.99.0 0.0.0.255
+              - source_addr: 172.144.44.0 0.0.0.255
                 destination_addr: any
                 action: permit
-                protocols: IP
+                protocols: ip
               acl_type: extended
               name: '102'
             afi: IPv4
         state:  replaced
 
-#After state:
+# After state:
 # -----------
 #
 # awplus#show access-list
 # Extended IP access list 102
 #     4 permit ip 172.144.44.0 0.0.0.255 any
+# Extended IP access list 2001
+#     4 permit ip 192.182.99.0 0.0.0.255 any
 
 
 # Using Overridden
@@ -281,16 +292,16 @@ EXAMPLES = """
         config:
           - acls:
             - aces:
-              - source_addr: 192.182.99.0 0.0.0.255
+              - source_addr: 192.182.88.0 0.0.0.255
                 destination_addr: any
                 action: permit
-                protocols: IP
-              acl_type: extended
-              name: '2001'
-            afi: IPv4
+                protocols: ip
+            acl_type: extended
+            name: '2001'
+          afi: IPv4
         state:  overridden
 
-#After state:
+# After state:
 # -----------
 #
 # awplus#show access-list
@@ -314,9 +325,11 @@ EXAMPLES = """
         config:
           - acls:
             - name: '2001'
+              acl_type: extended
+          afi: "IPv4"
         state: deleted
 
-#After state:
+# After state:
 # -----------
 #
 # awplus#show access-list
@@ -342,7 +355,7 @@ commands:
   description: The set of commands pushed to the remote device.
   returned: always
   type: list
-  sample: ['command 1', 'command 2', 'command 3']
+  sample: ['access-list', '4 deny ip 192.168.72.0 any']
 """
 
 
