@@ -1,13 +1,13 @@
 ---
 name: Build and Test
 
-on: [push, pull_request, pull_request_review]
+on: [push, pull_request, pull_request_review, workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Build collection
         run: ansible-galaxy collection build
       - name: Update pip
@@ -29,13 +29,13 @@ jobs:
         python-version: ["3.9", "3.10"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ansible_collections/alliedtelesis/awplus
       - name: Install netcommon module
         run: ansible-galaxy collection install ansible.netcommon -p ${GITHUB_WORKSPACE}
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set awplus and ansible env vars
@@ -66,11 +66,11 @@ jobs:
       # A large chunk of the following is duplicated, since GitHub Actions doesn't
       # yet support YAML anchors.
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ansible_collections/alliedtelesis/awplus
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.9
       - name: Set awplus and ansible env vars
