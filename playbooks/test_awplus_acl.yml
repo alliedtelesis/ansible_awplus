@@ -86,6 +86,13 @@
                 protocols: icmp
               name: ipv6_test
               acl_type: extended
+            - aces:
+              - source_addr: 2001:db8::/64
+                destination_addr: 2001:db8::f/64
+                action: deny
+                protocols: ip
+              name: ipv6_test_hardware
+              acl_type: hardware
             afi: IPv6
                   
         state: overridden
@@ -470,6 +477,21 @@
             afi: IPv4
         state: merged
 
+    - name: Merged test - merge new IPv6 hardware acl
+      tags: m_13
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+                - source_addr: 2001:db8::f/64
+                  destination_addr: 2001:db8::f/64
+                  protocols: ip
+                  action: permit
+              name: 'ipv6_hardware'
+              acl_type: hardware
+            afi: IPv6
+        state: merged
+
     - name: Merged test - merge config with extra parameters 1
       tags: m_ep_1
       alliedtelesis.awplus.awplus_acl:
@@ -834,6 +856,21 @@
             afi: IPv4
         state:  replaced
 
+    - name: Replaced test - replace existing with IPv6 hardware acl
+      tags: r_11
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 2001:db8::f/63
+                destination_addr: 2001:db8::f/64
+                protocols: ip
+                action: permit
+              name: 'ipv6_test_hardware'
+              acl_type: hardware
+            afi: IPv6
+        state:  replaced
+
     - name: Overidden test - overwrite with empty config 1
       tags: o_ec_1
       alliedtelesis.awplus.awplus_acl:
@@ -1031,7 +1068,17 @@
             afi: IPv4
         state: deleted
 
-    
-
-
-         
+    - name: Deleted test - delete existing IPv6 hardware acl
+      tags: d_9
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 2001:db8::f/64
+                destination_addr: 2001:db8::f/64
+                protocols: ip
+                action: permit
+              name: 'ipv6_test_hardware'
+              acl_type: hardware
+            afi: IPv6
+        state:  deleted

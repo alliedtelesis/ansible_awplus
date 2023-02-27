@@ -271,6 +271,10 @@ class Acl(ConfigBase):
                             commands.append(f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list {w_name} {ace_cmd}")
                         else:
                             w_name = w_acl.get('name')
+                            # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
+                            # so need to check for this.
+                            if w_acl_type == 'hardware' and w_afi == 'ipv6':
+                                w_acl_type = ''
                             commands.append(
                                 f"{'' if w_afi == 'ipv4' else 'ipv6'} "
                                 f"access-list {w_acl_type if not w_name.isnumeric() else ''} "
@@ -305,6 +309,12 @@ class Acl(ConfigBase):
                 cmd_type = h_acl_type
             else:
                 cmd_type = ''
+
+            # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
+            # so need to check for this.
+            if h_acl_type == 'hardware' and h_afi == 'ipv6':
+                cmd_type = ''
+
             commands.append(f"no {'' if h_afi == 'ipv4' else 'ipv6'} access-list {cmd_type} {h_name}")
         # adding new acls
         if want is not None:
@@ -326,6 +336,11 @@ class Acl(ConfigBase):
                             commands.append(f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list {w_name} {cmd}")
                         else:
                             w_name = w_acl.get('name')
+
+                            # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
+                            # so need to check for this.
+                            if w_acl_type == 'hardware' and w_afi == 'ipv6':
+                                w_acl_type = ''
 
                             commands.append(
                                 f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list "
@@ -372,6 +387,12 @@ class Acl(ConfigBase):
 
                         else:
                             w_name = w_acl.get('name')
+
+                            # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
+                            # so need to check for this.
+                            if w_acl_type == 'hardware' and w_afi == 'ipv6':
+                                w_acl_type = ''
+
                             cmd.append(
                                 f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list "
                                 f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
@@ -405,6 +426,11 @@ class Acl(ConfigBase):
                         commands.append(f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list {w_name} {ace_cmd}")
                     else:
 
+                        # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
+                        # so need to check for this.
+                        if w_acl_type == 'hardware' and w_afi == 'ipv6':
+                            w_acl_type = ''
+
                         commands.append(
                             f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list "
                             f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
@@ -426,7 +452,7 @@ class Acl(ConfigBase):
         h_acls = have.get("acls") if have != [] else []
         for item in want:
             w_acls = item.get('acls')
-            w_afi = item.get('afi')
+            w_afi = item.get('afi').lower()
 
             for w_acl in w_acls:
                 w_aces = w_acl.get('aces')
@@ -435,14 +461,25 @@ class Acl(ConfigBase):
                         w_acl_type = w_acl.get('acl_type').lower()
                         w_name = w_acl.get('name')
                         if w_aces is None or w_acl_type == 'hardware':  # delete the acl if no ace is provided
+                            # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
+                            # so need to check for this.
+                            if w_acl_type == 'hardware' and w_afi == 'ipv6':
+                                w_acl_type = ''
+
                             commands.append(
-                                f"no {'' if w_afi == 'IPv4' else 'IPv6'} access-list "
+                                f"no {'' if w_afi == 'ipv4' else 'IPv6'} access-list "
                                 f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
                             )
                         else:  # delete the specified ace entry only
                             cmd = []
+
+                            # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
+                            # so need to check for this.
+                            if w_acl_type == 'hardware' and w_afi == 'ipv6':
+                                w_acl_type = ''
+
                             cmd.append(
-                                f"{'' if w_afi == 'IPv4' else 'IPv6'} access-list "
+                                f"{'' if w_afi == 'ipv4' else 'IPv6'} access-list "
                                 f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
                             )
                             for w_ace in w_aces:
