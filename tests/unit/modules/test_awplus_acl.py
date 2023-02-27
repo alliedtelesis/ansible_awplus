@@ -850,7 +850,7 @@ class TestACLModule(TestAwplusModule):
         ]
         self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_acl_replace_acls_differant_afis(self):
+    def test_awplus_acl_replace_acls_different_afis(self):
         set_module_args(
             dict(
                 config=[
@@ -1224,7 +1224,7 @@ class TestACLModule(TestAwplusModule):
         commands = ["no access-list hardware hardware_acl"]
         self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_acl_delete_acls_differant_afis(self):
+    def test_awplus_acl_delete_acls_different_afis(self):
         set_module_args(
             dict(
                 config=[
@@ -1284,73 +1284,7 @@ class TestACLModule(TestAwplusModule):
         )
         commands = [
             "access-list 2001", "no permit ip 141.143.42.0 0.0.0.255 any", "no permit ip 181.185.85.0 0.0.0.255 any",
-            "no access-list extended test", "no access-list 72", "IPv6 access-list extended ipv6_test",
-            "no deny icmp 2001:db8::/64 2001:db8::f/64"
-        ]
-        self.execute_module(changed=True, commands=commands)
-
-    def test_awplus_acl_delete_acls_differant_afis(self):
-        set_module_args(
-            dict(
-                config=[
-                    dict(
-                        afi="IPv4",
-                        acls=[
-                            dict(
-                                name="2001",
-                                acl_type="extended",
-                                aces=[
-                                    dict(
-                                        source_addr="141.143.42.0 0.0.0.255",
-                                        destination_addr="any",
-                                        action="permit",
-                                        protocols="ip"
-                                    ),
-                                    dict(
-                                        source_addr="181.185.85.0 0.0.0.255",
-                                        destination_addr="any",
-                                        action="permit",
-                                        protocols="ip"
-                                    )
-                                ]
-                            ),
-                            dict(
-                                name="test",
-                                acl_type="extended",
-                                aces=None
-                            ),
-                            dict(
-                                name="72",
-                                acl_type="standard",
-                                aces=None
-                            )
-                        ]
-                    ),
-                    dict(
-                        afi="IPv6",
-                        acls=[
-                            dict(
-                                name="ipv6_test",
-                                acl_type="extended",
-                                aces=[
-                                    dict(
-                                        source_addr="2001:db8::/64",
-                                        destination_addr="2001:db8::f/64",
-                                        action="deny",
-                                        protocols="icmp"
-                                    )
-                                ]
-                            )
-                        ]
-                    )
-                ],
-                state="deleted"
-            )
-        )
-        commands = [
-            "access-list 2001", "no permit ip 141.143.42.0 0.0.0.255 any",
-            "no permit ip 181.185.85.0 0.0.0.255 any", "no access-list extended test",
-            "no access-list 72", "IPv6 access-list extended ipv6_test",
+            "no access-list extended test", "no access-list 72", "ipv6 access-list extended ipv6_test",
             "no deny icmp 2001:db8::/64 2001:db8::f/64"
         ]
         self.execute_module(changed=True, commands=commands)

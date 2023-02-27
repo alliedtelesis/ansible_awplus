@@ -218,6 +218,27 @@ class Acl(ConfigBase):
         )
         return command[0]
 
+    def generate_acl_header_commands(self, name, acl_type, afi):
+        """ Generates commands for ACL header component of ACL command
+
+        :param name: the name of the ACL
+        :param acl_type: the type of ACL
+        :param afi: the ACL afi
+
+        :rtype: A string
+        :returns: the ACL header command necessary for the ACl command
+        """
+        # strangely enough, IPv6 hardware acls don't use 'hardware' in their commands
+        # so need to check for this.
+        if acl_type == 'hardware' and afi == 'ipv6':
+            acl_type = ''
+
+        command = (
+            f"{'' if afi == 'ipv4' else 'ipv6'} access-list "
+            f"{acl_type if not name.isnumeric() else ''} {name}"
+        )
+        return command
+
     def set_state(self, want, have):
         """ Select the appropriate function based on the state provided
 
@@ -261,7 +282,7 @@ class Acl(ConfigBase):
                 for h_acl in h_acls:
                     if w_acl.get('name') == h_acl.get('name'):
                         w_afi = w_acls.get('afi').lower()
-                        # hardware acls have a differant command layout
+                        # hardware acls have a different command layout
                         if w_acl_type == 'hardware' and w_acl.get('name').isnumeric():
                             if len(w_aces) > 1:
                                 self._module.fail_json(msg="only one ace allowed for numbered hardware acls")
@@ -271,15 +292,7 @@ class Acl(ConfigBase):
                             commands.append(f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list {w_name} {ace_cmd}")
                         else:
                             w_name = w_acl.get('name')
-                            # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
-                            # so need to check for this.
-                            if w_acl_type == 'hardware' and w_afi == 'ipv6':
-                                w_acl_type = ''
-                            commands.append(
-                                f"{'' if w_afi == 'ipv4' else 'ipv6'} "
-                                f"access-list {w_acl_type if not w_name.isnumeric() else ''} "
-                                f"{h_acl.get('name')}"
-                            )
+                            commands.append(self.generate_acl_header_commands(w_name, w_acl_type, w_afi))
                             h_aces = h_acl.get('ace')
                             if h_aces is not None:
                                 for h_ace in h_aces:
@@ -305,17 +318,7 @@ class Acl(ConfigBase):
             h_acl_type = h_acl.get('type').lower()
             h_afi = h_acl.get('afi').lower()
             h_name = h_acl.get('name')
-            if not h_name.isnumeric():
-                cmd_type = h_acl_type
-            else:
-                cmd_type = ''
-
-            # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
-            # so need to check for this.
-            if h_acl_type == 'hardware' and h_afi == 'ipv6':
-                cmd_type = ''
-
-            commands.append(f"no {'' if h_afi == 'ipv4' else 'ipv6'} access-list {cmd_type} {h_name}")
+            commands.append(f"no {self.generate_acl_header_commands(h_name, h_acl_type, h_afi)}")
         # adding new acls
         if want is not None:
             for item in want:
@@ -337,15 +340,7 @@ class Acl(ConfigBase):
                         else:
                             w_name = w_acl.get('name')
 
-                            # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
-                            # so need to check for this.
-                            if w_acl_type == 'hardware' and w_afi == 'ipv6':
-                                w_acl_type = ''
-
-                            commands.append(
-                                f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list "
-                                f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
-                            )
+                            commands.append(self.generate_acl_header_commands(w_name, w_acl_type, w_afi))
                             if w_aces is not None:
                                 for ace in w_aces:
                                     ace_cmd = self.generate_ace_commands(ace, w_acl_type)
@@ -388,15 +383,7 @@ class Acl(ConfigBase):
                         else:
                             w_name = w_acl.get('name')
 
-                            # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
-                            # so need to check for this.
-                            if w_acl_type == 'hardware' and w_afi == 'ipv6':
-                                w_acl_type = ''
-
-                            cmd.append(
-                                f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list "
-                                f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
-                            )
+                            cmd.append(self.generate_acl_header_commands(w_name, w_acl_type, w_afi))
                             if w_aces is not None:
                                 for ace in w_aces:
                                     ace_dict = dict(ace)
@@ -425,16 +412,7 @@ class Acl(ConfigBase):
                         ace_cmd = self.generate_ace_commands(w_aces[0], w_acl_type)
                         commands.append(f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list {w_name} {ace_cmd}")
                     else:
-
-                        # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
-                        # so need to check for this.
-                        if w_acl_type == 'hardware' and w_afi == 'ipv6':
-                            w_acl_type = ''
-
-                        commands.append(
-                            f"{'' if w_afi == 'ipv4' else 'ipv6'} access-list "
-                            f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
-                        )
+                        commands.append(self.generate_acl_header_commands(w_name, w_acl_type, w_afi))
                         if w_aces is not None:
                             for ace in w_aces:
                                 ace_cmd = self.generate_ace_commands(ace, w_acl_type)
@@ -461,27 +439,10 @@ class Acl(ConfigBase):
                         w_acl_type = w_acl.get('acl_type').lower()
                         w_name = w_acl.get('name')
                         if w_aces is None or w_acl_type == 'hardware':  # delete the acl if no ace is provided
-                            # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
-                            # so need to check for this.
-                            if w_acl_type == 'hardware' and w_afi == 'ipv6':
-                                w_acl_type = ''
-
-                            commands.append(
-                                f"no {'' if w_afi == 'ipv4' else 'IPv6'} access-list "
-                                f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
-                            )
+                            commands.append(f"no {self.generate_acl_header_commands(w_name, w_acl_type, w_afi)}")
                         else:  # delete the specified ace entry only
                             cmd = []
-
-                            # strangely enough, IPv6 hardware acls don't use 'hardware' in thier commands
-                            # so need to check for this.
-                            if w_acl_type == 'hardware' and w_afi == 'ipv6':
-                                w_acl_type = ''
-
-                            cmd.append(
-                                f"{'' if w_afi == 'ipv4' else 'IPv6'} access-list "
-                                f"{w_acl_type if not w_name.isnumeric() else ''} {w_name}"
-                            )
+                            cmd.append(self.generate_acl_header_commands(w_name, w_acl_type, w_afi))
                             for w_ace in w_aces:
                                 h_aces = h_acl.get('ace')
                                 if h_aces is not None:
