@@ -55,6 +55,11 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
         )
         self.execute_show_int_command = self.mock_execute_show_int_command.start()
 
+        self.mock_check_stackports = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.l2_interfaces.l2_interfaces.check_stackports"
+        )
+        self.check_stackports = self.mock_check_stackports.start()
+
     def tearDown(self):
         super(TestAwplusL2InterfacesModule, self).tearDown()
         self.mock_get_resource_connection_config.stop()
@@ -63,6 +68,7 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
         self.mock_load_config.stop()
         self.mock_execute_show_command.stop()
         self.mock_execute_show_int_command.stop()
+        self.mock_check_stackports.stop()
 
     def load_fixtures(self, commands=None, transport="cli"):
         def load_from_file(*args, **kwargs):
@@ -70,6 +76,7 @@ class TestAwplusL2InterfacesModule(TestAwplusModule):
 
         self.execute_show_command.side_effect = load_from_file
         self.execute_show_int_command.return_value = ["port1.0.1", "port1.0.2", "port1.0.3", "port1.0.4"]
+        self.check_stackports.return_value = False
 
     def test_awplus_l2_interfaces_merged(self):
         set_module_args(
