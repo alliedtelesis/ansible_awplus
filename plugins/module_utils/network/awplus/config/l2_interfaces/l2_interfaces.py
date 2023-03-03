@@ -137,7 +137,7 @@ class L2_interfaces(ConfigBase):
         for name, want_dict in iteritems(want):
             if name in have:
                 if not check_stackports(connection, name):
-                    commands.extend(_do_replace(name, want_dict, have[name], self._module))
+                    commands.extend(_do_replace(name, want_dict, have[name], self._module, connection))
         return commands
 
     @staticmethod
@@ -149,10 +149,11 @@ class L2_interfaces(ConfigBase):
                   to the desired configuration
         """
         commands = []
+
         for name, have_dict in iteritems(have):
             if name in want:
                 if not check_stackports(connection, name):
-                    commands.extend(_do_replace(name, want[name], have_dict, self._module))
+                    commands.extend(_do_replace(name, want[name], have_dict, self._module, connection))
             else:
                 want_dict = {'name': name}
                 commands.extend(_do_delete(name, want_dict, have_dict, connection))
@@ -172,7 +173,7 @@ class L2_interfaces(ConfigBase):
             if name in have:
                 if not check_stackports(connection, name):
                     have_dict = have[name]
-                    commands.extend(_set_config(name, want_dict, have_dict, self._module))
+                    commands.extend(_set_config(name, want_dict, have_dict, self._module, connection))
         return commands
 
     @staticmethod
@@ -203,6 +204,18 @@ def check_stackports(connection, name):
 
     port_conf = connection.get(f"show running-config interface {name}")
     return True if re.search(r'stackport', port_conf) else False
+
+
+def get_vlan_conf(connection, vlan):
+    """ Checks whether a port is a stackport.
+
+        :param want: the device connection
+        :param name: the name of the interface
+        :rtype: bool
+        :returns: True if the interface is configured as
+                  a stacking port, False otherwise
+    """
+    return connection.get(f"show vlan {vlan}") if vlan is not None and vlan != 0 else ''
 
 
 def _do_delete(name, want_dict, have_dict, connection):
@@ -247,7 +260,7 @@ def _do_delete(name, want_dict, have_dict, connection):
     return p_cmd
 
 
-def _do_replace(name, want_dict, have_dict, module):
+def _do_replace(name, want_dict, have_dict, module, connection):
     """
     Carry out actions for replacing entire configuration of a port. This is used for
     both replaced and overridden operations.
@@ -262,7 +275,7 @@ def _do_replace(name, want_dict, have_dict, module):
     w_trunk = want_dict.get('trunk')
     w_native_vlan = None if w_trunk is None else w_trunk.get('native_vlan')
     w_native_vlan_flag = w_native_vlan is not None
-    w_allowed_vlans = None if w_trunk is None else w_trunk.get('allowed_vlans')
+    w_allowed_vlans = [] if w_trunk is None or w_trunk.get('allowed_vlans') is None else w_trunk.get('allowed_vlans')
     h_trunk = have_dict.get('trunk')
     h_native_vlan = None if h_trunk is None else h_trunk.get('native_vlan')
     h_native_vlan_flag = h_native_vlan is not None
@@ -283,14 +296,18 @@ def _do_replace(name, want_dict, have_dict, module):
         p_cmd.append(f'switchport access vlan {w_vlan}')
 
     # Set VLAN in trunk mode
-    if w_native_vlan_flag and (not h_native_vlan_flag or h_native_vlan != w_native_vlan):
+    if (w_native_vlan_flag and (not h_native_vlan_flag or h_native_vlan != w_native_vlan)) or (w_native_vlan is None and
+                                                                                               h_native_vlan not in (0, 1, None)):
         p_cmd.append(f'switchport trunk native vlan {"none" if w_native_vlan == 0 else w_native_vlan}')
 
     # Adjust allowed VLANs
     if w_allowed_vlans:
         for rv in w_allowed_vlans:
             if rv not in h_allowed_vlans:
-                p_cmd.append(f'switchport trunk allowed vlan add {rv}')
+                # need to check that wanted vlan is configured
+                get_vlan = get_vlan_conf(connection, rv)
+                if get_vlan != '':
+                    p_cmd.append(f'switchport trunk allowed vlan add {rv}')
         for rv in h_allowed_vlans:
             if rv not in w_allowed_vlans:
                 p_cmd.append(f'switchport trunk allowed vlan remove {rv}')
@@ -300,7 +317,7 @@ def _do_replace(name, want_dict, have_dict, module):
     return p_cmd
 
 
-def _set_config(name, want, have, module):
+def _set_config(name, want, have, module, connection):
     commands = []
 
     diff = dict_diff(have, want)
@@ -321,7 +338,10 @@ def _set_config(name, want, have, module):
         if value.get('allowed_vlans'):
             for vlan in value.get('allowed_vlans'):
                 if vlan not in have.get('trunk', {}).get('allowed_vlans', []):
-                    commands.append(f"switchport trunk allowed vlan add {vlan}")
+                    # need to check that wanted vlan is configured
+                    get_vlan = get_vlan_conf(connection, vlan)
+                    if get_vlan != '':
+                        commands.append(f"switchport trunk allowed vlan add {vlan}")
         if value.get('native_vlan') is not None and value.get('native_vlan') != have.get('trunk', {}).get('native_vlan'):
             commands.append(f'switchport trunk native vlan {"none" if value["native_vlan"] == 0 else value["native_vlan"]}')
 
