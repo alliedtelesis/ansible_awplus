@@ -19,6 +19,8 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
     dict_diff,
     iteritems,
     remove_empties,
+)
+from ansible.module_utils.common.network import (
     is_netmask,
     to_masklen,
     to_subnet,
