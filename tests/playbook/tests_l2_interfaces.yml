@@ -206,7 +206,7 @@
           - name: port1.0.7
         state: deleted
 
-    - name: Add an allowed VLAN wih replace
+    - name: Add an allowed VLAN with replace
       tags:
         - replace_1
       awplus_l2_interfaces:
@@ -216,7 +216,7 @@
               allowed_vlans: 5, 6, 7
         state: replaced
 
-    - name: Delete an allowed VLAN wih replace
+    - name: Delete an allowed VLAN with replace
       tags:
         - replace_2
       awplus_l2_interfaces:
@@ -227,7 +227,7 @@
               native_vlan: 22
         state: replaced
 
-    - name: Add/delete an allowed VLAN wih replace
+    - name: Add/delete an allowed VLAN with replace
       tags:
         - replace_3
       awplus_l2_interfaces:
@@ -238,7 +238,7 @@
               native_vlan: 22
         state: replaced
 
-    - name: Change everything wih replace
+    - name: Change everything with replace
       tags:
         - replace_4
       awplus_l2_interfaces:
@@ -249,7 +249,7 @@
               native_vlan: 22
         state: replaced
 
-    - name: Add/delete an allowed VLAN wih replace
+    - name: Add/delete an allowed VLAN with replace
       tags:
         - replace_5
       awplus_l2_interfaces:
@@ -327,6 +327,15 @@
           - name: port1.0.7
             trunk:
               native_vlan: 99
+        state: replaced
+
+    - name: Replaced test - replace allowed vlans with invalid and valid vlans
+      tags: replace_13
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.6
+            trunk:
+              allowed_vlans: 902, 9, 703, 231, 10, 450, 348, 705
         state: replaced
 
     - name: Override all VLANs
@@ -502,7 +511,7 @@
               allowed_vlans: 7
         state: merged
 
-    - name: Set trunk netive VLAN with merge
+    - name: Set trunk native VLAN with merge
       tags:
         - merged_2
       awplus_l2_interfaces:
@@ -512,7 +521,7 @@
               native_vlan: 99
         state: merged
 
-    - name: Set access netive VLAN with merge
+    - name: Set access native VLAN with merge
       tags:
         - merged_3
       awplus_l2_interfaces:
@@ -631,4 +640,13 @@
         - merged_14
       awplus_l2_interfaces:
         config:
+        state: merged
+
+    - name: Merge test - merge port with invalid and valid vlans
+      tags: merged_15
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.3
+            trunk:
+              allowed_vlans: 902, 9, 703, 231, 10, 450, 348, 705
         state: merged

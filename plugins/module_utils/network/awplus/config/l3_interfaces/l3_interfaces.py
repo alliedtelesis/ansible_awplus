@@ -18,8 +18,10 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
     remove_empties,
     validate_ip_v6_address,
     validate_ip_address,
-    is_masklen,
 )
+
+from ansible.module_utils.common.network import is_masklen
+
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.facts import Facts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.utils.utils import (
     get_have_dict,
