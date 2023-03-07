@@ -218,7 +218,11 @@ class User(ConfigBase):
         result = True
         if have.get(name) and value['configured_password'] is not None:
             have_hashed = have.get(name)['hashed_password']
-            result = sha256_crypt.verify(value['configured_password'], have_hashed)
+            # checks if a valid sha256_crypt hash is used
+            if have_hashed is not None and have_hashed[0:3] == '$5$':
+                result = sha256_crypt.verify(value['configured_password'], have_hashed)
+            else:
+                result = False  # update password to use sha256_crypt
         elif not (have.get(name)['hashed_password'] == value['hashed_password']):
             result = False
         return result

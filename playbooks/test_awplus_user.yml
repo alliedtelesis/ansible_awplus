@@ -12,7 +12,10 @@
           #   privilege: 15
           - name: tonyp
             configured_password: tonyptonyp
-            privilege: 15 
+            privilege: 15
+          - name: bill
+            hashed_password: $1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G1
+            privilege: 2
         state: overridden
       tags:
         - test_init
@@ -44,9 +47,9 @@
             configured_password: spider
             privilege: 15
         state: merged
-      tags: 
+      tags:
         - test_3
-  
+
 
     - name: Test 4 - Repeat test 3 again to check if another command is issued
       alliedtelesis.awplus.awplus_user:
@@ -55,7 +58,7 @@
             configured_password: spider
             privilege: 15
         state: merged
-      tags: 
+      tags:
         - test_4
 
     - name: Test 5 - Change John's privilege level
@@ -65,7 +68,7 @@
             configured_password: spider
             privilege: 10
         state: merged
-      tags: 
+      tags:
         - test_5
 
     - name: Test 6 - Repeat test 5 again to check if another command is issued
@@ -75,7 +78,7 @@
             configured_password: spider
             privilege: 10
         state: merged
-      tags: 
+      tags:
         - test_6
 
     - name: Test 7 - Change Johns password without providing a privilege level
@@ -84,16 +87,16 @@
           - name: John
             configured_password: dinosaur
         state: merged
-      tags: 
+      tags:
         - test_7
-      
+
     - name: Test 8 - Change Johns privilege level without providing a password
       alliedtelesis.awplus.awplus_user:
         config:
           - name: John
             privilege: 5
         state: merged
-      tags: 
+      tags:
         - test_8
 
     - name: Test 9 - Switch Johns password to a hashed password
@@ -103,7 +106,7 @@
             hashed_password: $5$niumlS6h$ae.kFUj6zuvoedt63PFQM1T4dD.EvjHVKR3sG9VH18B
             privilege: 5
         state: merged
-      tags: 
+      tags:
         - test_9
 
     - name: Test 10 - Supply both an unhashed and hashed password for username John
@@ -115,7 +118,7 @@
             hashed_password: $5$NQrZJ.3CrY2rcH5U$Wodib.wzbtg5Eb1A7naZFpcUB4qzNpU9HUox4jd4EL1
             privilege: 5
         state: merged
-      tags: 
+      tags:
         - test_10
 
     - name: Test 11 - Replace Johns password
@@ -125,7 +128,7 @@
             configured_password: eagle
             privilege: 5
         state: replaced
-      tags: 
+      tags:
         - test_11
 
     - name: Test 12 - Replace Johns privilege level
@@ -135,7 +138,7 @@
             configured_password: eagle
             privilege: 10
         state: replaced
-      tags: 
+      tags:
         - test_12
 
     - name: Test 13 - Add a second user, Lisa with a hashed password
@@ -145,7 +148,7 @@
             hashed_password: $5$NQrZJ.3CrY2rcH5U$Wodib.wzbtg5Eb1A7naZFpcUB4qzNpU9HUox4jd4EL1
             privilege: 15
         state: merged
-      tags: 
+      tags:
         - test_13
 
     - name: Test 14 - Repeat test 13 again to check if another command is issued
@@ -155,7 +158,7 @@
             hashed_password: $5$NQrZJ.3CrY2rcH5U$Wodib.wzbtg5Eb1A7naZFpcUB4qzNpU9HUox4jd4EL1
             privilege: 15
         state: merged
-      tags: 
+      tags:
         - test_14
 
     - name: Test 15 - Change Lisa's hashed password
@@ -165,7 +168,7 @@
             hashed_password: $5$NQrZJ.3CrY2rcH5U$Wodib.wzbtg5Eb1A7naZFpcUB4qzeuU9HUox4jdyip4
             privilege: 15
         state: merged
-      tags: 
+      tags:
         - test_15
 
     - name: Test 16 - Add another user, Frank, but dont provide a password or privilege
@@ -174,8 +177,7 @@
         config:
           - name: Frank
         state: merged
-        
-      tags: 
+      tags:
         - test_16
 
     - name: Test 17 - Add Frank, but with only a privilege
@@ -185,7 +187,7 @@
           - name: Frank
             privilege: 10
         state: merged
-      tags: 
+      tags:
         - test_17
 
     - name: Test 18 - Supply Frank with a password but no privilege
@@ -194,7 +196,7 @@
           - name: Frank
             configured_password: fish
         state: merged
-      tags: 
+      tags:
         - test_18
 
     - name: Test 19 - Assign a privilege to Frank
@@ -203,7 +205,7 @@
           - name: Frank
             privilege: 8
         state: merged
-      tags: 
+      tags:
         - test_19
 
     - name: Test 20 - Attempt to set Franks privilege and password to 0
@@ -213,7 +215,7 @@
             privilege: 0
             configured_password: 0
         state: merged
-      tags: 
+      tags:
         - test_20
 
     - name: Test 21 - Add a user but set privilege to 0
@@ -223,9 +225,9 @@
             privilege: 0
             configured_password: fish
         state: merged
-      tags: 
+      tags:
         - test_21
-    
+
     - name: Test 22 - Change the privilege of John, Lisa and Frank to be the same.
       alliedtelesis.awplus.awplus_user:
         config:
@@ -234,31 +236,58 @@
 
           - name: Lisa
             privilege: 6
-          
+
           - name: Frank
             privilege: 6
         state: merged
-      tags: 
+      tags:
         - test_22
 
-    - name: Test 23 - Create a user but don't supply any details (merge test)
+    - name: Test_23 - Change password for user with MD5 hash 1
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: bill
+            configured_password: testing
+        state: merged
+      tags:
+        - test_23
+
+    - name: Test_24 - Change passwords for user with MD5 hash 2
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: bill
+            hashed_password: $1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G1
+        state: merged
+      tags:
+        - test_24
+
+    - name: Test_25 - Change passwords for user with MD5 hash 3
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: bill
+            hashed_password: $5$uRXfAAn95H5fo4bG$tedRlexoPG7rjOJRkAOwbyoKd6GXN8RagClqLnayjh.
+        state: merged
+      tags:
+        - test_25
+
+    - name: Test 26 - Create a user but don't supply any details (merge test)
       alliedtelesis.awplus.awplus_user:
         config:
         state: merged
-      tags: 
-        - test_23
+      tags:
+        - test_26
 
-    - name: Test 24 - delete the users John, Lisa, and Frank
+    - name: Test 27 - delete the users John, Lisa, and Frank
       alliedtelesis.awplus.awplus_user:
         config:
           - name: John
           - name: Lisa
           - name: Frank
         state: deleted
-      tags: 
-        - test_24
+      tags:
+        - test_27
 
-    - name: Test 25 - Add 10 new users at the same time
+    - name: Test 28 - Add 10 new users at the same time
       alliedtelesis.awplus.awplus_user:
         config:
           - name: Bill
@@ -282,10 +311,10 @@
           - name: Gordan
             configured_password: Also Blue
         state: merged
-      tags: 
-        - test_25
+      tags:
+        - test_28
 
-    - name: Test 26 - Delete the 10 users added in test 25
+    - name: Test 29 - Delete the 10 users added in test 25
       alliedtelesis.awplus.awplus_user:
         config:
           - name: Bill
@@ -299,20 +328,20 @@
           - name: James
           - name: Gordan
         state: deleted
-      tags: 
-        - test_26
+      tags:
+        - test_29
 
-    - name: Test 27 - Delete an empty config
-      alliedtelesis.awplus.awplus_user:
-        config:          
-        state: deleted
-      tags: 
-        - test_27
-
-    - name: Test 28 - Delete a user that doesn't exist 
+    - name: Test 30 - Delete an empty config
       alliedtelesis.awplus.awplus_user:
         config:
-          - name: peter   
         state: deleted
-      tags: 
-        - test_28
+      tags:
+        - test_30
+
+    - name: Test 31 - Delete a user that doesn't exist
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: peter
+        state: deleted
+      tags:
+        - test_31
