@@ -1,0 +1,495 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags: test_init
+      awplus_class_maps:
+        config:
+          - name: testing
+            access_group: 3000
+            cos: 4
+            dscp: 1
+            eth_format: 802dot2-tagged
+            eth_protocol: 0E
+            inner_cos: 1
+            inner_vlan: 5
+            mac_type: l2mcast
+            ip_precedence: 7
+            tcp_flags:
+              ack: false
+              psh: true
+              fin: true
+              syn: true
+              rst: true
+              urg: true
+            vlan: 4090
+
+          - name: test
+
+        state: overridden
+
+    - name: Replaced test - replace an empty config 1
+      tags: r_1
+      awplus_class_maps:
+        config:
+        state: replaced
+
+    - name: Replaced test - replace an empty config 2
+      tags: r_2
+      awplus_class_maps:
+        config:
+          - name:
+        state: replaced
+
+    - name: Replaced test - replace every element in config
+      tags: r_3
+      awplus_class_maps:
+        config:
+          - name: testing
+            access_group: 3001
+            cos: 2
+            dscp: 3
+            eth_format: 802dot2-untagged
+            eth_protocol: f0
+            inner_cos: 3
+            inner_vlan: 7
+            ip_precedence: 3
+            mac_type: l2bcast
+            tcp_flags:
+              ack: true
+              psh: false
+              fin: true
+              syn: true
+              rst: false
+              urg: true
+            vlan: 4050
+        state: replaced
+
+    - name: Replaced test - replace only eth_format
+      tags: r_4
+      awplus_class_maps:
+        config:
+          - name: testing
+            eth_format: 802dot2-tagged
+        state: replaced
+
+    - name: Replaced test - replace only eth_protocol
+      tags: r_5
+      awplus_class_maps:
+        config:
+          - name: testing
+            eth_protocol: f0
+        state: replaced
+
+    - name: Replaced test - out of range test 1
+      tags: r_6
+      awplus_class_maps:
+        config:
+          - name: testing
+            cos: 10
+        state: replaced
+
+    - name: Replaced test - out of range test 2
+      tags: r_7
+      awplus_class_maps:
+        config:
+          - name: testing
+            dscp: 100
+        state: replaced
+
+    - name: Replaced test - out of range test 3
+      tags: r_8
+      awplus_class_maps:
+        config:
+          - name: testing
+            inner_vlan: -3
+        state: replaced
+
+    - name: Replaced test - replace 2 class maps
+      tags: r_9
+      awplus_class_maps:
+        config:
+          - name: testing
+            mac_type: l2ucast
+            inner_cos: 3
+            vlan: 500
+            tcp_flags:
+              ack: true
+              syn: false
+          - name: test
+            dscp: 2
+            ip_precedence: 7
+            access_group: 3000
+        state: replaced
+
+    - name: Replaced test - replace nothing with new class map
+      tags: r_10
+      awplus_class_maps:
+        config:
+          - name: new_class_map
+        state: replaced
+
+    - name: Replaced test - replace config with empty config
+      tags: r_11
+      awplus_class_maps:
+        config:
+          - name: testing
+        state: replaced
+
+    - name: Replaced test - replace config with same config (idempotency test)
+      tags: r_12
+      awplus_class_maps:
+        config:
+          - name: testing
+            access_group: 3000
+            cos: 4
+            dscp: 1
+            eth_format: 802dot2-tagged
+            eth_protocol: 0E
+            inner_cos: 1
+            inner_vlan: 5
+            ip_precedence: 7
+            mac_type: l2mcast
+            tcp_flags:
+              fin: true
+              psh: true
+              rst: true
+              syn: true
+              urg: true
+            vlan: 4090
+        state: replaced
+
+    - name: Replaced test - replace with named_hardware_acl
+      tags: r_13
+      awplus_class_maps:
+        config:
+          - name: testing
+            access_group: named_hardware_acl
+        state: replaced
+
+    - name: Merged test - merge an empty config 1
+      tags: m_1
+      awplus_class_maps:
+        config:
+        state: merged
+
+    - name: Merged test - merge an empty config 2
+      tags: m_2
+      awplus_class_maps:
+        config:
+          - name:
+        state: merged
+
+    - name: Merged test - merge multiple parameters in an existing config
+      tags: m_3
+      awplus_class_maps:
+        config:
+          - name: testing
+            access_group: 3001
+            cos: 7
+            dscp: 2
+            eth_format: 802dot2-untagged
+            eth_protocol: netbeui
+            inner_cos: 5
+            inner_vlan: 700
+            ip_precedence: 1
+            mac_type: l2bcast
+            tcp_flags:
+              ack: true
+              fin: false
+              psh: true
+            vlan: 399
+        state: merged
+
+    - name: Merged test - merge multiple new parameters in an existing config
+      tags: m_4
+      awplus_class_maps:
+        config:
+          - name: test
+            cos: 3
+            dscp: 3
+            inner_cos: 3
+            ip_precedence: 3
+            tcp_flags:
+              ack: false
+              psh: true
+        state: merged
+
+    - name: Merged test - create a new empty class map
+      tags: m_5
+      awplus_class_maps:
+        config:
+          - name: new_class_map2
+        state: merged
+
+    - name: Merged test - create a new class map
+      tags: m_6
+      awplus_class_maps:
+        config:
+          - name: new_class_map2
+            cos: 3
+            dscp: 3
+            eth_format: 802dot2-untagged
+            eth_protocol: netbeui
+            tcp_flags:
+              syn: true
+        state: merged
+
+    - name: Merged test - merge multiple class maps
+      tags: m_7
+      awplus_class_maps:
+        config:
+          - name: test
+            cos: 5
+            access_group: 3000
+            mac_type: l2mcast
+
+          - name: new_class_map
+            inner_cos: 3
+            tcp_flags:
+              psh: true
+            vlan: 302
+        state: merged
+
+    - name: Merged test - new class map but only provide eth_format
+      tags: m_8
+      awplus_class_maps:
+        config:
+          - name: new_class_map
+            eth_format: netwareraw-tagged
+        state: merged
+
+    - name: Merged test - merge only eth_protocol with existing class map
+      tags: m_9
+      awplus_class_maps:
+        config:
+          - name: testing
+            eth_protocol: 0E
+        state: merged
+
+    - name: Merged test - merge same config (idempotency test)
+      tags: m_10
+      awplus_class_maps:
+        config:
+          - name: testing
+            access_group: 3000
+            cos: 4
+            dscp: 1
+            eth_format: 802dot2-tagged
+            eth_protocol: 0E
+            inner_cos: 1
+            inner_vlan: 5
+            ip_precedence: 7
+            mac_type: l2mcast
+            tcp_flags:
+              ack: false
+              fin: true
+              psh: true
+              rst: true
+              syn: true
+              urg: true
+        state: merged
+
+    - name: Merged test - toggle tcp flags
+      tags: m_11
+      awplus_class_maps:
+        config:
+          - name: testing
+            tcp_flags:
+              ack: true
+              syn: true
+              fin: false
+              psh: false
+        state: merged
+
+    - name: Merged test - add named_hardware_acl
+      tags: m_12
+      awplus_class_maps:
+        config:
+          - name: test
+            access_group: named_hardware_acl
+        state: merged
+
+    - name: Merged test - update named_hardware_acl
+      tags: m_13
+      awplus_class_maps:
+        config:
+          - name: testing
+            access_group: named_hardware_acl
+        state: merged
+
+    - name: Deleted test - delete an empty config 1
+      tags: d_1
+      awplus_class_maps:
+        config:
+        state: deleted
+
+    - name: Deleted test - delete an empty config 2
+      tags: d_2
+      awplus_class_maps:
+        config:
+          - name:
+        state: deleted
+
+    - name: Deleted test - delete existing class map just by name
+      tags: d_3
+      awplus_class_maps:
+        config:
+          - name: testing
+        state: deleted
+
+    - name: Deleted test - delete non-existing class map just by name
+      tags: d_4
+      awplus_class_maps:
+        config:
+          - name: class-map
+        state: deleted
+
+    - name: Deleted test - delete multiple existing class maps just by name
+      tags: d_5
+      awplus_class_maps:
+        config:
+          - name: testing
+          - name: test
+        state: deleted
+
+    - name: Deleted test - delete an existing and non-existing class map just by name
+      tags: d_6
+      awplus_class_maps:
+        config:
+          - name: testing
+          - name: not-real-class-map
+        state: deleted
+
+    - name: Deleted test - delete all elements in class map by specifying values
+      tags: d_7
+      awplus_class_maps:
+        config:
+          - name: testing
+            access_group: 3000
+            cos: 4
+            dscp: 1
+            eth_format: 802dot2-tagged
+            eth_protocol: 0E
+            inner_cos: 1
+            inner_vlan: 5
+            ip_precedence: 7
+            mac_type: l2mcast
+            tcp_flags:
+              ack: false
+              fin: false
+              psh: false
+              rst: false
+              syn: false
+              urg: false
+            vlan: 4090
+        state: deleted
+
+    - name: Deleted test - delete elements in multiple class maps
+      tags: d_8
+      awplus_class_maps:
+        config:
+          - name: testing
+            access_group: 3000
+            inner_cos: 4
+            tcp_flags:
+              ack: false
+              syn: false
+          - name: test
+        state: deleted
+
+    - name: Deleted test - delete element with invalid config 1
+      tags: d_9
+      awplus_class_maps:
+        config:
+          - name: testing
+            inner_cos: -1
+        state: deleted
+
+    - name: Deleted test - delete element with invalid config 2
+      tags: d_10
+      awplus_class_maps:
+        config:
+          - name: testing
+            eth_format: ethii-tagged
+        state: deleted
+
+    - name: Deleted test - delete eth format protocol with only eth_format
+      tags: d_11
+      awplus_class_maps:
+        config:
+          - name: testing
+            eth_format: 802dot2-tagged
+        state: deleted
+
+    - name: Overidden test - override with empty config 1
+      tags: o_1
+      awplus_class_maps:
+        config:
+        state: overridden
+
+    - name: Overidden test - override with empty config 2
+      tags: o_2
+      awplus_class_maps:
+        config:
+          - name:
+        state: overridden
+
+    - name: Overidden test - override with empty config 3
+      tags: o_3
+      awplus_class_maps:
+        config:
+          - name:
+            access_group:
+            cos:
+            dscp:
+            # eth_format:
+            # eth_protocol:
+            inner_cos:
+            inner_vlan:
+            ip_precedence:
+            # mac_type:
+            tcp_flags:
+            vlan:
+        state: overridden
+
+    - name: Overidden test - override existing config
+      tags: o_4
+      awplus_class_maps:
+        config:
+          - name: testing
+            inner_cos: 4
+            inner_vlan: 7
+            mac_type: l2bcast
+            ip_precedence: 1
+            vlan: 3
+        state: overridden
+
+    - name: Overidden test - override with new config
+      tags: o_5
+      awplus_class_maps:
+        config:
+          - name: new-class-map
+            cos: 3
+            vlan: 3
+            tcp_flags:
+              ack: true
+              syn: true
+              urg: true
+        state: overridden
+
+    - name: Overidden test - override multiple class maps
+      tags: o_6
+      awplus_class_maps:
+        config:
+          - name: new-class-map
+            mac_type: l2ucast
+            tcp_flags:
+              fin: true
+          - name: test
+            inner_cos: 5
+            vlan: 390
+        state: overridden

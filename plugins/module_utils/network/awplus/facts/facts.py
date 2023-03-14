@@ -16,6 +16,7 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplu
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.acl_interfaces.acl_interfaces import Acl_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.banner.banner import BannerFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.bgp.bgp import BgpFacts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.class_maps.class_maps import Class_mapsFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.interfaces.interfaces import InterfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l2_interfaces.l2_interfaces import L2_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.l3_interfaces.l3_interfaces import L3_interfacesFacts
@@ -47,6 +48,7 @@ FACT_RESOURCE_SUBSETS = dict(
     acl_interfaces=Acl_interfacesFacts,
     banner=BannerFacts,
     bgp=BgpFacts,
+    class_maps=Class_mapsFacts,
     interfaces=InterfacesFacts,
     l2_interfaces=L2_interfacesFacts,
     l3_interfaces=L3_interfacesFacts,
