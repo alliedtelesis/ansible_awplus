@@ -132,7 +132,7 @@ class Class_maps(ConfigBase):
             for h_class_map in have:
                 w_name = w_class_map.get('name')
                 h_name = h_class_map.get('name')
-                if w_name == h_name:
+                if w_name == h_name and h_name != 'default':
                     commands.extend(self._do_replace(w_name, w_class_map, h_class_map))
         return commands
 
@@ -155,16 +155,16 @@ class Class_maps(ConfigBase):
             if h_name in w_names:
                 for w_class_map in want:
                     w_name = w_class_map.get('name')
-                    if h_name == w_name:
+                    if h_name == w_name and h_name != 'default':
                         # update current configuration
                         commands.extend(self._do_replace(w_name, w_class_map, h_class_map))
-            else:
+            elif h_name != 'default':
                 # delete class-maps not in want
                 commands.extend(self._do_delete(h_name, {f"{h_name}": None}, h_class_map))
 
         for w_class_map in want:
             w_name = w_class_map.get('name')
-            if w_name not in h_names:
+            if w_name not in h_names and w_name != 'default':
                 # create new class-maps
                 commands.extend(self._do_config(w_name, w_class_map, {}))
         return commands
@@ -184,9 +184,11 @@ class Class_maps(ConfigBase):
             h_class_map = {}
             w_name = w_class_map.get('name')
             for item in have:
-                if w_name == item.get('name'):
+                item_name = item.get('name')
+                if w_name == item_name:
                     h_class_map = item
-            commands.extend(self._do_config(w_name, w_class_map, h_class_map))
+            if h_class_map.get('name') != 'default':
+                commands.extend(self._do_config(w_name, w_class_map, h_class_map))
         return commands
 
     @staticmethod
@@ -202,7 +204,8 @@ class Class_maps(ConfigBase):
         for w_class_map in want:
             w_name = w_class_map.get('name')
             for h_class_map in have:
-                if w_name == h_class_map.get('name'):
+                h_name = h_class_map.get('name')
+                if w_name == h_name and h_name != 'default':
                     commands.extend(self._do_delete(w_name, w_class_map, h_class_map))
         return commands
 

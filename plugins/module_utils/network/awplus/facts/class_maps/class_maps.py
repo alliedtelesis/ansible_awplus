@@ -38,7 +38,7 @@ class Class_mapsFacts(object):
 
     @staticmethod
     def get_class_map_conf(connection):
-        return connection.get("show running-config | begin class")
+        return connection.get("show class-map")
 
     def populate_facts(self, connection, ansible_facts, data=None):
         """ Populate the facts for class_maps
@@ -54,7 +54,7 @@ class Class_mapsFacts(object):
         if not data:
 
             data = self.get_class_map_conf(connection)
-        resources = data.split('!')
+        resources = data.split('\n\n')
 
         objs = []
         for resource in resources:
@@ -83,26 +83,27 @@ class Class_mapsFacts(object):
         :returns: The generated config
         """
         config = deepcopy(spec)
-        tcp_patterns = (r'(ack|fin|psh|rst|syn|urg)', r'match tcp-flags')
-        if re.search(r'class-map', conf):
+        tcp_patterns = (r'(ack|fin|psh|rst|syn|urg)', r'Match TCP Flags')
+
+        if re.search(r'CLASS-MAP-NAME', conf):
             for item in conf.split('\n'):
-                name_match = re.search(r'class-map (\d+|\S+)', item)
+                name_match = re.search(r'CLASS-MAP-NAME: (\d+|\S+)', item)
                 if name_match:
                     config["name"] = name_match.group(1)
 
-                access_group_match = re.search(r'match access-group (\d+|\S+)', item)
+                access_group_match = re.search(r'QOS-ACCESS-LIST-NAME: (\d+|\S+)', item)
                 if access_group_match:
                     config["access_group"] = access_group_match.group(1)
 
-                dscp_match = re.search(r'match dscp (\d+)', item)
+                dscp_match = re.search(r'Match IP DSCP: (\d+)', item)
                 if dscp_match:
                     config["dscp"] = dscp_match.group(1)
 
-                ip_precedence_match = re.search(r'match ip-precedence (\d+)', item)
+                ip_precedence_match = re.search(r'Match IP precedence: (\d+)', item)
                 if ip_precedence_match:
                     config["ip_precedence"] = ip_precedence_match.group(1)
 
-                cos_match = re.search(r'match cos (\d+)', item)
+                cos_match = re.search(r'Match CoS: (\d+)', item)
                 if cos_match:
                     config["cos"] = cos_match.group(1)
 
@@ -116,24 +117,27 @@ class Class_mapsFacts(object):
                         flags[f'{flag}'] = False
                     config["tcp_flags"] = flags
 
-                mac_type_match = re.search(r'match mac-type (\S+)', item)
+                mac_type_match = re.search(r'Match Mac Type: (\d+) (\S+)', item)
                 if mac_type_match:
-                    config["mac_type"] = mac_type_match.group(1)
+                    config["mac_type"] = mac_type_match.group(2)
 
-                eth_match = re.search(r'match eth-format (\S+) protocol (\S+)', item)
-                if eth_match:
-                    config["eth_format"] = eth_match.group(1)
-                    config["eth_protocol"] = eth_match.group(2)
+                eth_format_match = re.search(r'Match Eth Format: (\S+)', item)
+                if eth_format_match:
+                    config["eth_format"] = eth_format_match.group(1)
 
-                inner_cos_match = re.search(r'match inner-cos (\d+)', item)
+                eth_protocol_match = re.search(r'Match Protocol: (\S+)', item)
+                if eth_protocol_match:
+                    config["eth_protocol"] = eth_protocol_match.group(1)
+
+                inner_cos_match = re.search(r'Match Inner CoS: (\d+)', item)
                 if inner_cos_match:
                     config["inner_cos"] = inner_cos_match.group(1)
 
-                inner_vlan_match = re.search(r'match inner-vlan (\d+)', item)
+                inner_vlan_match = re.search(r'Match Inner VLAN: (\d+)', item)
                 if inner_vlan_match:
                     config["inner_vlan"] = inner_vlan_match.group(1)
 
-                vlan_match = re.search(r'match vlan (\d+)', item)
+                vlan_match = re.search(r'Match vlan: (\d+)', item)
                 if vlan_match:
                     config["vlan"] = vlan_match.group(1)
 
