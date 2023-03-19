@@ -152,7 +152,7 @@ options:
             type: list
             elements: dict
             suboptions:
-              class:
+              class_in:
                 description:
                 - The traffic class of the packet to be remarked. Any absent class just means no change to those packets.
                 type: str

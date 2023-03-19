@@ -36,6 +36,14 @@ class Policy_mapsFacts(object):
 
         self.generated_spec = utils.generate_dict(facts_argument_spec)
 
+    @staticmethod
+    def get_policy_map_conf(connection):
+        return connection.get("show policy-map")
+
+    @staticmethod
+    def get_policy_class_map_conf(connection):
+        return connection.get("show running-config | begin policy-map")
+
     def populate_facts(self, connection, ansible_facts, data=None):
         """ Populate the facts for policy_maps
         :param connection: the device connection
@@ -51,26 +59,17 @@ class Policy_mapsFacts(object):
             # typically data is populated from the current device configuration
             # data = connection.get('show running-config | section ^interface')
             # using mock data instead
-            data = ("resource rsrc_a\n"
-                    "  a_bool true\n"
-                    "  a_string choice_a\n"
-                    "  resource here\n"
-                    "resource rscrc_b\n"
-                    "  key is property01 value is value end\n"
-                    "  an_int 10\n")
+            data = self.get_policy_map_conf(connection)
+            class_data = self.get_policy_class_map_conf(connection)
 
         # split the config into instances of the resource
-        resource_delim = 'resource'
-        find_pattern = r'(?:^|\n)%s.*?(?=(?:^|\n)%s|$)' % (resource_delim,
-                                                           resource_delim)
-        resources = [p.strip() for p in re.findall(find_pattern,
-                                                   data,
-                                                   re.DOTALL)]
+        data = re.split(r'POLICY-MAP-NAME:', data)
+        class_data = class_data.split('!')
 
         objs = []
-        for resource in resources:
+        for resource in data:
             if resource:
-                obj = self.render_config(self.generated_spec, resource)
+                obj = self.render_config(self.generated_spec, resource, class_data)
                 if obj:
                     objs.append(obj)
 
@@ -83,7 +82,7 @@ class Policy_mapsFacts(object):
         ansible_facts['ansible_network_resources'].update(facts)
         return ansible_facts
 
-    def render_config(self, spec, conf):
+    def render_config(self, spec, conf, class_data):
         """
         Render config as dictionary structure and delete keys
           from spec for null values
@@ -94,24 +93,133 @@ class Policy_mapsFacts(object):
         :returns: The generated config
         """
         config = deepcopy(spec)
-        config['name'] = utils.parse_conf_arg(conf, 'resource')
-        config['some_string'] = utils.parse_conf_arg(conf, 'a_string')
+        result = re.split(r'CLASS-MAP-NAME:', conf)
+        if result:
+            policy_conf = result[0].split('\n')
 
-        match = re.match(r'.*key is property01 (\S+)',
-                         conf, re.MULTILINE | re.DOTALL)
-        if match:
-            config['some_dict']['property_01'] = match.groups()[0]
+            # policy config
+            config['name'] = policy_conf[0].lstrip()
+            for item in result:
+                default_action_match = re.search(r'Default class-map action: (\S+)', item)
+                if default_action_match:
+                    default_action = default_action_match.group(1)
+                    default_action = default_action.replace('-', '_')
+                    config['default_action'] = default_action
 
-        a_bool = utils.parse_conf_arg(conf, 'a_bool')
-        if a_bool == 'true':
-            config['some_bool'] = True
-        elif a_bool == 'false':
-            config['some_bool'] = False
-        else:
-            config['some_bool'] = None
+                description_match = re.search(r'Description: (.+)', item)
+                if description_match:
+                    config['description'] = description_match.group(1)
 
-        try:
-            config['some_int'] = int(utils.parse_conf_arg(conf, 'an_int'))
-        except TypeError:
-            config['some_int'] = None
-        return utils.remove_empties(config)
+                trust_dscp_match = re.search(r'Trust state: (\S+)', item)
+                if trust_dscp_match:
+                    config['trust_dscp'] = True if trust_dscp_match.group(1) == 'DSCP' else False
+            # get class config
+            config['classifiers'] = self.render_classifiers(config.get('name'), class_data)
+            config = utils.remove_empties(config)
+        return config
+
+    def render_classifiers(self, name, conf):
+        """
+        Render config for classifiers
+
+        :param name: The name of the policy map
+        :param conf: The class configuration of each policy map
+        :rtype: list
+        :returns: The classifier config for the policy-map
+        """
+        results = []
+        policer = dict()
+        remark_maps = []
+
+        for classifier in conf:
+
+            pol_name_match = re.search(r'policy-map (\S+)', classifier)
+            if pol_name_match:
+                # need to make sure name obtained matches the policy name obtained from parent function
+                if pol_name_match.group(1) == name:
+                    result = dict()
+                    for item in classifier.split('\n'):
+
+                        # class name
+                        class_name_match = re.search(r'^ class (\S+)', item)
+                        if class_name_match:
+                            # append classifier to results and clear variables for next classifier
+                            if result:
+                                results.append(result)
+                                result = dict()
+                                remark_map = dict()
+                                remark_maps = []
+                                policer = dict()
+                            result['name'] = class_name_match.group(1)
+
+                        # policer facts
+                        policer_match = re.match(r'  police (single-rate|twin-rate) (.+) action (\S+)', item)
+                        if policer_match:
+                            policer['type'] = policer_match.group(1).replace('-', '_')
+                            policer['action'] = policer_match.group(3).replace('-', '_')
+                            rate_type = policer_match.group(2)
+                            if policer['type'] == 'single_rate':
+                                sr_match = re.search(r'(\d+) (\d+) (\d+)', rate_type)
+                                if sr_match:
+                                    policer['cir'] = sr_match.group(1)
+                                    policer['cbs'] = sr_match.group(2)
+                                    policer['ebs'] = sr_match.group(3)
+                            elif policer['type'] == 'twin_rate':
+                                tr_match = re.search(r'(\d+) (\d+) (\d+) (\d+)', rate_type)
+                                if tr_match:
+                                    policer['cir'] = tr_match.group(1)
+                                    policer['pir'] = tr_match.group(2)
+                                    policer['cbs'] = tr_match.group(3)
+                                    policer['pbs'] = tr_match.group(4)
+
+                        # remark_map facts
+                        remark_map_match = re.search(r'remark-map bandwidth-class (\S+) to new-dscp (\d+) new-bandwidth-class (\S+)', item)
+                        if remark_map_match:
+                            remark_map = {}
+                            remark_map['class_in'] = remark_map_match.group(1)
+                            remark_map['new_dscp'] = remark_map_match.group(2)
+                            remark_map['new_class'] = remark_map_match.group(3)
+                            remark_maps.append(remark_map)
+
+                        # remark facts
+                        remark_new_cos_match = re.search(r'remark new-cos (\d+) (\S+)', item)
+                        if remark_new_cos_match:
+                            result['remark'] = {'new_cos': remark_new_cos_match.group(1), 'apply': remark_new_cos_match.group(2)}
+
+                        # pbr_next_hop facts
+                        ip_next_hop_match = re.search(r'set ip next-hop (\S+)', item)
+                        if ip_next_hop_match:
+                            result['pbr_next_hop'] = ip_next_hop_match.group(1)
+
+                        # storm facts
+                        storm_protection_match = re.search(r'storm-protection', item)
+                        if storm_protection_match:
+                            result['storm_protection'] = True
+
+                        storm_action_match = re.search(r'storm-action (\S+)', item)
+                        if storm_action_match:
+                            action = storm_action_match.group(1)
+                            action = action.replace('disable', '_disable')
+                            action = action.replace('down', '_down')
+                            result['storm_action'] = action
+
+                        storm_window_match = re.search(r'storm-window (\S+)', item)
+                        if storm_window_match:
+                            result['storm_window'] = storm_window_match.group(1)
+
+                        storm_rate_match = re.search(r'storm-rate (\S+)', item)
+                        if storm_rate_match:
+                            result['storm_rate'] = storm_rate_match.group(1)
+
+                        storm_downtime_match = re.search(r'storm-downtime (\S+)', item)
+                        if storm_downtime_match:
+                            result['storm_downtime'] = storm_downtime_match.group(1)
+
+                        if policer:
+                            result['policer'] = policer
+                        if remark_maps:
+                            result['remark_map'] = remark_maps
+
+                    # append the last classifier to results
+                    results.append(result)
+        return results
