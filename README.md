@@ -35,8 +35,11 @@ Name | Description
 ### Modules
 Name | Description
 --- | ---
+alliedtelesis.awplus.awplus_acl|Configure ACLs
+alliedtelesis.awplus.awplus_acl_interfaces|Attach ACLs to interfaces
 alliedtelesis.awplus.awplus_banner|Manage multiline banners on Allied Telesis AW+ devices
 alliedtelesis.awplus.awplus_bgp|Configure global BGP protocol settings on Allied Telesis AW+
+alliedtelesis.awplus.awplus_class_maps|Configure classifier maps
 alliedtelesis.awplus.awplus_command|Run arbitrary commands on an Allied Telesis AW+ device
 alliedtelesis.awplus.awplus_config|Manage Allied Telesis AW+ configuration sections
 alliedtelesis.awplus.awplus_facts|Collect facts from remote devices running Allied Telesis AW+

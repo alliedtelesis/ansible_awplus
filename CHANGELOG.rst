@@ -4,6 +4,33 @@ Allied Telesis Alliedware Plus (AW+) Collection Release Notes
 
 .. contents:: Topics
 
+v1.2.2
+======
+
+Minor Changes
+-------------
+
+- improved tests in awplus_user module
+- improved tests in awplus_openflow module
+- minor improvements to Github workflow
+- replace all formatting strings with f-strings
+
+Bugfixes
+--------
+
+- awplus_l2_interfaces - Check for stackports before applying configuation.
+- awplus_user - Support password hashing correctly.
+
+Deleted Modules
+---------------
+
+New Modules
+-----------
+
+- awplus_acl - Resource module for ACLs.
+- awplus_acl_interfaces - Resource module for configuring ACLs to interfaces.
+- awplus_class_maps - Resource module for classifier maps.
+
 v1.2.1
 ======
 
