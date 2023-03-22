@@ -5,6 +5,7 @@ authors:
     "Jeremy Toth (@jtsource)",
     "Darryl Alang",
     "Tony van der Peet",
+    "Ben Hoelker",
   ]
 dependencies: {}
 description: "Modules to support configuration of AlliedWare Plus devices."
@@ -21,4 +22,4 @@ build_ignore:
 - .vscode
 - .github
 - .gitignore
-version: 1.2.1
+version: 1.2.2
