@@ -33,6 +33,7 @@ class FactsArgs(object):  # pylint: disable=R0903
         'logging',
         'ntp',
         'openflow',
+        'policy_maps',
         'static_lag_interfaces',
         'user',
         'vlans',
