@@ -1,0 +1,338 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags: test_init
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+            dscp_new: 40
+            cos_new: 4
+            class_new: red
+          - dscp_in: 34
+            cos_new: 4
+          - dscp_in: 61
+            cos_new: 1
+            class_new: yellow
+          - dscp_in: 50
+            dscp_new: 32
+            class_new: red
+        state: overridden
+
+    - name: Replaced test - replace an empty config 1
+      tags: r_1
+      awplus_premark_dscps:
+        config:
+        state: replaced
+
+    - name: Replaced test - replace an empty config 2
+      tags: r_2
+      awplus_premark_dscps:
+        config:
+          - dscp_in:
+        state: replaced
+
+    - name: Replaced test - replace 1 parameter in empty premark-dscp map
+      tags: r_3
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 60
+            dscp_new: 63
+        state: replaced
+
+    - name: Replaced test - replace 2 parameters in empty premark-dscp map
+      tags: r_4
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 60
+            dscp_new: 63
+            cos_new: 3
+        state: replaced
+
+    - name: Replaced test - replace all parameters in empty premark-dscp map
+      tags: r_5
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 60
+            dscp_new: 63
+            cos_new: 3
+            class_new: red
+        state: replaced
+
+    - name: Replaced test - replace 2 parameters in premark-dscp map 1
+      tags: r_6
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+            dscp_new: 60
+            cos_new: 7
+        state: replaced
+
+    - name: Replaced test - replace 2 parameters in premark-dscp map 2
+      tags: r_7
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+            cos_new: 7
+            class_new: yellow
+        state: replaced
+
+    - name: Replaced test - idempotency test
+      tags: r_8
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+            dscp_new: 40
+            cos_new: 4
+            class_new: red
+          - dscp_in: 34
+            cos_new: 4
+          - dscp_in: 61
+            cos_new: 1
+            class_new: yellow
+          - dscp_in: 50
+            dscp_new: 32
+            class_new: red
+        state: replaced
+
+    - name: Replaced test - replace multiple premark-dscps map in config
+      tags: r_9
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 60
+            dscp_new: 3
+            cos_new:  5
+            class_new: yellow
+          - dscp_in: 61
+            dscp_new: 4
+            cos_new:  3
+            class_new: red
+          - dscp_in: 63
+            dscp_new: 45
+            class_new: green
+        state: replaced
+
+    - name: Replaced test - reset map to default with replace
+      tags: r_10
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+        state: replaced
+
+    - name: Merged test - merge an empty config 1
+      tags: m_1
+      awplus_premark_dscps:
+        config:
+        state: merged
+
+    - name: Merged test - merge an empty config 2
+      tags: m_2
+      awplus_premark_dscps:
+        config:
+          - dscp_in:
+        state: merged
+
+    - name: Merged test - merge a new config
+      tags: m_3
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 60
+            dscp_new: 34
+            class_new: red
+            cos_new: 3
+        state: merged
+
+    - name: Merged test - update an existing config
+      tags: m_4
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+            dscp_new: 34
+            class_new: yellow
+            cos_new: 3
+        state: merged
+
+    - name: Merged test - merge mulitple premark-dscp maps
+      tags: m_5
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 60
+            dscp_new: 34
+            class_new: yellow
+            cos_new: 3
+          - dscp_in: 61
+            dscp_new: 23
+            class_new: red
+            cos_new: 6
+        state: merged
+
+    - name: Merged test - idempotency test
+      tags: m_6
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+            dscp_new: 40
+            cos_new: 4
+            class_new: red
+          - dscp_in: 34
+            cos_new: 4
+          - dscp_in: 61
+            cos_new: 1
+            class_new: yellow
+          - dscp_in: 50
+            dscp_new: 32
+            class_new: red
+        state: merged
+
+    - name: Deleted test - delete an empty config 1
+      tags: d_1
+      awplus_premark_dscps:
+        config:
+        state: deleted
+
+    - name: Deleted test - delete an empty config 2
+      tags: d_2
+      awplus_premark_dscps:
+        config:
+          - dscp_in:
+        state: deleted
+
+    - name: Deleted test - delete items in a premark_dscp config
+      tags: d_3
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+            dscp_new: 40
+            cos_new: 4
+        state: deleted
+
+    - name: Deleted test - delete using the dscp_in value
+      tags: d_4
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+        state: deleted
+
+    - name: Deleted test - delete premark-dscp using name that is already at default state
+      tags: d_5
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 58
+        state: deleted
+
+    - name: Deleted test - delete multiple premark-dscps
+      tags: d_6
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+          - dscp_in: 34
+            cos_new: 4
+          - dscp_in: 50
+          - dscp_in: 61
+        state: deleted
+
+    - name: Overridden test - override an empty config 1
+      tags: o_1
+      awplus_premark_dscps:
+        config:
+        state: overridden
+
+    - name: Overridden test - override an empty config 2
+      tags: o_2
+      awplus_premark_dscps:
+        config:
+          - dscp_in:
+        state: overridden
+
+    - name: Overridden test - override an empty premark-dscp map
+      tags: o_3
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 62
+            cos_new: 4
+            class_new: red
+        state: overridden
+
+    - name: Overridden test - override a changed premark-dscp map
+      tags: o_4
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+            cos_new: 7
+            class_new: red
+        state: overridden
+
+    - name: All States - invalid input 1
+      tags: as_1
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 64
+            cos_new: 8
+        state: "{{ item }}"
+      loop:
+        - merged
+        - replaced
+        - deleted
+
+    - name: All States - invalid input 2
+      tags: as_2
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+            cos_new: 8
+        state: "{{ item }}"
+      loop:
+        - merged
+        - replaced
+        - deleted
+
+    - name: All States - invalid input 3
+      tags: as_3
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+            cos_new: '8'
+        state: "{{ item }}"
+      loop:
+        - merged
+        - replaced
+        - deleted
+
+    - name: All States - invalid input 4
+      tags: as_4
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+            dscp_new: 64
+        state: "{{ item }}"
+      loop:
+        - merged
+        - replaced
+        - deleted
+
+    - name: All States - invalid input 5
+      tags: as_5
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+            dscp_new: -1
+        state: "{{ item }}"
+      loop:
+        - merged
+        - replaced
+        - deleted
+
+    - name: All States - invalid input 6
+      tags: as_6
+      awplus_premark_dscps:
+        config:
+          - dscp_in: 63
+            class_new: redd
+        state: "{{ item }}"
+      loop:
+        - merged
+        - replaced
+        - deleted
