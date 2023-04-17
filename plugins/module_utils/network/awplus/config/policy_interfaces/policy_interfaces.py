@@ -193,7 +193,7 @@ class Policy_interfaces(ConfigBase):
         return commands
 
     def change_config(self, w_pol_int, h_pol_int, delete=False, merge=False, replace=False):
-        """ The command generator when state is deleted
+        """ Generate commands to change the config, given a state flag
         :param w_pol_int: dictionary of the policy map and the interface to apply to
         :param h_pol_int: dictionary of the current configuration of the interface in w_pol_int
         :param delete: flag to specify a delete action
@@ -207,22 +207,36 @@ class Policy_interfaces(ConfigBase):
         int_name = h_pol_int.get('int_name')
         w_name = w_pol_int.get('policy_name')
         h_name = h_pol_int.get('policy_name')
-        # if merge flag is raised, check that a policy map is given before merging
-        if merge and (int_name and w_name) or not merge and (h_name or w_name):
-            # check that given policy map actually exists on device
-            if self.check_policy_maps(w_name) or replace and (h_name and not w_name):
-                if not delete and w_name != h_name and (h_name) or delete and (w_name == h_name):
+
+        # merge
+        if merge and int_name and w_name:
+            if self.check_policy_maps(w_name):
+                if w_name != h_name and h_name and w_name:
                     cmd.append(f"no service-policy input {h_name}")
-                if w_name != h_name and (w_name and not delete):
+                if w_name != h_name and w_name:
                     cmd.append(f"service-policy input {w_name}")
+
+        # replace
+        if replace and (h_name or w_name):
+            if self.check_policy_maps(w_name) or (h_name and not w_name):
+                if w_name != h_name and h_name:
+                    cmd.append(f"no service-policy input {h_name}")
+                if w_name != h_name and w_name:
+                    cmd.append(f"service-policy input {w_name}")
+
+        # delete
+        if delete and (h_name or w_name):
+            if self.check_policy_maps(w_name):
+                if w_name == h_name:
+                    cmd.append(f"no service-policy input {h_name}")
         if cmd:
             cmd.insert(0, f"interface {int_name}")
         return cmd
 
     def check_policy_maps(self, name):
-        """ The command generator when state is deleted
+        """ Check that the given policy map is available on the host device
         :param name: the name of the policy map to be checked
-        :rtype: A list
+        :rtype: A bool
         :returns: True if a policy map of the given name exists on the host device,
                   False otherwise
         """
