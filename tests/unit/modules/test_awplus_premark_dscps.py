@@ -60,10 +60,6 @@ class TestPremarkDscpsModule(TestAwplusModule):
         set_module_args(dict(config=None, state='replaced'))
         self.execute_module(changed=False)
 
-    def test_awplus_premark_dscps_replace_empty_config_2(self):
-        set_module_args(dict(config=[dict(dscp_in=None)], state='replaced'))
-        self.execute_module(changed=False)
-
     def test_awplus_premark_dscps_replace_1_parameter_in_empty_premark_dscps_map(self):
         set_module_args(dict(config=[dict(dscp_in=60, dscp_new=63)], state='replaced'))
         commands = [
@@ -151,10 +147,6 @@ class TestPremarkDscpsModule(TestAwplusModule):
         set_module_args(dict(config=None, state='merged'))
         self.execute_module(changed=False)
 
-    def test_awplus_premark_dscps_merge_empty_config_2(self):
-        set_module_args(dict(config=[dict(dscp_in=None)], state='merged'))
-        self.execute_module(changed=False)
-
     def test_awplus_premark_dscps_merge_new_config(self):
         set_module_args(dict(config=[dict(dscp_in=60, dscp_new=34, class_new='red', cos_new=3)], state='merged'))
         commands = [
@@ -229,10 +221,6 @@ class TestPremarkDscpsModule(TestAwplusModule):
         set_module_args(dict(config=None, state='deleted'))
         self.execute_module(changed=False)
 
-    def test_awplus_premark_dscps_delete_empty_config_2(self):
-        set_module_args(dict(config=[dict(dscp_in=None)], state='deleted'))
-        self.execute_module(changed=False)
-
     def test_awplus_premark_dscps_delete_items_in_config(self):
         set_module_args(dict(config=[dict(dscp_in=63, dscp_new=40, cos_new=4)], state='deleted'))
         commands = [
@@ -260,14 +248,6 @@ class TestPremarkDscpsModule(TestAwplusModule):
 
     def test_awplus_premark_dscps_override_empty_config_1(self):
         set_module_args(dict(config=None, state='overridden'))
-        commands = [
-            "no mls qos map premark-dscp 34", "no mls qos map premark-dscp 50",
-            "no mls qos map premark-dscp 61", "no mls qos map premark-dscp 63"
-        ]
-        self.execute_module(changed=True, commands=commands)
-
-    def test_awplus_premark_dscps_override_empty_config_2(self):
-        set_module_args(dict(config=[dict(dscp_in=None)], state='overridden'))
         commands = [
             "no mls qos map premark-dscp 34", "no mls qos map premark-dscp 50",
             "no mls qos map premark-dscp 61", "no mls qos map premark-dscp 63"

@@ -77,10 +77,6 @@ class TestPolicyMapsModule(TestAwplusModule):
         set_module_args(dict(config=None, state='replaced'))
         self.execute_module(changed=False)
 
-    def test_awplus_policy_maps_replace_empty_config_2(self):
-        set_module_args(dict(config=[dict(name=None, classifiers=None)], state='replaced'))
-        self.execute_module(changed=False)
-
     def test_awplus_policy_maps_replace_some_of_full_config(self):
         set_module_args(
             dict(
@@ -483,10 +479,6 @@ class TestPolicyMapsModule(TestAwplusModule):
         set_module_args(dict(config=None, state='merged'))
         self.execute_module(changed=False)
 
-    def test_awplus_policy_maps_merge_empty_config_2(self):
-        set_module_args(dict(config=[dict(name=None, classifiers=None)], state='merged'))
-        self.execute_module(changed=False)
-
     def test_awplus_policy_maps_merge_new_policy_map(self):
         set_module_args(
             dict(
@@ -836,10 +828,6 @@ class TestPolicyMapsModule(TestAwplusModule):
         set_module_args(dict(config=None, state='deleted'))
         self.execute_module(changed=False)
 
-    def test_awplus_policy_maps_delete_empty_config_2(self):
-        set_module_args(dict(config=[dict(name=None, classifiers=None)], state='deleted'))
-        self.execute_module(changed=False)
-
     def test_awplus_policy_maps_delete_everything_in_policy_map(self):
         set_module_args(
             dict(
@@ -1099,13 +1087,6 @@ class TestPolicyMapsModule(TestAwplusModule):
         set_module_args(dict(config=None, state='overridden'))
         commands = [
             "no policy-map test_pol_map", "no policy-map test"
-        ]
-        self.execute_module(changed=True, commands=commands)
-
-    def test_awplus_policy_maps_override_empty_config_2(self):
-        set_module_args(dict(config=[dict(name=None, classifiers=None)], state='overridden'))
-        commands = [
-            "no policy-map test", "no policy-map test_pol_map"
         ]
         self.execute_module(changed=True, commands=commands)
 

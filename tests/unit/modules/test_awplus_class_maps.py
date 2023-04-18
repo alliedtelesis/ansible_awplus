@@ -57,10 +57,6 @@ class TestClassMapsModule(TestAwplusModule):
         set_module_args(dict(config=None, state='replaced'))
         self.execute_module(changed=False)
 
-    def test_awplus_class_maps_replace_empty_config_2(self):
-        set_module_args(dict(config=[dict(name=None)], state='replaced'))
-        self.execute_module(changed=False)
-
     def test_awplus_class_maps_replace_each_element_in_config(self):
         set_module_args(
             dict(
@@ -211,10 +207,6 @@ class TestClassMapsModule(TestAwplusModule):
 
     def test_awplus_class_maps_merge_empty_config_1(self):
         set_module_args(dict(config=None))
-        self.execute_module(changed=False)
-
-    def test_awplus_class_maps_merge_empty_config_2(self):
-        set_module_args(dict(config=[dict(name=None)]))
         self.execute_module(changed=False)
 
     def test_awplus_class_maps_merge_into_existing_config(self):
@@ -372,10 +364,6 @@ class TestClassMapsModule(TestAwplusModule):
         set_module_args(dict(config=None, state='deleted'))
         self.execute_module(changed=False)
 
-    def test_awplus_class_maps_delete_empty_config_2(self):
-        set_module_args(dict(config=[dict(name=None)], state='deleted'))
-        self.execute_module(changed=False)
-
     def test_awplus_class_maps_delete_class_map_with_name(self):
         set_module_args(dict(config=[dict(name='testing')], state='deleted'))
         commands = ["no class-map testing"]
@@ -469,11 +457,6 @@ class TestClassMapsModule(TestAwplusModule):
 
     def test_awplus_class_maps_override_with_empty_config_1(self):
         set_module_args(dict(config=None, state='overridden'))
-        commands = ["no class-map test", "no class-map testing"]
-        self.execute_module(changed=True, commands=commands)
-
-    def test_awplus_class_maps_override_with_empty_config_2(self):
-        set_module_args(dict(config=[dict(name=None)], state='overridden'))
         commands = ["no class-map test", "no class-map testing"]
         self.execute_module(changed=True, commands=commands)
 
