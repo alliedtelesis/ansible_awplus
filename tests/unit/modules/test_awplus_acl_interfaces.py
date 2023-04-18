@@ -127,7 +127,8 @@ class TestACLInterfacesModule(TestAwplusModule):
 
     def test_awplus_acl_interfaces_replace_new_port_with_acl(self):
         set_module_args(dict(config=[dict(name="port1.6.6", acl_names=["test_acl_4"])], state="replaced"))
-        self.execute_module(changed=False)
+        commands = ["interface port1.6.6", "access-group test_acl_4"]
+        self.execute_module(changed=True, commands=commands)
 
     def test_awplus_acl_interfaces_replace_port_with_nothing(self):
         set_module_args(dict(config=[dict(name="port1.1.10", acl_names=None)], state="replaced"))
@@ -175,11 +176,7 @@ class TestACLInterfacesModule(TestAwplusModule):
 
     def test_awplus_acl_interfaces_delete_all_acls_attached_to_port(self):
         set_module_args(dict(config=[dict(name="port1.1.10")], state="deleted"))
-        commands = [
-            "interface port1.1.10", "no access-group test_acl_1",
-            "no access-group test_acl_2"
-        ]
-        self.execute_module(changed=True, commands=commands)
+        self.execute_module(changed=False)
 
     def test_awplus_acl_interfaces_delete_one_acl_attached_port(self):
         set_module_args(dict(config=[dict(name="port1.1.10", acl_names=["test_acl_1"])], state="deleted"))

@@ -1,0 +1,254 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: Test init - remove all test ACLs
+      tags: test_init_remove_all
+      awplus_acl_interfaces:
+        config:
+          - name: port1.1.10
+            acl_names:
+              - 'test_acl_1'
+              - 'test_acl_2'
+
+          - name: port1.6.5
+            acl_names:
+              - 'test_acl_3'
+              - 'test_acl_4'
+        state: deleted
+
+    - name: Test init - create new test hardware acls
+      tags: test_init_create_test_acls
+      awplus_acl:
+        config:
+          - acls:
+              - aces:
+                - action: permit
+                  source_addr: 192.172.68.0/24
+                  destination_addr: any
+                  protocols: ip
+                acl_type: hardware
+                name: test_acl_1
+
+              - aces:
+                - action: permit
+                  source_addr: 162.154.54.0/24
+                  destination_addr: any
+                  protocols: tcp
+                acl_type: hardware
+                name: test_acl_2
+
+              - aces:
+                - action: permit
+                  source_addr: any
+                  destination_addr: any
+                  protocols: ip
+                acl_type: hardware
+                name: test_acl_3
+
+              - aces:
+                - action: permit
+                  source_addr: any
+                  destination_addr: any
+                  protocols: tcp
+                acl_type: hardware
+                name: test_acl_4
+
+              - aces:
+                - action: permit
+                  source_addr: any
+                  destination_addr: any
+                  protocols: tcp
+                acl_type: extended
+                name: test_acl_5
+            afi: IPv4
+        state: overridden
+
+    - name: Test init - restore init conditions
+      tags: test_init
+      awplus_acl_interfaces:
+        config:
+          - name: port1.1.10
+            acl_names:
+              - 'test_acl_1'
+              - 'test_acl_2'
+
+          - name: port1.6.5
+            acl_names:
+              - 'test_acl_3'
+        state: overridden
+
+    - name: Merged test - merge invalid config 1
+      tags: m_iv_1
+      awplus_acl_interfaces:
+        config:
+          - name: port1.6.6
+        state: merged
+
+    - name: Merged test - merge invalid config 2
+      tags: m_iv_2
+      awplus_acl_interfaces:
+        config:
+          - acl_names:
+            - test_acl_4
+        state: merged
+
+    - name: Merged test - merge with empty config
+      tags: m_1
+      awplus_acl_interfaces:
+        config:
+        state: merged
+
+    - name: Merged test - merge existing port with new acl
+      tags: m_2
+      awplus_acl_interfaces:
+        config:
+          - name: port1.6.5
+            acl_names:
+              - test_acl_4
+        state: merged
+
+    - name: Merged test - merge new port with new acl
+      tags: m_3
+      awplus_acl_interfaces:
+        config:
+          - name: port1.6.6
+            acl_names:
+              - test_acl_4
+        state: merged
+
+    - name: Merged test - attach extended acl to interface
+      tags: m_4
+      awplus_acl_interfaces:
+        config:
+          - name: port1.6.6
+            acl_names:
+              - test_acl_5
+        state: merged
+
+    - name: Merged test - merge to port with multiple acl interfaces
+      tags: m_5
+      awplus_acl_interfaces:
+        config:
+          - name: port1.6.6
+            acl_names:
+              - test_acl_5
+              - test_acl_2
+              - test_acl_3
+        state: merged
+
+    - name: Replaced test - replace with empty config
+      tags: r_1
+      awplus_acl_interfaces:
+        config:
+        state: replaced
+
+    - name: Replaced test - replace acl with another acl
+      tags: r_2
+      awplus_acl_interfaces:
+        config:
+          - name: port1.6.5
+            acl_names:
+              - test_acl_4
+        state: replaced
+
+    - name: Replaced test - replace new port with acl
+      tags: r_3
+      awplus_acl_interfaces:
+        config:
+          - name: port1.6.6
+            acl_names:
+              - test_acl_4
+        state: replaced
+
+    - name: Replaced test - replace port with nothing
+      tags: r_4
+      awplus_acl_interfaces:
+        config:
+          - name: port1.1.10
+            acl_names:
+        state: replaced
+
+    - name: Overidden test - override with empty config 1
+      tags: o_1
+      awplus_acl_interfaces:
+        config:
+        state: overridden
+
+    - name: Overidden test - override with empty config 2
+      tags: o_2
+      awplus_acl_interfaces:
+        config:
+          - name:
+        state: overridden
+
+    - name: Overidden test - override with empty config 3
+      tags: o_3
+      awplus_acl_interfaces:
+        config:
+          - name:
+            acl_names:
+        state: overridden
+
+    - name: Overidden test - override port with empty acl list
+      tags: o_4
+      awplus_acl_interfaces:
+        config:
+          - name: port1.1.10
+        state: overridden
+
+    - name: Overidden test - override port with new config
+      tags: o_5
+      awplus_acl_interfaces:
+        config:
+          - name: port1.1.10
+            acl_names:
+              - test_acl_4
+        state: overridden
+
+    - name: Deleted test - delete an empty config 1
+      tags: d_1
+      awplus_acl_interfaces:
+        config:
+        state: deleted
+
+    - name: Deleted test - delete an empty config 2
+      tags: d_2
+      awplus_acl_interfaces:
+        config:
+          - name: port1.1.10
+        state: deleted
+
+    - name: Deleted test - delete one acl attached to port
+      tags: d_3
+      awplus_acl_interfaces:
+        config:
+          - name: port1.1.10
+            acl_names:
+              - 'test_acl_1'
+        state: deleted
+
+    - name: Deleted test - delete one acl from differant interfaces
+      tags: d_4
+      awplus_acl_interfaces:
+        config:
+          - name: port1.1.10
+            acl_names:
+              - 'test_acl_1'
+
+          - name: port1.6.5
+            acl_names:
+              - 'test_acl_3'
+        state: deleted
+
+    - name: Deleted test - delete multiple acl interfaces from one interface
+      tags: d_5
+      awplus_acl_interfaces:
+        config:
+          - name: port1.1.10
+            acl_names:
+              - 'test_acl_1'
+              - 'test_acl_2'
+        state: deleted

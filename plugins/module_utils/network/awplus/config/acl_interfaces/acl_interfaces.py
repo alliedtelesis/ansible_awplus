@@ -133,6 +133,11 @@ class Acl_interfaces(ConfigBase):
             want_interfaces = self.get_structure_info(want)
         have_interfaces = self.get_structure_info(have)
 
+        # iterates through all interfaces in want but not in have
+        for interface in list(set(want_interfaces.keys()).difference(set(have_interfaces.keys()))):
+            # add access-groups
+            commands.extend(self.generate_commands(interface, want_interfaces[interface], False))
+
         # iterate through interfaces both in want and have
         for interface in list(set(have_interfaces.keys()).intersection(set(want_interfaces.keys()))):
             have_interfaces_set = set(have_interfaces[interface])
@@ -243,13 +248,8 @@ class Acl_interfaces(ConfigBase):
             have_interfaces_set = set(have_interfaces[interface])
             want_interfaces_set = set(want_interfaces[interface])
 
-            if want_interfaces_set == set():
-                # If no acls specified in want,
-                #   - remove all acls attached to said interface in have
-                removed_access_groups = have_interfaces[interface]
-            else:
-                # If access-groups isn't empty, remove only it's specified access-groups
-                removed_access_groups = list(have_interfaces_set.intersection(want_interfaces_set))
+            # If access-groups isn't empty, remove only it's specified access-groups
+            removed_access_groups = list(have_interfaces_set.intersection(want_interfaces_set))
             commands.extend(self.generate_commands(interface, removed_access_groups, True))
         return commands
 
