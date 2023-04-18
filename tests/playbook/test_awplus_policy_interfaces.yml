@@ -1,0 +1,280 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: Initial setup - create required policy-maps
+      tags: create_pol
+      awplus_policy_maps:
+        config:
+          - name: test_pol_map
+          - name: test_pol_map_2
+          - name: test
+          - name: test_2
+          - name: pol_map
+          - name: pol_map_2
+        state: merged
+
+    - name: All tests - restore init conditions
+      tags: test_init
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.1
+            policy_name: test_pol_map
+          - int_name: port1.6.2
+            policy_name: test
+          - int_name: port1.6.3
+            policy_name: test_pol_map_2
+        state: overridden
+
+    - name: Replaced test - replace empty config 1
+      tags: r_1
+      awplus_policy_interfaces:
+        config:
+        state: replaced
+
+    - name: Replaced test - replace empty config 2
+      tags: r_2
+      awplus_policy_interfaces:
+        config:
+          - int_name:
+        state: replaced
+
+    - name: Replaced test -  replace policy map on interface with no policy map attached
+      tags: r_3
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.1.1
+            policy_name: test_pol_map
+        state: merged
+
+    - name: Replaced test -  replace policy map on interface with another policy map attached
+      tags: r_4
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.2
+            policy_name: test_2
+        state: merged
+
+    - name: Replaced test - idempotency test
+      tags: r_5
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.1
+            policy_name: test_pol_map
+          - int_name: port1.6.2
+            policy_name: test
+          - int_name: port1.6.3
+            policy_name: test_pol_map_2
+        state: replaced
+
+    - name: Replaced test -  replace multiple policy interfaces
+      tags: r_6
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.5
+            policy_name: test_pol_map
+          - int_name: port1.6.6
+            policy_name: test
+          - int_name: port1.6.2
+            policy_name: pol_map
+          - int_name: port1.6.3
+            policy_name: pol_map_2
+        state: replaced
+
+    - name: Replaced test -  remove policy-map with replaced
+      tags: r_7
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.1
+        state: replaced
+
+    - name: Replaced test -  only give policy-map
+      tags: r_8
+      awplus_policy_interfaces:
+        config:
+          - policy_name: pol_map_2
+        state: replaced
+
+
+    - name: Merged test - merge empty config 1
+      tags: m_1
+      awplus_policy_interfaces:
+        config:
+        state: merged
+
+    - name: Merged test - merge empty config 2
+      tags: m_2
+      awplus_policy_interfaces:
+        config:
+          - int_name:
+        state: merged
+
+    - name: Merged test - merge policy-map to interface with no policy-maps
+      tags: m_3
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.4
+            policy_name: test_2
+        state: merged
+
+    - name: Merged test - merge policy-map to interface with policy-map attached
+      tags: m_4
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.1
+            policy_name: test_2
+        state: merged
+
+    - name: Merged test - merge no policy-map to interface with policy-map attached
+      tags: m_5
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.1
+        state: merged
+
+    - name: Merged test - only give policy map
+      tags: m_6
+      awplus_policy_interfaces:
+        config:
+          - policy_name: test_pol_map
+        state: merged
+
+    - name: Merged test - merge with non-existing policy map
+      tags: m_7
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.1
+            policy_name: non-existing-policy-map
+        state: merged
+
+    - name: deleted test - delete an empty config_1
+      tags: d_1
+      awplus_policy_interfaces:
+        config:
+        state: deleted
+
+    - name: deleted test - delete an empty config_2
+      tags: d_2
+      awplus_policy_interfaces:
+        config:
+          - int_name:
+        state: deleted
+
+    - name: deleted test - delete single policy interface
+      tags: d_3
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.1
+            policy_name: test_pol_map
+        state: deleted
+
+    - name: deleted test - delete single policy interface using interface name only
+      tags: d_4
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.1
+        state: deleted
+
+    - name: deleted test - delete policy interface that doesn't exist
+      tags: d_5
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.1
+            policy_name: non-existant
+        state: deleted
+
+    - name: deleted test - delete policy interface from non-existant interface
+      tags: d_6
+      awplus_policy_interfaces:
+        config:
+          - int_name: non-existant item
+            policy_name: test_pol_map
+        state: deleted
+
+    - name: deleted test - delete multiple policy interfaces
+      tags: d_7
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.1
+            policy_name: test_pol_map
+          - int_name: port1.6.2
+            policy_name: test
+        state: deleted
+
+    - name: overridden test - override empty config_1
+      tags: o_1
+      awplus_policy_interfaces:
+        config:
+        state: overridden
+
+    - name: overridden test - override empty config_2
+      tags: o_2
+      awplus_policy_interfaces:
+        config:
+          - int_name:
+        state: overridden
+
+    - name: overridden test - override with new policy interface
+      tags: o_3
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.9
+            policy_name: test
+        state: overridden
+
+    - name: overridden test - override with incomplete/invalid config 1
+      tags: o_4
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.9
+        state: overridden
+
+    - name: overridden test - override with incomplete/invalid config 2
+      tags: o_5
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.9
+            policy_name: non-existant-item|
+        state: overridden
+
+    - name: overridden test - override with incomplete/invalid config 3
+      tags: o_6
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.9
+            policy_name: non existant item with spaces
+        state: overridden
+
+    - name: overridden test - override with incomplete/invalid config 4
+      tags: o_7
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.9
+            policy_name: non existant item with spaces \ |
+        state: overridden
+
+    - name: overridden test - idempotency test
+      tags: o_8
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.1
+            policy_name: test_pol_map
+          - int_name: port1.6.2
+            policy_name: test
+          - int_name: port1.6.3
+            policy_name: test_pol_map_2
+        state: overridden
+
+    - name: overridden test - override with similar config
+      tags: o_9
+      awplus_policy_interfaces:
+        config:
+          - int_name: port1.6.1
+            policy_name: test_pol_map
+          - int_name: port1.6.2
+            policy_name: test
+          - int_name: port1.6.4
+            policy_name: test_pol_map_2
+        state: overridden

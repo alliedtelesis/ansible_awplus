@@ -28,6 +28,7 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplu
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.logging.logging import LoggingFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.ntp.ntp import NtpFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.openflow.openflow import OpenflowFacts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.policy_interfaces.policy_interfaces import Policy_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.policy_maps.policy_maps import Policy_mapsFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.premark_dscps.premark_dscps import Premark_dscpsFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.static_lag_interfaces.static_lag_interfaces import (
@@ -62,6 +63,7 @@ FACT_RESOURCE_SUBSETS = dict(
     logging=LoggingFacts,
     ntp=NtpFacts,
     openflow=OpenflowFacts,
+    policy_interfaces=Policy_interfacesFacts,
     policy_maps=Policy_mapsFacts,
     premark_dscps=Premark_dscpsFacts,
     static_lag_interfaces=Static_lag_interfacesFacts,
