@@ -338,6 +338,31 @@
               allowed_vlans: 902, 9, 703, 231, 10, 450, 348, 705
         state: replaced
 
+    - name: Replaced test - replace range of allowed vlans
+      tags:
+        - replace_14
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              allowed_vlans: 7-11, 5
+        state: replaced
+
+    - name: Replaced test - replace list of allowed vlans
+      tags:
+        - replace_15
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              allowed_vlans:
+                - 1
+                - 2
+                - 4
+                - 6
+                - 11
+        state: replaced
+
     - name: Override all VLANs
       tags:
         - override_1
@@ -649,4 +674,28 @@
           - name: port1.0.3
             trunk:
               allowed_vlans: 902, 9, 703, 231, 10, 450, 348, 705
+        state: merged
+
+    - name: Merge test - merge range of allowed vlans
+      tags:
+        - merged_16
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              allowed_vlans: 8-11, 2
+        state: merged
+
+    - name: Merge test - merge list of allowed vlans
+      tags:
+        - merged_17
+      awplus_l2_interfaces:
+        config:
+          - name: port1.0.2
+            trunk:
+              allowed_vlans:
+                - 1
+                - 2
+                - 4
+                - 11
         state: merged
