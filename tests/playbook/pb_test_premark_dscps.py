@@ -135,11 +135,11 @@ def test_replace_reset_map_to_default_with_replace():
     assert run_a_test('r_10')
 
 
-def test_merge_an_empty_config():
+def test_merge_an_empty_config_1():
     assert run_a_test('m_1')
 
 
-def test_merge_an_empty_config():
+def test_merge_an_empty_config_2():
     assert run_a_test('m_2')
 
 
@@ -159,11 +159,11 @@ def test_merge_idempotency_test():
     assert run_a_test('m_6')
 
 
-def test_delete_an_empty_config():
+def test_delete_an_empty_config_1():
     assert run_a_test('d_1')
 
 
-def test_delete_an_empty_config():
+def test_delete_an_empty_config_2():
     assert run_a_test('d_2')
 
 

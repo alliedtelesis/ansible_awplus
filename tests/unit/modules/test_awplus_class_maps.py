@@ -485,30 +485,6 @@ class TestClassMapsModule(TestAwplusModule):
         ]
         self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_class_maps_override_existing_config(self):
-        set_module_args(
-            dict(
-                config=[
-                    dict(
-                        name='new-class-map',
-                        cos=3,
-                        vlan=3,
-                        tcp_flags=dict(
-                            ack=True,
-                            syn=True,
-                            urg=True
-                        )
-                    )
-                ],
-                state='overridden'
-            )
-        )
-        commands = [
-            "no class-map testing", "no class-map test", "class-map new-class-map",
-            "match cos 3", "match vlan 3", "match tcp-flags ack syn urg "
-        ]
-        self.execute_module(changed=True, commands=commands)
-
     def test_awplus_class_maps_override_multiple_class_maps(self):
         set_module_args(
             dict(

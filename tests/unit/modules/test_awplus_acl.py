@@ -258,7 +258,7 @@ class TestACLModule(TestAwplusModule):
         ]
         self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_acl_merge_multiple_acls(self):
+    def test_awplus_acl_merge_multiple_acls_different_afis(self):
         set_module_args(
             dict(
                 config=[

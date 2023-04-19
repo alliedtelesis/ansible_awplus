@@ -115,7 +115,7 @@ def test_replace_empty_config_1():
     assert run_a_test('r_1')
 
 
-def test_replace_empty_config_1():
+def test_replace_empty_config_2():
     assert run_a_test('r_2')
 
 
