@@ -37,6 +37,11 @@ tests = {
     "replace_10": ['interface port1.0.6', 'switchport trunk native vlan 22'],
     "replace_11": ['interface port1.0.4', 'switchport trunk native vlan none'],
     "replace_12": ['interface port1.0.7', 'switchport trunk native vlan 99'],
+    "replace_13": ["interface port1.0.6", "switchport trunk allowed vlan add 9", "switchport trunk allowed vlan add 10"],
+    "replace_14": ["interface port1.0.2", "switchport trunk allowed vlan add 8", "switchport trunk allowed vlan add 9",
+                   "switchport trunk allowed vlan add 10", "switchport trunk allowed vlan remove 6"],
+    "replace_15": ["interface port1.0.2", "switchport trunk allowed vlan add 1", "switchport trunk allowed vlan add 2",
+                   "switchport trunk allowed vlan add 4", "switchport trunk allowed vlan remove 5", "switchport trunk allowed vlan remove 7"],
     "override_1": ['interface port1.0.1', 'switchport access vlan 101', 'interface port1.0.2',
                    'switchport mode access', 'switchport access vlan 102', 'interface port1.0.3',
                    'switchport mode access', 'switchport access vlan 103', 'interface port1.0.4',
@@ -90,6 +95,11 @@ tests = {
     "merged_12": ['interface port1.0.4', 'switchport trunk native vlan none'],
     "merged_13": ['interface port1.0.7', 'switchport trunk native vlan 99'],
     "merged_14": [],
+    "merged_15": ["interface port1.0.3", "switchport trunk allowed vlan add 9", "switchport trunk allowed vlan add 10"],
+    "merged_16": ["interface port1.0.2", "switchport trunk allowed vlan add 8",
+                  "switchport trunk allowed vlan add 9", "switchport trunk allowed vlan add 10", "switchport trunk allowed vlan add 2"],
+    "merged_17": ["interface port1.0.2", "switchport trunk allowed vlan add 1",
+                  "switchport trunk allowed vlan add 2", "switchport trunk allowed vlan add 4"]
 }
 
 
@@ -106,15 +116,21 @@ def parse_output(op):
     for outl in op.splitlines():
         ls = outl.strip()
         if looking:
-            if ls.startswith(('ok:', 'changed:')) and ls.endswith('{'):
+            if ls.startswith(('ok:', 'changed:')):
                 pop = "{"
                 looking = False
         else:
-            pop += ls
-            if outl.rstrip() == '}':
-                break
+            if ls.startswith('changed:'):
+                pop += ls
+                if outl.rstrip() == '}':
+                    break
+
     pop = pop.replace("false", "False")
     pop = pop.replace("true", "True")
+    pop = pop.replace("null", "None")
+    pop = pop.replace('{changed: [aw2] => ', '')
+    pop = pop.replace('ok: [aw2] => ', '')
+
     try:
         pop = ast.literal_eval(pop)
     except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError):
@@ -265,6 +281,26 @@ def test_replace_12():
     assert run_a_test('replace_12')
 
 
+def test_replace_11():
+    assert run_a_test('replace_11')
+
+
+def test_replace_12():
+    assert run_a_test('replace_12')
+
+
+def test_replace_13():
+    assert run_a_test('replace_13')
+
+
+def test_replace_14():
+    assert run_a_test('replace_14')
+
+
+def test_replace_15():
+    assert run_a_test('replace_15')
+
+
 def test_override_1():
     assert run_a_test('override_1')
 
@@ -323,3 +359,15 @@ def test_merged_13():
 
 def test_merged_14():
     assert run_a_test('merged_14')
+
+
+def test_merged_15():
+    assert run_a_test('merged_15')
+
+
+def test_merged_16():
+    assert run_a_test('merged_16')
+
+
+def test_merged_17():
+    assert run_a_test('merged_17')
