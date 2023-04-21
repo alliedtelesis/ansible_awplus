@@ -1,0 +1,350 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: manager
+            hashed_password: "$1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G1"
+            privilege: 15
+          - name: tonyp
+            configured_password: tonyptonyp
+            privilege: 15
+          - name: bill
+            hashed_password: $1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G1
+            privilege: 2
+          - name: test_user
+            configured_password: test_password
+            privilege: 10
+        state: overridden
+      tags:
+        - test_init
+
+    - name: Merged test 1 - Create a user but don't supply any details (merge test)
+      alliedtelesis.awplus.awplus_user:
+        config:
+        state: merged
+      tags:
+        - m_test_1
+
+    - name: Merged test 2 - Add a new user with no config
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: John
+        state: merged
+      tags:
+        - m_test_2
+
+    - name: Merged test 3 - Add a new user
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: John
+            hashed_password: $5$beWs4hWrHY4RGTl4$ju8Nt.r6yl72AfqkKIc1VW72R4ra9X3nM2UzyrHLer5
+            privilege: 15
+        state: merged
+      tags:
+        - m_test_3
+
+    - name: Merged test 4 - Add a new user with a hashed password
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: John
+            hashed_password: $5$niumlS6h$ae.kFUj6zuvoedt63PFQM1T4dD.EvjHVKR3sG9VH18B
+            privilege: 15
+        state: merged
+      tags:
+        - m_test_4
+
+    - name: Merged test 5 - Add a new user with no password
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: John
+            privilege: 4
+        state: merged
+      tags:
+        - m_test_5
+
+    - name: Merged test 6 - Add a new user with no privilege
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: John
+            hashed_password: $5$kcJ1qirn0dvhKLn0$Rxczwr8iuySduL7VFA8oTbadI/X5Jb3CR7YRhPlE0P0
+        state: merged
+      tags:
+        - m_test_6
+
+    - name: Merged test 7 - Add a new user with both passwords
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: frank
+            configured_password: test
+            hashed_password: $5$niumlS6h$ae.kFUj6zuvoedt63PFQM1T4dD.EvjHVKR3sG9VH18B
+            privilege: 6
+        state: merged
+      tags:
+        - m_test_7
+
+    - name: Merged test 8 - Supply both an unhashed and hashed password for configured user
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: test_user
+            configured_password: fluffy
+            hashed_password: $5$NQrZJ.3CrY2rcH5U$Wodib.wzbtg5Eb1A7naZFpcUB4qzNpU9HUox4jd4EL1
+        state: merged
+      tags:
+        - m_test_8
+
+    - name: Merged test 9 - Change configured users password.
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: test_user
+            hashed_password: $5$ZfeSXZNKkFtGaOsh$AvLzVpiZGWK7lZxtxNV447Oi9GK4czItLqBgJV3tcTA
+        state: merged
+      tags:
+        - m_test_9
+
+    - name: Merged test 10 - Change configured users privilege level
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: test_user
+            privilege: 11
+        state: merged
+      tags:
+        - m_test_10
+
+    - name: Merged test 11 - Switch configured users password to a hashed password
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: test_user
+            hashed_password: $5$niumlS6h$ae.kFUj6zuvoedt63PFQM1T4dD.EvjHVKR3sG9VH18B
+            privilege: 5
+        state: merged
+      tags:
+        - m_test_11
+
+    - name: Merged test 12 - Attempt to set users privilege to 0
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: test_user
+            privilege: 0
+        state: merged
+      tags:
+        - m_test_12
+
+    - name: Merged test 13 - Add user with privilege set to 0
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: bob
+            privilege: 0
+            hashed_password: $5$xH1k.yIKmf.HyO0y$rAekVASnw8OzjQ8ja.v0lAulU79hF6t0Gaqx1aPQ914
+        state: merged
+      tags:
+        - m_test_13
+
+    - name: Merged test 14 - Change password for user with MD5 hash 1
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: bill
+            hashed_password: $1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G9
+        state: merged
+      tags:
+        - m_test_14
+
+    - name: Merged test 15 - Change passwords for user with MD5 hash 2
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: bill
+            hashed_password: $1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G1
+        state: merged
+      tags:
+        - m_test_15
+
+    - name: Merged test 16 - Change passwords for user with MD5 hash 3
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: bill
+            hashed_password: $5$uRXfAAn95H5fo4bG$tedRlexoPG7rjOJRkAOwbyoKd6GXN8RagClqLnayjh.
+        state: merged
+      tags:
+        - m_test_16
+
+    - name: Merged test 17 - Merge 10 new users at the same time
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: Bill
+            hashed_password: $5$uRXfAAn95H5fo4bG$tedRlexoPG7rjOJRkAOwbyoKd6GXN8RagClqLnayjh.
+          - name: Bob
+            hashed_password: $5$4zkZU10hy4kwk2Ao$b27giLpBKXip7kqGvOlxVCOkPiNDCmVXGPmAiPU8pfC
+          - name: David
+            hashed_password: $5$qReaGY6chtTPnkjx$lKmF6hF2zw7L1THYPnm2NWFDBJCYe1Z345MYXiVzKw0
+          - name: Anne
+            hashed_password: $5$4VUSIR41T4xN0uu7$vjDcy7Kgv9.t7RvDZrTu77PZR4yGl/q4Xyle0A1wCT/
+          - name: Mary
+            hashed_password: $5$WmZt2w0HDUVjcM2X$6DaV5tJCbQd8F0R776cV054DET7FD5/hU81dSqV6.ZC
+          - name: April
+            hashed_password: $5$mahTa3ZqoN5U9YHp$HT.ea/PyUUDsalDAON59iUSS2D2SWh5pr1gjWgV4ZY1
+          - name: Thomas
+            hashed_password: $5$AXkoQLp93itzrANk$z80kxStcPQfQdtaNaU77Ir38egpO4jEsxtJwUpmMXnC
+          - name: Percy
+            hashed_password: $5$vBUDapAnW7/PURSR$6Jpxdf.UlEIgEDwV9owDyFVg0h1XaOPsbeZVI/uUX/7
+          - name: James
+            hashed_password: $5$iJoYqlj0VtMJOWVW$/Fe83KeQoqfyjCwJzrjkv6JLjRt0bkEtnuVM0NVa5f9
+          - name: Gordan
+            hashed_password: $5$EnsT9gFKhX8jvAST$PX6oiJwkFXXccU/H5/TUbfwjQDs5Irhf5aYR1TL3n51
+        state: merged
+      tags:
+        - m_test_17
+
+    - name: Merged test 18 - idempotency test
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: manager
+            hashed_password: "$1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G1"
+            privilege: 15
+          - name: tonyp
+            configured_password: tonyptonyp
+            privilege: 15
+          - name: bill
+            hashed_password: $1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G1
+            privilege: 2
+          - name: test_user
+            configured_password: test_password
+            privilege: 10
+        state: merged
+      tags:
+        - m_test_18
+
+    - name: Replaced test 1 - Replace user password
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: test_user
+            hashed_password: $5$nABt9VDrIVdrHht/$/3a1c3ZK9TQ4c1oi47mDnWRSsS5t6MbCH3PwV39qdq7
+        state: replaced
+      tags:
+        - r_test_1
+
+    - name: Replaced test 2 - Replace users privilege level
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: test_user
+            privilege: 10
+        state: replaced
+      tags:
+        - r_test_2
+
+    - name: Replaced test 3 - Replace user password with MD5 hash
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: test_user
+            hashed_password: $1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G1
+        state: replaced
+      tags:
+        - r_test_3
+
+    - name: Deleted test 1 - Delete an empty config
+      alliedtelesis.awplus.awplus_user:
+        config:
+        state: deleted
+      tags:
+        - d_test_1
+
+    - name: Deleted test 2 - Delete a user that doesn't exist
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: peter
+        state: deleted
+      tags:
+        - d_test_2
+
+    - name: Deleted test 3 - Delete configured user only using name
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: test_user
+        state: deleted
+      tags:
+        - d_test_3
+
+    - name: Deleted test 4 - Delete muliple users only using name
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: test_user
+          - name: bill
+        state: deleted
+      tags:
+        - d_test_4
+
+    - name: Deleted test 5 - Delete users password
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: test_user
+            configured_password: test_password
+        state: deleted
+      tags:
+        - d_test_5
+
+    - name: Deleted test 6 - Delete users hashed password
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: bill
+            hashed_password: $1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G1
+        state: deleted
+      tags:
+        - d_test_6
+
+    - name: Deleted test 7 - Delete users configured password using wrong pasword
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: test_user
+            configured_password: wrong_password
+        state: deleted
+      tags:
+        - d_test_7
+
+    - name: Overridden test 1 - override empty config
+      alliedtelesis.awplus.awplus_user:
+        config:
+        state: overridden
+      tags:
+        - o_test_1
+
+    - name: Overridden test 2 - override with new user
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: new_user
+            configured_password: test_password
+            privilege: 12
+        state: overridden
+      tags:
+        - o_test_2
+
+    - name: Overridden test 3 - override existing user
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: bill
+            configured_password: test_password
+            privilege: 12
+        state: overridden
+      tags:
+        - o_test_3
+
+    - name: Overidden test 4 - idempotency test
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: manager
+            hashed_password: "$1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G1"
+            privilege: 15
+          - name: tonyp
+            configured_password: tonyptonyp
+            privilege: 15
+          - name: bill
+            hashed_password: $1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G1
+            privilege: 2
+          - name: test_user
+            configured_password: test_password
+            privilege: 10
+        state: overridden
+      tags:
+        - o_test_4

@@ -127,11 +127,9 @@ class TestAwplusUserModule(TestAwplusModule):
         commands = ["no username ansible"]
         self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_user_delete_all(self):
+    def test_awplus_user_delete_empty_config(self):
         set_module_args(dict(state="deleted"))
-        commands = ["no username ansible",
-                    "no username jin"]
-        self.execute_module(changed=True, commands=commands)
+        self.execute_module(changed=False)
 
     def test_awplus_user_delete_no_user(self):
         set_module_args(dict(config=[dict(name="intern")], state="deleted"))

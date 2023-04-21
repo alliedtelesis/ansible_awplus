@@ -178,8 +178,6 @@ class User(ConfigBase):
             commands.append('username manager privilege 15 password friend')
         if want:
             commands.extend(self._clear_config(want, have))
-        else:
-            commands.extend(self._clear_config(have, have))
         return commands
 
     def _set_config(self, want, have):
