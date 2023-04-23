@@ -1,0 +1,583 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags:
+        - test_init
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+              - port1.1.3
+            member-filters: false
+          - name: "55"
+            members:
+              - port1.1.2
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: True
+        state: overridden
+
+    - name: Override test - add new port
+      tags:
+        - override1
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+              - port1.1.3
+              - port1.1.8
+            member-filters: false
+          - name: "55"
+            members:
+              - port1.1.2
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: true
+        state: overridden
+
+    - name: Override test - add port from group 55
+      tags:
+        - override2
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+              - port1.1.3
+              - port1.1.2
+            member-filters: false
+          - name: "55"
+            members:
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: true
+        state: overridden
+
+    - name: Override test - member-filters change
+      tags:
+        - override3
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+              - port1.1.3
+            member-filters: true
+          - name: "55"
+            members:
+              - port1.1.2
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: true
+        state: overridden
+
+    - name: Override test - member-filters change, add new port
+      tags:
+        - override4
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+              - port1.1.3
+              - port1.1.8
+            member-filters: true
+          - name: "55"
+            members:
+              - port1.1.2
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: true
+        state: overridden
+
+    - name: Override test - member-filters change, add port from group 55
+      tags:
+        - override5
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+              - port1.1.3
+              - port1.1.2
+            member-filters: true
+          - name: "55"
+            members:
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: true
+        state: overridden
+
+    - name: Override test - swap ports
+      tags:
+        - override6
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.2
+              - port1.1.3
+            member-filters: false
+          - name: "55"
+            members:
+              - port1.1.1
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: true
+        state: overridden
+
+    - name: Override test - swap ports, change filters group 33
+      tags:
+        - override7
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.3
+              - port1.1.2
+            member-filters: true
+          - name: "55"
+            members:
+              - port1.1.1
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: true
+        state: overridden
+
+    - name: Override test - swap ports, change filters group 55
+      tags:
+        - override8
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.2
+              - port1.1.3
+            member-filters: false
+          - name: "55"
+            members:
+              - port1.1.1
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: false
+        state: overridden
+
+    - name: Override test - swap ports, change filters both groups
+      tags:
+        - override9
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.2
+              - port1.1.3
+            member-filters: true
+          - name: "55"
+            members:
+              - port1.1.1
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: false
+        state: overridden
+
+    - name: Override test - wipe out everything
+      tags:
+        - override10
+      awplus_static_lag_interfaces:
+        config:
+        state: overridden
+
+    - name: Override test - same port in two groups
+      tags:
+        - override11
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.2
+              - port1.1.3
+            member-filters: true
+          - name: "55"
+            members:
+              - port1.1.1
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+              - port1.1.2
+            member-filters: false
+        state: overridden
+
+    - name: Merge test - do nothing
+      tags:
+        - merge0
+      awplus_static_lag_interfaces:
+        config:
+        state: merged
+
+    - name: Merge test - add new port
+      tags:
+        - merge1
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.8
+            member-filters: false
+        state: merged
+
+    - name: Merge test - add port from group 55
+      tags:
+        - merge2
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.2
+            member-filters: false
+        state: merged
+
+    - name: Merge test - member-filters change
+      tags:
+        - merge3
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            member-filters: true
+        state: merged
+
+    - name: Merge test - member-filters change, add new port
+      tags:
+        - merge4
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.8
+            member-filters: true
+        state: merged
+
+    - name: Merge test - member-filters change, add port from group 55
+      tags:
+        - merge5
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.2
+            member-filters: true
+        state: merged
+
+    - name: Merge test - swap ports
+      tags:
+        - merge6
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.2
+            member-filters: false
+          - name: "55"
+            members:
+              - port1.1.1
+            member-filters: true
+        state: merged
+
+    - name: Merge test - swap ports, change filters group 33
+      tags:
+        - merge7
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.2
+            member-filters: true
+          - name: "55"
+            members:
+              - port1.1.1
+            member-filters: true
+        state: merged
+
+    - name: Merge test - swap ports, change filters group 55
+      tags:
+        - merge8
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.2
+            member-filters: false
+          - name: "55"
+            members:
+              - port1.1.1
+            member-filters: false
+        state: merged
+
+    - name: Merge test - swap ports, change filters both groups
+      tags:
+        - merge9
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.2
+            member-filters: true
+          - name: "55"
+            members:
+              - port1.1.1
+            member-filters: false
+        state: merged
+
+    - name: Replace test - do nothing
+      tags:
+        - replace0
+      awplus_static_lag_interfaces:
+        config:
+        state: replaced
+
+    - name: Replace test - add new port
+      tags:
+        - replace1
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+              - port1.1.3
+              - port1.1.8
+            member-filters: false
+        state: replaced
+
+    - name: Replace test - add port from group 55
+      tags:
+        - replace2
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+              - port1.1.3
+              - port1.1.2
+            member-filters: false
+        state: replaced
+
+    - name: Replace test - member-filters change
+      tags:
+        - replace3
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+              - port1.1.3
+            member-filters: true
+        state: replaced
+
+    - name: Replace test - member-filters change, add new port
+      tags:
+        - replace4
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+              - port1.1.3
+              - port1.1.8
+            member-filters: true
+        state: replaced
+
+    - name: Replace test - member-filters change, add port from group 55
+      tags:
+        - replace5
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+              - port1.1.3
+              - port1.1.2
+            member-filters: true
+        state: replaced
+
+    - name: Replace test - swap ports
+      tags:
+        - replace6
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.3
+              - port1.1.2
+            member-filters: false
+          - name: "55"
+            members:
+              - port1.1.1
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: true
+        state: replaced
+
+    - name: Replace test - swap ports, change filters group 33
+      tags:
+        - replace7
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.3
+              - port1.1.2
+            member-filters: true
+          - name: "55"
+            members:
+              - port1.1.1
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: true
+        state: replaced
+
+    - name: Replace test - swap ports, change filters group 55
+      tags:
+        - replace8
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.2
+              - port1.1.3
+            member-filters: false
+          - name: "55"
+            members:
+              - port1.1.1
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: false
+        state: replaced
+
+    - name: Replace test - swap ports, change filters both groups
+      tags:
+        - replace9
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.2
+              - port1.1.3
+            member-filters: true
+          - name: "55"
+            members:
+              - port1.1.1
+              - port1.1.4
+              - port1.1.5
+              - port1.1.6
+              - port1.1.7
+            member-filters: false
+        state: replaced
+
+    - name: Delete test - do nothing
+      tags:
+        - delete0
+      awplus_static_lag_interfaces:
+        config:
+        state: deleted
+
+    - name: Delete test - delete one port
+      tags:
+        - delete1
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+            member-filters: false
+        state: deleted
+
+    - name: Delete test - delete all ports
+      tags:
+        - delete2
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+              - port1.1.3
+            member-filters: false
+        state: deleted
+
+    - name: Delete test - member-filters change, delete one port
+      tags:
+        - delete3
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+            member-filters: true
+        state: deleted
+
+    - name: Delete test - member-filters change, delete all ports
+      tags:
+        - delete4
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.1
+              - port1.1.3
+            member-filters: true
+        state: deleted
+
+    - name: Delete test - two groups
+      tags:
+        - delete5
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            members:
+              - port1.1.3
+            member-filters: false
+          - name: "55"
+            members:
+              - port1.1.4
+            member-filters: true
+        state: deleted
+
+    - name: Delete test - whole group
+      tags:
+        - delete6
+      awplus_static_lag_interfaces:
+        config:
+          - name: "33"
+            member-filters: true
+        state: deleted
