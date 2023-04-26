@@ -1,0 +1,370 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags: test_init
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: dhcp
+                secondary: false
+                dhcp_client: 4
+                dhcp_hostname: testing1234
+            ipv6:
+              - address: 2003:db8::ffdf/64
+          - name: vlan2
+            ipv4:
+              - address: 172.172.172.6/24
+        state: overridden
+
+    - name: Merged test - merge empty config
+      tags: m_1
+      awplus_l3_interfaces:
+        config:
+        state: merged
+
+    - name: Merged test - merge new interface
+      tags: m_2
+      awplus_l3_interfaces:
+        config:
+          - name: vlan3
+            ipv4:
+              - address: 10.172.192.4/24
+        state: merged
+
+    - name: Merged test - merge existing interface
+      tags: m_3
+      awplus_l3_interfaces:
+        config:
+          - name: vlan2
+            ipv6:
+              - address: 2000:db8::ffdf/62
+        state: merged
+
+    - name: Merged test - switch to dhcp from static
+      tags: m_4
+      awplus_l3_interfaces:
+        config:
+          - name: vlan2
+            ipv4:
+              - address: dhcp
+                dhcp_client: 5
+                dhcp_hostname: test_host
+        state: merged
+
+    - name: Merged test - switch to static from dhcp
+      tags: m_5
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: 192.172.172.6/24
+        state: merged
+
+    - name: Merged test - add secondary address
+      tags: m_6
+      awplus_l3_interfaces:
+        config:
+          - name: vlan2
+            ipv4:
+              - address: 192.172.172.6/24
+                secondary: true
+        state: merged
+
+    - name: Merged test - merge multiple ipv4 addresses
+      tags: m_7
+      awplus_l3_interfaces:
+        config:
+          - name: vlan3
+            ipv4:
+              - address: 176.172.172.6/24
+              - address: 192.176.172.6/24
+        state: merged
+
+    - name: Merged test - merge multiple ipv6 addresses
+      tags: m_8
+      awplus_l3_interfaces:
+        config:
+          - name: vlan3
+            ipv6:
+              - address: 1000:db8::ffdf/62
+              - address: 1100:db8::ffdf/62
+        state: merged
+
+    - name: Merged test - merge on non-existing interface
+      tags: m_9
+      awplus_l3_interfaces:
+        config:
+          - name: vlan999
+            ipv4:
+              - address: 192.172.172.6/24
+        state: merged
+
+    - name: Merged test - merge multiple interfaces
+      tags: m_10
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: 192.172.172.6/24
+          - name: vlan6
+            ipv6:
+              - address: 1100:db8::ffdf/62
+        state: merged
+
+    - name: Merged test - idempotency test
+      tags: m_11
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: dhcp
+                dhcp_client: 4
+                dhcp_hostname: testing1234
+            ipv6:
+              - address: 2003:db8::ffdf/64
+          - name: vlan2
+            ipv4:
+              - address: 172.172.172.6/24
+        state: overridden
+
+    - name: Merged test - dhcp to dhcp
+      tags: m_12
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: dhcp
+                dhcp_client: 50
+                dhcp_hostname: new_name
+        state: merged
+
+    - name: replaced test - replace empty config
+      tags: r_1
+      awplus_l3_interfaces:
+        config:
+        state: replaced
+
+    - name: replaced test - replace nothing with new interface
+      tags: r_2
+      awplus_l3_interfaces:
+        config:
+          - name: vlan3
+            ipv4:
+              - address: 10.172.192.4/24
+        state: replaced
+
+    - name: replaced test - replace items on existing interface
+      tags: r_3
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: 192.192.154.4/24
+            ipv6:
+              - address: 1124:db8::ffdf/62
+        state: replaced
+
+    - name: replaced test - dhcp to static
+      tags: r_4
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: 192.192.154.4/24
+            ipv6:
+              - address: 2003:db8::ffdf/64
+        state: replaced
+
+    - name: replaced test - static to dhcp
+      tags: r_5
+      awplus_l3_interfaces:
+        config:
+          - name: vlan2
+            ipv4:
+              - address: dhcp
+                dhcp_client: 3
+                dhcp_hostname: test_dhcps
+        state: replaced
+
+    - name: replaced test - replace ipv4 and ipv6 addresses
+      tags: r_6
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: 192.192.154.4/24
+            ipv6:
+              - address: 2042:db8::ffdf/64
+        state: replaced
+
+    - name: replaced test - replace on multiple interfaces
+      tags: r_7
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: dhcp
+                dhcp_client: 5
+                dhcp_hostname: test_host
+          - name: vlan2
+            ipv6:
+              - address: 2023:db8::ffdf/64
+        state: replaced
+
+    - name: replaced test - idempotency test
+      tags: r_8
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: dhcp
+                dhcp_client: 4
+                dhcp_hostname: testing1234
+            ipv6:
+              - address: 2003:db8::ffdf/64
+          - name: vlan2
+            ipv4:
+              - address: 172.172.172.6/24
+        state: replaced
+
+    - name: replaced test - dhcp to dhcp
+      tags: r_9
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: dhcp
+                dhcp_client: 50
+                dhcp_hostname: new_name
+        state: replaced
+
+    - name: Overridden test - override empty config
+      tags: o_1
+      awplus_l3_interfaces:
+        config:
+        state: overridden
+
+    - name: Overridden test - override to new interface
+      tags: o_2
+      awplus_l3_interfaces:
+        config:
+          - name: vlan3
+            ipv4:
+              - address: 172.172.172.6/24
+        state: overridden
+
+    - name: Overridden test - override existing interface
+      tags: o_3
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: 192.172.172.6/24
+            ipv6:
+              - address: 2012:db8::ffdf/64
+        state: overridden
+
+    - name: Overridden test - static to dhcp
+      tags: o_4
+      awplus_l3_interfaces:
+        config:
+          - name: vlan2
+            ipv4:
+              - address: dhcp
+                dhcp_client: 100
+                dhcp_hostname: test2
+        state: overridden
+
+    - name: Overridden test - dhcp to static
+      tags: o_5
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: 192.172.172.6/24
+        state: overridden
+
+    - name: Overridden test - dhcp to dhcp
+      tags: o_6
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: dhcp
+                dhcp_client: 50
+                dhcp_hostname: new_name
+        state: overridden
+
+    - name: Overridden test - idempotency test
+      tags: o_7
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: dhcp
+                dhcp_client: 4
+                dhcp_hostname: testing1234
+            ipv6:
+              - address: 2003:db8::ffdf/64
+          - name: vlan2
+            ipv4:
+              - address: 172.172.172.6/24
+        state: overridden
+
+    - name: Overridden test - override interface to only use ipv6
+      tags: o_8
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv6:
+              - address: 2402:db8::ffdf/64
+        state: overridden
+
+    - name: Deleted test - delete empty config
+      tags: d_1
+      awplus_l3_interfaces:
+        config:
+        state: deleted
+
+    - name: Deleted test - delete interface config using name
+      tags: d_2
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+        state: deleted
+
+    - name: Deleted test - delete interface config using non-existing name
+      tags: d_3
+      awplus_l3_interfaces:
+        config:
+          - name: vlan2010
+        state: deleted
+
+    - name: Deleted test - delete items in config
+      tags: d_4
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: dhcp
+                secondary: false
+                dhcp_client: 4
+                dhcp_hostname: testing1234
+        state: deleted
+
+    - name: Deleted test - delete incorrectly specified items in config
+      tags: d_5
+      awplus_l3_interfaces:
+        config:
+          - name: vlan1
+            ipv4:
+              - address: dhcp
+                secondary: false
+                dhcp_client: 6
+                dhcp_hostname: something_differant
+        state: deleted
