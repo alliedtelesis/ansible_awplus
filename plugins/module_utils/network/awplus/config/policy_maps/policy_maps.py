@@ -12,9 +12,7 @@ created
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base import (
     ConfigBase,
 )
-from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
-    to_list,
-)
+
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.facts import Facts
 
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
@@ -24,7 +22,6 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
     remove_empties,
 )
 
-import itertools
 import re
 
 
@@ -235,7 +232,6 @@ class Policy_maps(ConfigBase):
 
             # generate commands for classifiers
             if item == 'classifiers':
-                c_cmd = []
                 class_names = []
                 # get want and have classifiers
                 w_classifiers = w_policy_map.get('classifiers') if w_policy_map.get('classifiers') is not None else []
@@ -491,8 +487,6 @@ class Policy_maps(ConfigBase):
                 cmd.insert(0, f"policy-map {name}")
             else:
                 cmd = []
-        with open('output.txt', 'a') as f:
-            f.write(f"{cmd}\n\n")
 
         return cmd
 
@@ -540,7 +534,6 @@ class Policy_maps(ConfigBase):
                 for classifier in changed_items.get('classifiers'):
                     w_target = {}
                     h_target = {}
-                    c_cmd = []
 
                     # get w_classifier and h_classifier that has its class name in classifier
                     for w_classifier in w_classifiers:
@@ -650,7 +643,7 @@ class Policy_maps(ConfigBase):
                                 ip_cmd = f"set ip next-hop {w_item}"
                                 cmd_dict[class_name].append(ip_cmd) if ip_cmd not in cmd_dict[class_name] else ''
                             elif h_item and not w_item or h_item and w_item == 'none':
-                                ip_cmd = f"no set ip next-hop"
+                                ip_cmd = "no set ip next-hop"
                                 cmd_dict[class_name].append(ip_cmd) if ip_cmd not in cmd_dict[class_name] else ''
 
                 # compile commands into one command

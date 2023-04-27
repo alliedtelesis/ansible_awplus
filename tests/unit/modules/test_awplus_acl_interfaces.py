@@ -113,10 +113,6 @@ class TestACLInterfacesModule(TestAwplusModule):
         commands = ["interface port1.6.6", "access-group test_acl_4"]
         self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_acl_interfaces_merge_empty_config(self):
-        set_module_args(dict(config=[dict(name="port1.1.10")]))
-        self.execute_module(changed=False)
-
     def test_awplus_acl_interfaces_replace_empty_config(self):
         set_module_args(dict(config=None, state="replaced"))
         self.execute_module(changed=False)

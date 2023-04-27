@@ -227,12 +227,12 @@ class Premark_dscps(ConfigBase):
                 if c_val == w_val and c_val != h_val:
                     cos_new_cmd = f" new-cos {w_val}"
                 elif not w_val and h_val != 0:
-                    cos_new_cmd = f" new-cos 0"
+                    cos_new_cmd = " new-cos 0"
             elif c_item == 'class_new':
                 if w_val:
                     class_new_cmd = f" new-bandwidth-class {w_val}"
                 elif not w_val and h_val != 'green':
-                    class_new_cmd = f" new-bandwidth-class green"
+                    class_new_cmd = " new-bandwidth-class green"
 
         # generate a command if a sub-command has generated
         if (dscp_new_cmd or cos_new_cmd or class_new_cmd):

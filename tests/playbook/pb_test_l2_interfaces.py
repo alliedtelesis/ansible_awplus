@@ -281,14 +281,6 @@ def test_replace_12():
     assert run_a_test('replace_12')
 
 
-def test_replace_11():
-    assert run_a_test('replace_11')
-
-
-def test_replace_12():
-    assert run_a_test('replace_12')
-
-
 def test_replace_13():
     assert run_a_test('replace_13')
 

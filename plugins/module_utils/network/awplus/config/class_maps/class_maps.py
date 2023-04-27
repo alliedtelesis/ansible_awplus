@@ -21,8 +21,6 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.facts import Facts
 
-import re
-
 
 class Class_maps(ConfigBase):
     """
@@ -218,7 +216,7 @@ class Class_maps(ConfigBase):
         """
         valid_ranges = {'cos': {'lower': 0, 'upper': 7}, 'dscp': {'lower': 0, 'upper': 63},
                         'inner_cos': {'lower': 0, 'upper': 7}, 'inner_vlan': {'lower': 1, 'upper': 4094},
-                        'inner_vlan': {'lower': 1, 'upper': 4094}, 'ip_precedence': {'lower': 0, 'upper': 7}
+                        'vlan': {'lower': 1, 'upper': 4094}, 'ip_precedence': {'lower': 0, 'upper': 7}
                         }
 
         item = valid_ranges.get(name)
@@ -333,7 +331,7 @@ class Class_maps(ConfigBase):
                         if cmd_str not in cmd:
                             cmd.append(cmd_str)
                 elif w_item is None:
-                    cmd.append(f"no match eth-format protocol")
+                    cmd.append("no match eth-format protocol")
 
             elif item == "tcp_flags":
                 add_flag = ''

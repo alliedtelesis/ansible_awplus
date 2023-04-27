@@ -314,8 +314,8 @@ def _do_replace(name, want_dict, have_dict, module, connection):
             p_cmd.append(f'switchport access vlan {w_vlan[0]}')
 
     # Set VLAN in trunk mode
-    if (w_native_vlan_flag and (not h_native_vlan_flag or h_native_vlan != w_native_vlan)) or (w_native_vlan is None and
-                                                                                               h_native_vlan not in (0, 1, None)):
+    if ((w_native_vlan_flag and (not h_native_vlan_flag or h_native_vlan != w_native_vlan))
+            or (w_native_vlan is None and h_native_vlan not in (0, 1, None))):
         if w_native_vlan != 0:
             w_native_vlan = check_vlan_conf(connection, [w_native_vlan])
         else:
