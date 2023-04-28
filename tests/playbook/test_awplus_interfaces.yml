@@ -1,0 +1,354 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags:
+        - test_init
+      awplus_interfaces:
+        config:
+          - name: port1.6.6
+            description: test description
+            enabled: true
+            speed: 1000
+            duplex: full
+          - name: vlan1
+            description: another test description
+            enabled: false
+            mtu: 100
+        state: overridden
+
+    - name: Merged test - merge empty config
+      tags:
+        - m_1
+      awplus_interfaces:
+        config:
+        state: merged
+
+    - name: Merged test - merge new switchport config
+      tags:
+        - m_2
+      awplus_interfaces:
+        config:
+          - name: port1.6.1
+            description: something new
+            enabled: false
+            speed: 10000
+            duplex: full
+        state: merged
+
+    - name: Merged test - merge new vlan config
+      tags:
+        - m_3
+      awplus_interfaces:
+        config:
+          - name: vlan2
+            description: something new
+            enabled: true
+            mtu: 1000
+        state: merged
+
+    - name: Merged test - merge existing switchport config
+      tags:
+        - m_4
+      awplus_interfaces:
+        config:
+          - name: port1.6.6
+            description: something different
+            enabled: false
+            speed: 10000
+            duplex: auto
+        state: merged
+
+    - name: Merged test - merge existing vlan config
+      tags:
+        - m_5
+      awplus_interfaces:
+        config:
+          - name: vlan1
+            description: something different
+            enabled: false
+            mtu: 1000
+        state: merged
+
+    - name: Merged test - idempotency test
+      tags:
+        - m_6
+      awplus_interfaces:
+        config:
+          - name: port1.6.6
+            description: test description
+            enabled: true
+            speed: 1000
+            duplex: full
+          - name: vlan1
+            description: another test description
+            enabled: false
+            mtu: 100
+        state: merged
+
+    - name: Merged test - shutdown -> no shutdown
+      tags:
+        - m_7
+      awplus_interfaces:
+        config:
+          - name: vlan1
+            enabled: true
+        state: merged
+
+    - name: Merged test - no shutdown -> shutdown
+      tags:
+        - m_8
+      awplus_interfaces:
+        config:
+          - name: port1.6.6
+            enabled: false
+        state: merged
+
+    - name: Merged test - out of range test 1
+      tags:
+        - m_9
+      awplus_interfaces:
+        config:
+          - name: vlan1
+            mtu: 10000
+        state: merged
+
+    - name: Merged test - out of range test 2
+      tags:
+        - m_10
+      awplus_interfaces:
+        config:
+          - name: vlan1
+            mtu: -1
+        state: merged
+
+    - name: Merged test - out of range test 3
+      tags:
+        - m_11
+      awplus_interfaces:
+        config:
+          - name: port1.6.6
+            speed: 1000000
+        state: merged
+
+    - name: Merged test - out of range test 4
+      tags:
+        - m_12
+      awplus_interfaces:
+        config:
+          - name: port1.6.6
+            speed: 1
+        state: merged
+
+    - name: Merged test - out of range test 5
+      tags:
+        - m_13
+      awplus_interfaces:
+        config:
+          - name: port1.6.6
+            speed: 1
+        state: merged
+
+    - name: Merged test - merge incompatible config 1
+      tags:
+        - m_14
+      awplus_interfaces:
+        config:
+          - name: port1.6.6
+            mtu: 1000
+        state: merged
+
+    - name: Merged test - merge incompatible config 2
+      tags:
+        - m_15
+      awplus_interfaces:
+        config:
+          - name: vlan1
+            speed: 10000
+        state: merged
+
+    - name: Merged test - merge incompatible config 3
+      tags:
+        - m_16
+      awplus_interfaces:
+        config:
+          - name: vlan1
+            duplex: full
+        state: merged
+
+    - name: Replaced test - replace empty config
+      tags:
+        - r_1
+      awplus_interfaces:
+        config:
+        state: replaced
+
+    - name: Replaced test - replace nothing with new config
+      tags:
+        - r_2
+      awplus_interfaces:
+        config:
+          - name: port1.6.5
+            description: new description
+            enabled: true
+            speed: 10000
+            duplex: full
+        state: replaced
+
+    - name: Replaced test - replace existing config
+      tags:
+        - r_3
+      awplus_interfaces:
+        config:
+          - name: vlan1
+            enabled: true
+            mtu: 1105
+        state: replaced
+
+    - name: Replaced test - remove config with replaced
+      tags:
+        - r_4
+      awplus_interfaces:
+        config:
+          - name: vlan1
+        state: replaced
+
+    - name: Replaced test - provide config with non-existing name
+      tags:
+        - r_5
+      awplus_interfaces:
+        config:
+          - name: not-a-valid-name
+        state: replaced
+
+    - name: Replaced test - idempotency test
+      tags:
+        - r_6
+      awplus_interfaces:
+        config:
+          - name: port1.6.6
+            description: test description
+            enabled: true
+            speed: 1000
+            duplex: full
+          - name: vlan1
+            description: another test description
+            enabled: false
+            mtu: 100
+        state: replaced
+
+    - name: Overidden test - override empty config
+      tags:
+        - o_1
+      awplus_interfaces:
+        config:
+        state: overridden
+
+    - name: Overidden test - override with new configs
+      tags:
+        - o_2
+      awplus_interfaces:
+        config:
+          - name: port1.6.7
+            description: new test description
+            enabled: true
+            speed: 1000
+            duplex: auto
+          - name: vlan2
+            description: new test description
+            enabled: false
+            mtu: 100
+        state: overridden
+
+    - name: Overidden test - override exisitng config
+      tags:
+        - o_3
+      awplus_interfaces:
+        config:
+          - name: port1.6.6
+            description: new test description
+            enabled: false
+            duplex: auto
+        state: overridden
+
+    - name: Overidden test - override using non-existing name
+      tags:
+        - o_4
+      awplus_interfaces:
+        config:
+          - name: not-a-valid-name
+            description: something descriptive
+        state: overridden
+
+    - name: Overriden test - idempotency test
+      tags:
+        - o_5
+      awplus_interfaces:
+        config:
+          - name: port1.6.6
+            description: test description
+            enabled: true
+            speed: 1000
+            duplex: full
+          - name: vlan1
+            description: another test description
+            enabled: false
+            mtu: 100
+        state: overridden
+
+    - name: Deleted test - delete empty test
+      tags:
+        - d_1
+      awplus_interfaces:
+        config:
+        state: deleted
+
+    - name: Deleted test - delete configs using name
+      tags:
+        - d_2
+      awplus_interfaces:
+        config:
+          - name: port1.6.6
+          - name: vlan1
+        state: deleted
+
+    - name: Deleted test - delete config in empty interface
+      tags:
+        - d_3
+      awplus_interfaces:
+        config:
+          - name: port1.6.5
+        state: deleted
+
+    - name: Deleted test - delete config in non-existing interface
+      tags:
+        - d_4
+      awplus_interfaces:
+        config:
+          - name: not-a-valid-name
+        state: deleted
+
+    - name: Deleted test - delete items in switchport interface
+      tags:
+        - d_5
+      awplus_interfaces:
+        config:
+          - name: port1.6.6
+            duplex: full
+            speed: 1000
+            enabled: true
+        state: deleted
+
+    - name: Deleted test - delete items in vlan interface
+      tags:
+        - d_6
+      awplus_interfaces:
+        config:
+          - name: vlan1
+            mtu: 100
+            description: "another test description"
+            enabled: true
+        state: deleted
