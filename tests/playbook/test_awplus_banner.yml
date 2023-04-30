@@ -1,0 +1,127 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags: test_init
+      awplus_banner:
+        config:
+          - banner: motd
+            text: test123
+        state: replaced
+
+    - name: Replaced test - replace empty config 1
+      tags: r_1
+      awplus_banner:
+        config:
+        state: replaced
+
+    - name: Replaced test - add new banner with replaced
+      tags: r_2
+      awplus_banner:
+        config:
+          - banner: motd
+            text: test123
+          - banner: exec
+            text: test456
+        state: replaced
+
+    - name: Replaced test - replace existing config
+      tags: r_3
+      awplus_banner:
+        config:
+          - banner: exec
+            text: something new
+          - banner: motd
+            text: something else
+        state: replaced
+
+    - name: Replaced test - idempotency test
+      tags: r_4
+      awplus_banner:
+        config:
+          - banner: motd
+            text: test123
+        state: replaced
+
+    - name: Replaced test - change banner type
+      tags: r_5
+      awplus_banner:
+        config:
+          - banner: exec
+            text: test123
+        state: replaced
+
+    - name: Merged test - merge empty config
+      tags: m_1
+      awplus_banner:
+        config:
+        state: merged
+
+    - name: Merged test - merge new config
+      tags: m_2
+      awplus_banner:
+        config:
+          - banner: exec
+            text: awplus
+        state: merged
+
+    - name: Merged test - merge to existing config
+      tags: m_3
+      awplus_banner:
+        config:
+          - banner: motd
+            text: awplus
+        state: merged
+
+    - name: Replaced test - supply insuffiecient config 1
+      tags: m_4
+      awplus_banner:
+        config:
+          - banner: motd
+        state: merged
+
+    - name: Replaced test - supply insuffiecient config 2
+      tags: m_5
+      awplus_banner:
+        config:
+          - text: test
+        state: merged
+
+    - name: Merged test - idempotency test
+      tags: m_6
+      awplus_banner:
+        config:
+          - banner: motd
+            text: test123
+        state: merged
+
+    - name: Deleted test - delete empty config
+      tags: d_1
+      awplus_banner:
+        config:
+        state: deleted
+
+    - name: Deleted test - delete config using banner type only
+      tags: d_2
+      awplus_banner:
+        config:
+          - banner: motd
+        state: deleted
+
+    - name: Deleted test - delete config using text only
+      tags: d_3
+      awplus_banner:
+        config:
+          - text: test123
+        state: deleted
+
+    - name: Deleted test - delete config using same config
+      tags: d_4
+      awplus_banner:
+        config:
+          - banner: motd
+            text: test123
+        state: deleted
