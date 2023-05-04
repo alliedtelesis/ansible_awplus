@@ -36,6 +36,9 @@ class Static_routeFacts(object):
 
         self.generated_spec = utils.generate_dict(facts_argument_spec)
 
+    def get_static_route_conf(self, connection):
+        return connection.get("show running-config | include route")
+
     def populate_facts(self, connection, ansible_facts, data=None):
         """ Populate the facts for static_route
         :param connection: the device connection
@@ -51,21 +54,9 @@ class Static_routeFacts(object):
             # typically data is populated from the current device configuration
             # data = connection.get('show running-config | section ^interface')
             # using mock data instead
-            data = ("resource rsrc_a\n"
-                    "  a_bool true\n"
-                    "  a_string choice_a\n"
-                    "  resource here\n"
-                    "resource rscrc_b\n"
-                    "  key is property01 value is value end\n"
-                    "  an_int 10\n")
+            data = self.get_static_route_conf(connection)
 
-        # split the config into instances of the resource
-        resource_delim = 'resource'
-        find_pattern = r'(?:^|\n)%s.*?(?=(?:^|\n)%s|$)' % (resource_delim,
-                                                           resource_delim)
-        resources = [p.strip() for p in re.findall(find_pattern,
-                                                   data,
-                                                   re.DOTALL)]
+        resources = re.findall(r'(ip|ipv6) route (.+)', data)
 
         objs = []
         for resource in resources:
@@ -94,24 +85,52 @@ class Static_routeFacts(object):
         :returns: The generated config
         """
         config = deepcopy(spec)
-        config['name'] = utils.parse_conf_arg(conf, 'resource')
-        config['some_string'] = utils.parse_conf_arg(conf, 'a_string')
+        index = 0
 
-        match = re.match(r'.*key is property01 (\S+)',
-                         conf, re.MULTILINE | re.DOTALL)
+        config['afi'] = 'IPv6' if conf[0] == 'ipv6' else 'IPv4'
+
+        # All valid patterns to match input against
+        patterns = [
+            ('SADR', r'(\S+) (\S+) (\S+) (\d+) description (.+)'),
+            ('SADR', r'(\S+) (\S+) (\S+) (\d+)'),
+            ('VRF', r'vrf (\S+) (\S+) (\S+) (\d+) description (.+)'),
+            ('VRF', r'vrf (\S+) (\S+) (\S+) (\d+)'),
+            ('VRF', r'vrf (\S+) (\S+) (\S+) description (.+)'),
+            ('VRF', r'vrf (\S+) (\S+) (\S+)'),
+            ('DEFAULT', r'(\S+) (\S+) (\d+) description (.+)'),
+            ('SADR', r'(\S+) (\S+) (\S+) description (.+)'),
+            ('DEFAULT', r'(\S+) (\S+) (\d+)'),
+            ('DEFAULT', r'(\S+) (\S+) description (.+)'),
+            ('SADR', r'(\S+) (\S+) (\S+)'),
+            ('DEFAULT', r'(\S+) (\S+)'),
+        ]
+
+        # iterate through the patterns to find a match
+        for pattern in patterns:
+            match = re.findall(pattern[1], conf[1])
+            if match:
+                matched_type = pattern[0]
+                break
+
         if match:
-            config['some_dict']['property_01'] = match.groups()[0]
+            items = match[0]
+            if re.search(r'vrf', conf[1]):
+                config['vrf'] = items[0]
+                index = 1
 
-        a_bool = utils.parse_conf_arg(conf, 'a_bool')
-        if a_bool == 'true':
-            config['some_bool'] = True
-        elif a_bool == 'false':
-            config['some_bool'] = False
-        else:
-            config['some_bool'] = None
+            config['address'] = items[0 + index]
+            config['next_hop'] = items[1 + index] if matched_type != 'SADR' else items[2]
+            config['next_hop'] = config['next_hop'].replace("null", "NULL")
+            if config['afi'] == 'IPv6':
+                config['source_address'] = items[1] if matched_type == 'SADR' else None
 
-        try:
-            config['some_int'] = int(utils.parse_conf_arg(conf, 'an_int'))
-        except TypeError:
-            config['some_int'] = None
+            if matched_type == 'SADR':
+                index = 1
+
+            if len(items) > 2 + index:
+                if items[2 + index].isnumeric():
+                    config['admin_distance'] = items[2 + index]
+                if not items[-1].isnumeric():
+                    config['description'] = items[-1]
+
         return utils.remove_empties(config)
