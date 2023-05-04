@@ -36,6 +36,7 @@ class FactsArgs(object):  # pylint: disable=R0903
         'policy_interfaces',
         'policy_maps',
         'premark_dscps',
+        'static_route',
         'static_lag_interfaces',
         'user',
         'vlans',
