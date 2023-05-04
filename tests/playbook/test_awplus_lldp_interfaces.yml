@@ -1,0 +1,487 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags: test_init
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+            med_tlv_select:
+              capabilities: true
+              inventory_management: true
+              location: true
+              network_policy: false
+              power_management_ext: False
+
+          - name: port1.6.3
+            tlv_select:
+              link_aggregation: true
+              mac_phy_config: true
+              management_address: true
+              max_frame_size: true
+              port_and_protocol_vlans: true
+              port_description: true
+              port_vlan: false
+              power_management: false
+              protocol_ids: false
+              system_capabilities: false
+              system_description: false
+              system_name: false
+              vlan_names: false
+
+          - name: port1.6.4
+            receive: true
+            transmit: false
+        state: overridden
+
+    - name: Replaced test - replace empty config
+      tags: r_1
+      awplus_lldp_interfaces:
+        config:
+        state: replaced
+
+    - name: Replaced test - replace port using med tlv config with med tlv config
+      tags: r_2
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+            med_tlv_select:
+              inventory_management: false
+              power_management_ext: true
+        state: replaced
+
+    - name: Replaced test - replace port using tlv config with tlv config
+      tags: r_3
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.3
+            tlv_select:
+              link_aggregation: false
+              port_and_protocol_vlans: false
+              port_description: true
+              system_capabilities: true
+              vlan_names: true
+        state: replaced
+
+    - name: Replaced test - replace port using lldp ads config
+      tags: r_4
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.4
+            receive: false
+            transmit: true
+        state: replaced
+
+    - name: Replaced test - med tlv -> tlv
+      tags: r_5
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+            tlv_select:
+              link_aggregation: false
+              power_management: true
+              protocol_ids: true
+              vlan_names: true
+        state: replaced
+
+    - name: Replaced test - tlv -> med tlv
+      tags: r_6
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.3
+            med_tlv_select:
+              capabilities: true
+              inventory_management: true
+              power_management_ext: true
+              network_policy: false
+        state: replaced
+
+    - name: Replaced test - tlv -> lldp ads
+      tags: r_7
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.3
+            receive: true
+            transmit: false
+        state: replaced
+
+    - name: Replaced test - med tlv -> lldp ads
+      tags: r_8
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+            receive: false
+            transmit: false
+        state: replaced
+
+    - name: Replaced test - lldp ads -> med tlv
+      tags: r_9
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.4
+            med_tlv_select:
+              inventory_management: true
+              power_management_ext: false
+        state: replaced
+
+    - name: Replaced test - lldp ads -> tlv
+      tags: r_10
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.4
+            tlv_select:
+              system_capabilities: true
+              port_and_protocol_vlans: false
+              port_vlan: false
+              port_description: true
+        state: replaced
+
+    - name: Replaced test - replace with config using all options
+      tags: r_11
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.4
+            receive: false
+            transmit: true
+            med_tlv_select:
+              inventory_management: true
+              capabilities: true
+              power_management_ext: true
+            tlv_select:
+              system_capabilities: false
+              vlan_names: true
+              system_description: true
+              protocol_ids: false
+        state: replaced
+
+    - name: Replaced test - perform replaced on multiple interfaces
+      tags: r_12
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+            med_tlv_select:
+              location: false
+              network_policy: true
+          - name: port1.6.3
+            tlv_select:
+              system_capabilities: false
+              port_and_protocol_vlans: true
+              vlan_names: true
+          - name: port1.6.4
+            transmit: true
+            receive: true
+        state: replaced
+
+    - name: Replaced test - idempotency test
+      tags: r_13
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+            med_tlv_select:
+              capabilities: true
+              inventory_management: true
+              location: true
+              network_policy: false
+              power_management_ext: False
+
+          - name: port1.6.3
+            tlv_select:
+              link_aggregation: true
+              mac_phy_config: true
+              management_address: true
+              max_frame_size: true
+              port_and_protocol_vlans: true
+              port_description: true
+              port_vlan: false
+              power_management: false
+              protocol_ids: false
+              system_capabilities: false
+              system_description: false
+              system_name: false
+              vlan_names: false
+          - name: port1.6.4
+            receive: true
+            transmit: false
+        state: replaced
+
+    - name: Merged test - replace empty config
+      tags: m_1
+      awplus_lldp_interfaces:
+        config:
+        state: merged
+
+    - name: Merged test - merge port using med tlv config with med tlv config
+      tags: m_2
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+            med_tlv_select:
+              inventory_management: false
+              power_management_ext: true
+        state: merged
+
+    - name: Merged test - merge port using tlv config with tlv config
+      tags: m_3
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.3
+            tlv_select:
+              link_aggregation: false
+              port_and_protocol_vlans: false
+              port_description: true
+              system_capabilities: true
+              vlan_names: true
+        state: merged
+
+    - name: Merged test - merge port using lldp ads config
+      tags: m_4
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.4
+            receive: false
+            transmit: true
+        state: merged
+
+    - name: Merged test - merge med tlv config to interface with tlv config
+      tags: m_5
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+            tlv_select:
+              link_aggregation: false
+              power_management: true
+              protocol_ids: true
+              vlan_names: true
+        state: merged
+
+    - name: Merged test - merge tlv config to interface with med tlv config
+      tags: m_6
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.3
+            med_tlv_select:
+              capabilities: true
+              inventory_management: true
+              power_management_ext: true
+              network_policy: false
+        state: merged
+
+    - name: Merged test - merge tlv config to interface with lldp ads config
+      tags: m_7
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.3
+            receive: true
+            transmit: false
+        state: merged
+
+    - name: Merged test - merge med tlv config to interface with lldp ads config
+      tags: m_8
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+            receive: false
+            transmit: false
+        state: merged
+
+    - name: Merged test - merge lldp ads config to interface with med tlv config
+      tags: m_9
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.4
+            med_tlv_select:
+              inventory_management: true
+              power_management_ext: false
+        state: merged
+
+    - name: Merged test - merge lldp ads config to interface with tlv config
+      tags: m_10
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.4
+            tlv_select:
+              system_capabilities: true
+              port_and_protocol_vlans: false
+              port_vlan: false
+              port_description: true
+        state: merged
+
+    - name: Merged test - merge config using all options
+      tags: m_11
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.4
+            receive: false
+            transmit: true
+            med_tlv_select:
+              inventory_management: true
+              capabilities: false
+              power_management_ext: false
+            tlv_select:
+              system_capabilities: false
+              vlan_names: true
+              system_description: true
+              protocol_ids: false
+        state: merged
+
+    - name: Merged test - perform merged on multiple interfaces
+      tags: m_12
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+            med_tlv_select:
+              location: false
+              network_policy: true
+          - name: port1.6.3
+            tlv_select:
+              system_capabilities: false
+              port_and_protocol_vlans: true
+              vlan_names: true
+          - name: port1.6.4
+            transmit: true
+            receive: true
+        state: merged
+
+    - name: Merged test - idempotency test
+      tags: m_13
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+            med_tlv_select:
+              capabilities: true
+              inventory_management: true
+              location: true
+              network_policy: false
+              power_management_ext: False
+
+          - name: port1.6.3
+            tlv_select:
+              link_aggregation: true
+              mac_phy_config: true
+              management_address: true
+              max_frame_size: true
+              port_and_protocol_vlans: true
+              port_description: true
+              port_vlan: false
+              power_management: false
+              protocol_ids: false
+              system_capabilities: false
+              system_description: false
+              system_name: false
+              vlan_names: false
+
+          - name: port1.6.4
+            receive: true
+            transmit: false
+        state: merged
+
+    - name: Deleted test - delete empty config
+      tags: d_1
+      awplus_lldp_interfaces:
+        config:
+        state: deleted
+
+    - name: Deleted test - delete port with no config using name
+      tags: d_2
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.5
+        state: deleted
+
+    - name: Deleted test - delete port with med tlv config using name
+      tags: d_3
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+        state: deleted
+
+    - name: Deleted test - delete port with tlv config using name
+      tags: d_4
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.3
+        state: deleted
+
+    - name: Deleted test - delete port with lldp ads config using name
+      tags: d_5
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.4
+        state: deleted
+
+    - name: Deleted test - delete items in med tlv config
+      tags: d_6
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+            med_tlv_select:
+              location: true
+              inventory_management: false
+              network_policy: false
+        state: deleted
+
+    - name: Deleted test - delete items in tlv config
+      tags: d_7
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.3
+            tlv_select:
+              link_aggregation: true
+              mac_phy_config: true
+        state: deleted
+
+    - name: Deleted test - delete multiple configs
+      tags: d_8
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+          - name: port1.6.3
+        state: deleted
+
+    - name: Overidden test - override empty config
+      tags: o_1
+      awplus_lldp_interfaces:
+        config:
+        state: overridden
+
+    - name: Overidden test - override existing med tlv, tlv, and lldp ads config
+      tags: o_2
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.2
+            med_tlv_select:
+              location: true
+              inventory_management: true
+              network_policy: false
+          - name: port1.6.3
+            tlv_select:
+              link_aggregation: false
+              mac_phy_config: false
+              system_capabilities: true
+              vlan_names: false
+          - name: port1.6.4
+            transmit: true
+        state: overridden
+
+    - name: Overidden test - override new interfaces with med tlv, tlv, and lldp ads config
+      tags: o_3
+      awplus_lldp_interfaces:
+        config:
+          - name: port1.6.7
+            med_tlv_select:
+              location: true
+              inventory_management: true
+              network_policy: false
+          - name: port1.6.8
+            tlv_select:
+              link_aggregation: false
+              mac_phy_config: false
+              system_capabilities: true
+              vlan_names: false
+          - name: port1.6.9
+            transmit: true
+            receive: false
+        state: overridden

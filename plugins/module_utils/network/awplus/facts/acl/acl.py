@@ -161,16 +161,29 @@ class AclFacts(object):
 
             if re.search(r'icmp-type', line):
                 # handles icmp acls
-                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) icmp-type (\d+)', line)
+                acl_match = re.findall(
+                    r'(\d+) (permit|deny|copy-to-cpu|copy-to-mirror|send-to-mirror|send-to-cpu) '
+                    r'(\S+) (\S+) (\S+) icmp-type (\d+)', line
+                )
             elif re.search(r'(any)', line):
                 # if destination is any
-                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+)', line)
+                acl_match = re.findall(
+                    r'(\d+) (permit|deny|copy-to-cpu|copy-to-mirror|send-to-mirror|send-to-cpu) '
+                    r'(\S+) (\S+) (\S+) (\S+)', line
+                )
+
             else:
                 # if destination has address and wild card mask
-                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+) (\S+) (\S+)', line)
+                acl_match = re.findall(
+                    r'(\d+) (permit|deny|copy-to-cpu|copy-to-mirror|send-to-mirror|send-to-cpu) '
+                    r'(\S+) (\S+) (\S+) (\S+) (\S+)', line
+                )
             if not acl_match:
                 # if the address prefix is used for addresses
-                acl_match = re.findall(r'(\d+) (permit|deny) (\S+) (\S+) (\S+)', line)
+                acl_match = re.findall(
+                    r'(\d+) (permit|deny|copy-to-cpu|copy-to-mirror|send-to-mirror|send-to-cpu) '
+                    r'(\S+) (\S+) (\S+)', line
+                )
 
             if acl_match:
                 # assign parameters
@@ -239,9 +252,16 @@ class AclFacts(object):
             if re.search(r'access list', item):
                 acls_names.append(item)
 
-        for count, item in enumerate(acl_list):
+        temp_acl_list = acl_list
+        for count, item in enumerate(temp_acl_list):
             for acl_name in acls_names:
-                if re.search(item[0], acl_name):
+                acl_name_match = re.search(r'(\S+) (IP|IPv6) access list (\d+|\S+)', acl_name)
+
+                item_name_match = re.search(r'(IP|IPv6) access list (\d+|\S+)', item[0])
+                check_acl_name = acl_name_match.group(3) if acl_name_match else None
+                item_name = item_name_match.group(2) if item_name_match else None
+
+                if check_acl_name == item_name and check_acl_name and item_name:
                     acl_list[count][0] = acl_name
 
         # render each acl

@@ -1,0 +1,280 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags: test_init
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 100
+            timeout: short
+          - name: port1.6.2
+            port_priority: 500
+          - name: port1.6.5
+            port_priority: 1
+            timeout: long
+        state: overridden
+
+    - name: Test setup - create required channel groups
+      tags: create_channel_groups
+      awplus_lag_interfaces:
+        config:
+          - name: 2
+            members:
+              - member: port1.6.1
+                mode: active
+              - member: port1.6.2
+                mode: active
+              - member: port1.6.3
+                mode: active
+              - member: port1.6.4
+                mode: active
+              - member: port1.6.5
+                mode: active
+        state: overridden
+
+    - name: Replaced test - replace empty config
+      tags: r_1
+      awplus_lacp_interfaces:
+        config:
+        state: replaced
+
+    - name: Replaced test - replace nothing with new config
+      tags: r_2
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.3
+            port_priority: 10
+            timeout: long
+        state: replaced
+
+    - name: Replaced test - replace in existing config
+      tags: r_3
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 102
+            timeout: long
+        state: replaced
+
+    - name: Replaced test - replace multiple configs
+      tags: r_4
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 105
+            timeout: long
+          - name: port1.6.2
+            port_priority: 201
+            timeout: short
+        state: replaced
+
+    - name: Replaced test - idempotency test
+      tags: r_5
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 100
+            timeout: short
+          - name: port1.6.2
+            port_priority: 500
+          - name: port1.6.5
+            port_priority: 1
+            timeout: long
+        state: replaced
+
+    - name: Replaced test - remove config with replaced
+      tags: r_6
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+        state: replaced
+
+    - name: Replaced test - remove port_priority with replaced
+      tags: r_7
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            timeout: short
+        state: replaced
+
+    - name: Replaced test - remove timeout with replaced
+      tags: r_8
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 100
+        state: replaced
+
+    - name: Merged test - merge empty config
+      tags: m_1
+      awplus_lacp_interfaces:
+        config:
+        state: merged
+
+    - name: Merged test - merge new config
+      tags: m_2
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.3
+            port_priority: 20
+            timeout: long
+        state: merged
+
+    - name: Merged test - merge to existing conifg
+      tags: m_3
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 20
+            timeout: long
+        state: merged
+
+    - name: Merged test - supply out-of-range item for port_priority
+      tags: m_4
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 1000000000
+            timeout: long
+        state: merged
+
+    - name: Merged test - merge multiple configs
+      tags: m_5
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 20
+            timeout: long
+          - name: port1.6.4
+            port_priority: 80
+            timeout: short
+        state: merged
+
+    - name: Merged test - idempotency test
+      tags: m_6
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 100
+            timeout: short
+          - name: port1.6.2
+            port_priority: 500
+          - name: port1.6.5
+            port_priority: 1
+            timeout: long
+        state: merged
+
+    - name: Merged test - short -> long
+      tags: m_7
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            timeout: long
+        state: merged
+
+    - name: Merged test - long -> short
+      tags: m_8
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.5
+            timeout: short
+        state: merged
+
+    - name: Overidden test - override empty config
+      tags: o_1
+      awplus_lacp_interfaces:
+        config:
+        state: overridden
+
+    - name: Overidden test - override with new config
+      tags: o_2
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.4
+            port_priority: 5000
+            timeout: long
+        state: overridden
+
+    - name: Overidden test - override existing config
+      tags: o_3
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 5000
+            timeout: long
+        state: overridden
+
+    - name: Overridden test - idempotency test
+      tags: o_4
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 100
+            timeout: short
+          - name: port1.6.2
+            port_priority: 500
+          - name: port1.6.5
+            port_priority: 1
+            timeout: long
+        state: overridden
+
+    - name: Overridden test - overwrite multiple configs
+      tags: o_5
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 200
+          - name: port1.6.2
+            port_priority: 500
+          - name: port1.6.3
+            port_priority: 20000
+            timeout: short
+        state: overridden
+
+    - name: deleted test - delete empty config
+      tags: d_1
+      awplus_lacp_interfaces:
+        config:
+        state: deleted
+
+    - name: deleted test - delete config using interface name
+      tags: d_2
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+        state: deleted
+
+    - name: deleted test - delete non-exising config using name
+      tags: d_3
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.4
+        state: deleted
+
+    - name: deleted test - delete port_priority in config
+      tags: d_4
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 100
+        state: deleted
+
+    - name: deleted test - delete timeout in config
+      tags: d_5
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            timeout: short
+        state: deleted
+
+    - name: deleted test - delete incorrectly given item from existing interface
+      tags: d_6
+      awplus_lacp_interfaces:
+        config:
+          - name: port1.6.1
+            port_priority: 10
+        state: deleted

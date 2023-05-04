@@ -1,0 +1,1074 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags: test_init
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              name: '72'
+              acl_type: standard
+
+            - aces:
+              - source_addr: 170.42.45.0 0.0.0.255
+                destination_addr: any
+                action: deny
+                protocols: ip
+
+              - source_addr: 141.143.42.0 0.0.0.255
+                destination_addr: any
+                action: permit
+                protocols: ip
+
+              - source_addr: 181.185.85.0 0.0.0.255
+                destination_addr: any
+                action: permit
+                protocols: ip
+              name: '2001'
+              acl_type: extended
+            - aces:
+              - source_addr: 196.144.88.0 0.0.0.255
+                destination_addr: any
+                destination_port_protocol:
+                action: permit
+                protocols: ip
+              name: '104'
+              acl_type: extended
+
+            - aces:
+              - source_addr: 192.192.92.0/24
+                destination_addr: 197.197.97.0/24
+                action: deny
+                protocols: icmp
+                ICMP_type_number: 8
+              acl_type: hardware
+              name: '3000'
+
+            - aces:
+              - source_addr: 192.192.92.0/24
+                destination_addr: any
+                action: permit
+                protocols: ip
+              - source_addr: 198.192.92.0/24
+                destination_addr: any
+                action: copy-to-cpu
+                protocols: ip
+              acl_type: hardware
+              name: hardware_acl
+
+            - aces:
+              - source_addr: 192.143.87.0/24
+                source_port_protocol:
+                    - lt: 1
+                destination_addr: 192.142.50.0/24
+                destination_port_protocol:
+                  - eq: 50
+                action: deny
+                protocols: tcp
+              - source_addr: 196.143.87.0/24
+                destination_addr: 196.142.50.0/24
+                protocols: icmp
+                action: deny
+                ICMP_type_number: 8
+              name: 'test'
+              acl_type: extended
+            afi: IPv4
+
+          - acls:
+            - aces:
+              - source_addr: 2001:db8::/64
+                destination_addr: 2001:db8::f/64
+                action: deny
+                protocols: icmp
+              name: ipv6_test
+              acl_type: extended
+            - aces:
+              - source_addr: 2001:db8::/64
+                destination_addr: 2001:db8::f/64
+                action: deny
+                protocols: ip
+              name: ipv6_test_hardware
+              acl_type: hardware
+            afi: IPv6
+
+        state: overridden
+
+    - name: Merged test - merge incomplete config 1
+      tags: m_ic_1
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+        state: merged
+
+    - name: Merged test - merge incomplete config 2
+      tags: m_ic_2
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+        state: merged
+
+    - name: Merged test - merge invalid config 1
+      tags: m_iv_1
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0 0.0.0.255
+                destination_addr: any
+                action: permit
+              name: '108'
+              acl_type: extended
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merge invalid config 2
+      tags: m_iv_2
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0 0.0.0.255
+                destination_addr: any
+              name: '108'
+              acl_type: extended
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merge invalid config 3
+      tags: m_iv_3
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - action: permit
+                protocols: ip
+              name: '108'
+              acl_type: extended
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merge invalid config 4
+      tags: m_iv_4
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0 0.0.0.255
+                action: permit
+                protocols: ip
+              name: '108'
+              acl_type: extended
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merge invalid config 5
+      tags: m_iv_5
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0 0.0.0.255
+                destination_addr: any
+                action: permit
+                protocols: ip
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merge invalid config 6
+      tags: m_iv_6
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0 0.0.0.255
+                destination_addr: any
+                action: permit
+                protocols: ip
+              acl_type: extended
+              name: '108'
+        state: merged
+
+    - name: Merged test - merge invalid config 7
+      tags: m_iv_7
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0/24
+                source_port_protocol:
+                  - eq: 10
+                destination_addr: any
+                destination_port_protocol:
+                  - lt: 3
+                action: deny
+                protocols: tcp
+                ace_ID: 4
+              acl_type: extended
+              name: '2001'
+            afi: IPv4
+
+    - name: Merged test - merge invalid config 8
+      tags: m_iv_8
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0/24
+                source_port_protocol:
+                  - eq: 10
+                destination_addr: any
+                destination_port_protocol:
+                  - lt: 3
+                action: deny
+                protocols: tcp
+                ace_ID: 4
+              acl_type: standard
+              name: 'tcp_test'
+            afi: IPv4
+
+    - name: Merged test - merge empty config
+      tags: m_1
+      alliedtelesis.awplus.awplus_acl:
+        config:
+        state: merged
+
+    - name: Merged test - modifying existing ace
+      tags: m_2
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 196.146.88.0 0.0.0.255
+                destination_addr: any
+                action: permit
+                protocols: ip
+                ace_ID: 4
+              acl_type: extended
+              name: '104'
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - adding new acl
+      tags: m_3
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 196.144.88.0/24
+                source_port_protocol:
+                  - ne: 3
+                destination_addr: any
+                destination_port_protocol:
+                  - eq: 54
+                action: permit
+                protocols: tcp
+                ace_ID: 8
+              acl_type: extended
+              name: 'test2'
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merging multiple aces
+      tags: m_4
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 171.42.45.0 0.0.0.255
+                destination_addr: any
+                action: deny
+                protocols: ip
+                ace_ID: 4
+
+              - source_addr: 141.143.42.0 0.0.0.255
+                destination_addr: any
+                action: permit
+                protocols: ip
+                ace_ID: 8
+
+              - source_addr: 181.185.85.0 0.0.0.255
+                destination_addr: any
+                action: permit
+                protocols: ip
+                ace_ID: 12
+
+              acl_type: extended
+              name: '104'
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merging multiple acls
+      tags: m_5
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: any
+                destination_addr: any
+                action: deny
+                protocols: ip
+                ace_ID: 4
+              acl_type: extended
+              name: '104'
+            - aces:
+              - source_addr: 199.199.99.0 0.0.0.255
+                destination_addr: 179.179.79.0 0.0.0.255
+                action: permit
+                protocols: ip
+                ace_ID: 4
+              name: '166'
+              acl_type: extended
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merging multiple acls with differant afi's
+      tags: m_6
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 171.42.45.0 0.0.0.255
+                action: deny
+                ace_ID: 4
+              name: '67'
+              acl_type: standard
+            - aces:
+              - source_addr: 199.199.99.0 0.0.0.255
+                destination_addr: 179.179.79.0 0.0.0.255
+                action: permit
+                protocols: ip
+              name: '153'
+              acl_type: extended
+            - aces:
+              - source_addr: 199.199.99.0 0.0.0.255
+                destination_addr: 152.152.53.0 0.0.0.255
+                action: permit
+                protocols: ip
+              name: '2006'
+              acl_type: extended
+            afi: IPv4
+          - acls:
+            - aces:
+              - source_addr: 2001:db8::/64
+                destination_addr: 2001:db8::f/60
+                action: permit
+                protocols: icmp
+                ace_ID: 4
+              name: 'ipv6_test'
+              acl_type: extended
+            - aces:
+              - source_addr: 2001:db8::/60
+                destination_addr: 2001:db8::f/66
+                action: deny
+                protocols: icmp
+              name: 'ipv6_test2'
+              acl_type: extended
+            afi: IPv6
+        state: merged
+
+    - name: Merged test - merging new numbered Hardware acl
+      tags: m_7
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: any
+                destination_addr: any
+                action: deny
+                protocols: icmp
+                ICMP_type_number: 8
+              name: '3001'
+              acl_type: hardware
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merging existing numbered Hardware acl
+      tags: m_8
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 171.42.45.0/24
+                destination_addr: any
+                action: deny
+                protocols: icmp
+                ICMP_type_number: 8
+                ace_ID: 4
+              name: '3000'
+              acl_type: hardware
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merging new named Hardware acl
+      tags: m_9
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 175.67.67.0 0.0.0.255
+                destination_addr: any
+                action: deny
+                protocols: icmp
+                ICMP_type_number: 8
+                ace_ID: 4
+              name: 'new_hardware_acl'
+              acl_type: hardware
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merging existing named Hardware aces
+      tags: m_10
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.42.45.0 0.0.0.255
+                destination_addr: any
+                action: deny
+                protocols: ip
+                ace_ID: 4
+
+              - source_addr: 172.42.45.0 0.0.0.255
+                source_port_protocol:
+                  - range:
+                      - start: 3
+                        end: 4
+                destination_addr: any
+                destination_port_protocol:
+                  - ne: 4
+                action: deny
+                protocols: udp
+                ace_ID: 8
+              name: hardware_acl
+              acl_type: hardware
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merging existing named extended acl
+      tags: m_11
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.143.87.0/24
+                destination_addr: 198.143.87.0/24
+                action: deny
+                protocols: icmp
+                ICMP_type_number: 8
+                ace_ID: 4
+              name: test
+              acl_type: extended
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merge new acl with empty ace
+      tags: m_12
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              name: '77'
+              acl_type: standard
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merge new IPv6 hardware acl
+      tags: m_13
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+                - source_addr: 2001:db8::f/64
+                  destination_addr: 2001:db8::f/64
+                  protocols: ip
+                  action: permit
+              name: 'ipv6_hardware'
+              acl_type: hardware
+            afi: IPv6
+        state: merged
+
+    - name: Merged test - merge config with extra parameters 1
+      tags: m_ep_1
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0/24
+                source_port_protocol:
+                  - eq: 10
+                destination_addr: any
+                destination_port_protocol:
+                  - lt: 3
+                action: permit
+                protocols: ip
+                ace_ID: 4
+              acl_type: hardware
+              name: hardware_acl
+            afi: IPv4
+
+    - name: Merged test - merge config with extra parameters 2
+      tags: m_ep_2
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.143.87.0/24
+                destination_addr: 198.143.87.0/24
+                action: deny
+                protocols: ip
+                ICMP_type_number: 8
+                ace_ID: 4
+              name: test
+              acl_type: extended
+            afi: IPv4
+        state: merged
+
+    - name: Merged test - merge tcp/udp configs 1
+      tags: m_tcp_udp_1
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0/24
+                source_port_protocol:
+                  - range:
+                    - start: 2
+                      end: 10
+                destination_addr: any
+                destination_port_protocol:
+                  - range:
+                      - start: 30
+                        end: 35
+                action: permit
+                protocols: udp
+                ace_ID: 4
+              acl_type: hardware
+              name: hardware_acl
+            afi: IPv4
+
+    - name: Merged test - merge tcp/udp configs 2
+      tags: m_tcp_udp_2
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0/24
+                source_port_protocol:
+                  - eq: 10
+                destination_addr: any
+                destination_port_protocol:
+                  - lt: 3
+                action: permit
+                protocols: udp
+                ace_ID: 4
+              acl_type: hardware
+              name: hardware_acl
+            afi: IPv4
+
+    - name: Merged test - merge valid but incorrect tcp/upd config 1
+      tags: m_vic_1
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.143.87.0/24
+                source_port_protocol:
+                  - ne:
+                destination_addr: 192.142.50.0/24
+                destination_port_protocol:
+                  - eq:
+                action: deny
+                protocols: tcp
+                ace_ID: 4
+              name: 'test'
+              acl_type: extended
+            afi: IPv4
+
+    - name: Merged test - merge valid but incorrect tcp/upd config 2
+      tags: m_vic_2
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.143.87.0/24
+                source_port_protocol:
+                destination_addr: 192.142.50.0/24
+                action: deny
+                protocols: tcp
+                ace_ID: 4
+              name: 'test'
+              acl_type: extended
+            afi: IPv4
+
+    - name: Merged test - merge valid but incorrect tcp/upd config 3
+      tags: m_vic_3
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0/24
+                source_port_protocol:
+                  - range:
+                destination_addr: any
+                action: permit
+                protocols: udp
+                ace_ID: 4
+              acl_type: hardware
+              name: hardware_acl
+            afi: IPv4
+
+    - name: Merged test - merge valid but incorrect tcp/upd config 4
+      tags: m_vic_4
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0/24
+                source_port_protocol:
+                  - range:
+                    - start: 7
+                destination_addr: any
+                destination_port_protocol:
+                  - range:
+                      - start: 6
+                action: permit
+                protocols: udp
+                ace_ID: 4
+              acl_type: hardware
+              name: hardware_acl
+            afi: IPv4
+
+    - name: Merged test - merge valid but incorrect tcp/upd config 5
+      tags: m_vic_5
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0/24
+                source_port_protocol:
+                  - range:
+                    - start:
+                      end:
+                destination_addr: any
+                destination_port_protocol:
+                  - range:
+                      - start:
+                        end:
+                action: permit
+                protocols: udp
+                ace_ID: 4
+              acl_type: hardware
+              name: hardware_acl
+            afi: IPv4
+
+    - name: Merged test - merge valid but incorrect tcp/upd config 6
+      tags: m_vic_6
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: any
+                source_port_protocol:
+                  - range:
+                    - start: 6
+                      end: 7
+                destination_addr: any
+                destination_port_protocol:
+                  - lt: 9
+                action: permit
+                protocols: udp
+                ace_ID: 4
+              acl_type: extended
+              name: test3
+            afi: IPv4
+
+    - name: Replaced test - replace an empty config
+      tags: r_1
+      alliedtelesis.awplus.awplus_acl:
+        config:
+        state: replaced
+
+    - name: Replaced test - replace single ace entry in existing acl
+      tags: r_2
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - action: deny
+                destination_addr: any
+                destination_port_protocol:
+                  - gt: 9
+                protocols: tcp
+                source_addr: 170.42.45.0/24
+                source_port_protocol:
+                  - lt: 9
+                ace_ID: 4
+              name: test
+              acl_type: extended
+            afi: IPv4
+        state: replaced
+
+    - name: Replaced test - replace nothing with new acl
+      tags: r_3
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - action: deny
+                destination_addr: any
+                protocols: ip
+                source_addr: 170.42.45.0 0.0.0.255
+              name: '2005'
+              acl_type: extended
+            afi: IPv4
+        state: replaced
+
+    - name: Replaced test - replace multiple acls
+      tags: r_4
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.182.99.0 0.0.0.255
+                destination_addr: any
+                action: permit
+                protocols: ip
+                ace_ID: 4
+              acl_type: extended
+              name: '2001'
+            - aces:
+              - source_addr: 180.152.66.0 0.0.0.255
+                action: deny
+              acl_type: standard
+              name: '72'
+            afi: IPv4
+        state:  replaced
+
+    - name: Replaced test - replace multiple acls with differant afi's
+      tags: r_5
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.182.99.0 0.0.0.255
+                destination_addr: any
+                action: permit
+                protocols: ip
+                ace_ID: 4
+              acl_type: extended
+              name: '2001'
+            afi: IPv4
+          - acls:
+            - aces:
+              - source_addr: 2090:db8::/64
+                destination_addr: 2001:db8::f/64
+                action: deny
+                protocols: icmp
+              name: 'ipv6_test'
+              acl_type: extended
+            afi: IPv6
+        state:  replaced
+
+    - name: Replaced test - replace numbered hardware acl
+      tags: r_6
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.192.92.0/24
+                source_port_protocol:
+                  - eq: 2
+                destination_addr: any
+                destination_port_protocol:
+                  - lt: 5
+                action: permit
+                protocols: udp
+                # ICMP_type_number: 8
+                ace_ID: 4
+              acl_type: hardware
+              name: '3000'
+            afi: IPv4
+        state:  replaced
+
+    - name: Replaced test - replace ace in named udp hardware acl
+      tags: r_7
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 172.192.92.0/24
+                source_port_protocol:
+                  - range:
+                      - start: 2
+                        end: 5
+                destination_addr: any
+                destination_port_protocol:
+                  - eq: 3
+                action: permit
+                protocols: udp
+                ace_ID: 4
+              acl_type: hardware
+              name: hardware_acl
+            afi: IPv4
+        state:  replaced
+
+    - name: Replaced test - replace ICMP ace in named acl
+      tags: r_8
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 172.192.92.0/24
+                destination_addr: 192.192.92.0/24
+                action: permit
+                protocols: icmp
+                ICMP_type_number: 8
+                ace_ID: 4
+              acl_type: extended
+              name: test
+            afi: IPv4
+        state:  replaced
+
+    - name: Replaced test - replace existing acl with empty ace
+      tags: r_9
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              acl_type: extended
+              name: test
+            afi: IPv4
+        state:  replaced
+
+    - name: Replaced test - replace new acl with empty ace
+      tags: r_10
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              acl_type: extended
+              name: newacltest
+            afi: IPv4
+        state:  replaced
+
+    - name: Replaced test - replace existing with IPv6 hardware acl
+      tags: r_11
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 2001:db8::f/63
+                destination_addr: 2001:db8::f/64
+                protocols: ip
+                action: permit
+              name: 'ipv6_test_hardware'
+              acl_type: hardware
+            afi: IPv6
+        state:  replaced
+
+    - name: Overidden test - overwrite with empty config 1
+      tags: o_ec_1
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            afi: IPv4
+        state:  overridden
+
+    - name: Overidden test - overwrite with empty config 2
+      tags: o_ec_2
+      alliedtelesis.awplus.awplus_acl:
+        config:
+        state:  overridden
+
+    - name: Overidden test - overwrite with empty config 3
+      tags: o_ec_3
+      alliedtelesis.awplus.awplus_acl:
+        state:  overridden
+
+    - name: Overidden test - overwrite existing acl
+      tags: o_1
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.182.99.0 0.0.0.255
+                destination_addr: any
+                action: permit
+                protocols: ip
+              acl_type: extended
+              name: '2001'
+            afi: IPv4
+        state:  overridden
+
+    - name: Overidden test - overwrite with new acl
+      tags: o_2
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.182.99.0 0.0.0.255
+                destination_addr: any
+                action: deny
+                protocols: ip
+              acl_type: extended
+              name: '2010'
+            afi: IPv4
+        state:  overridden
+
+    - name: Overidden test - overwrite acl with missing parameter
+      tags: o_3
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 192.182.99.0/24
+              acl_type: extended
+              name: '2010'
+            afi: IPv4
+        state:  overridden
+
+    - name: Deleted test - delete an empty config
+      tags: d_1
+      alliedtelesis.awplus.awplus_acl:
+        config:
+        state: deleted
+
+    - name: Deleted test - delete an ace of an existing acl
+      tags: d_2
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+                - source_addr: 192.143.87.0/24
+                  source_port_protocol:
+                    - lt: 1
+                  destination_addr: 192.142.50.0/24
+                  destination_port_protocol:
+                    - eq: 50
+                  action: deny
+                  protocols: tcp
+              name: 'test'
+              acl_type: extended
+            afi: IPv4
+        state: deleted
+
+    - name: Deleted test - delete an ace of a non-existing acl
+      tags: d_3
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+                - source_addr: 181.185.85.0 0.0.0.255
+                  destination_addr: any
+                  action: permit
+                  protocols: ip
+              name: '154'
+              acl_type: extended
+            afi: IPv4
+        state: deleted
+
+    - name: Deleted test - delete a numbered hardware acl
+      tags: d_4
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+                - source_addr: 192.192.92.0/24
+                  destination_addr: 197.197.97.0/24
+                  protocols: icmp
+                  ICMP_type_number: 8
+                  action: deny
+              name: '3000'
+              acl_type: hardware
+            afi: IPv4
+        state: deleted
+
+    - name: Deleted test - delete a named hardware acl using name
+      tags: d_5
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              name: 'hardware_acl'
+              acl_type: hardware
+            afi: IPv4
+        state: deleted
+
+    - name: Deleted test - deleting multiple IPv4 and IPv6 aces
+      tags: d_6
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 141.143.42.0 0.0.0.255
+                destination_addr: any
+                action: permit
+                protocols: ip
+              - source_addr: 181.185.85.0 0.0.0.255
+                destination_addr: any
+                action: permit
+                protocols: ip
+              name: '2001'
+              acl_type: extended
+            - aces:
+              name: 'test'
+              acl_type: extended
+            - aces:
+              name: '72'
+              acl_type: standard
+            afi: IPv4
+          - acls:
+            - aces:
+              - source_addr: 2001:db8::/64
+                destination_addr: 2001:db8::f/64
+                action: deny
+                protocols: icmp
+              name: 'ipv6_test'
+              acl_type: extended
+            afi: IPv6
+        state: deleted
+
+    - name: Deleted test - delete an empty acl
+      tags: d_7
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              name: '72'
+              acl_type: standard
+            afi: IPv4
+        state: deleted
+
+    - name: Deleted test - delete an empty acl but provide an ace
+      tags: d_8
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+                - source_addr: any
+                  protocols: ip
+                  action: deny
+              name: '72'
+              acl_type: standard
+            afi: IPv4
+        state: deleted
+
+    - name: Deleted test - delete existing IPv6 hardware acl
+      tags: d_9
+      alliedtelesis.awplus.awplus_acl:
+        config:
+          - acls:
+            - aces:
+              - source_addr: 2001:db8::f/64
+                destination_addr: 2001:db8::f/64
+                protocols: ip
+                action: permit
+              name: 'ipv6_test_hardware'
+              acl_type: hardware
+            afi: IPv6
+        state:  deleted

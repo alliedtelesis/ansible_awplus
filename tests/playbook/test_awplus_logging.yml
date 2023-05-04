@@ -1,0 +1,317 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags: test_init
+      awplus_logging:
+        config:
+          - dest: host
+            name: test_name
+            facility: ftp
+            level: critical
+
+          - dest: external
+            size: 200
+
+          - dest: facility
+            facility: kern
+
+          - dest: console
+            level: alerts
+            facility: ftp
+        state: overridden
+
+    - name: Merged test - merge empty config
+      tags: m_1
+      awplus_logging:
+        config:
+        state: merged
+
+    - name: Merged test - merge monitor config
+      tags: m_2
+      awplus_logging:
+        config:
+          - dest: monitor
+            level: errors
+        state: merged
+
+    - name: Merged test - merge host log config
+      tags: m_3
+      awplus_logging:
+        config:
+          - dest: host
+            level: warnings
+            name: new_log
+            facility: mail
+        state: merged
+
+    - name: Merged test - merge permanent config
+      tags: m_4
+      awplus_logging:
+        config:
+          - dest: permanent
+            level: warnings
+            facility: daemon
+        state: merged
+
+    - name: Merged test - merge external config
+      tags: m_5
+      awplus_logging:
+        config:
+          - dest: external
+            level: warnings
+            name: new_item
+            facility: mail
+        state: merged
+
+    - name: Merged test - invalid value for facility
+      tags: m_6
+      awplus_logging:
+        config:
+          - dest: host
+            level: errors
+            name: test_name
+            facility: something_else
+        state: merged
+
+    - name: Merged test - invalid value for size
+      tags: m_7
+      awplus_logging:
+        config:
+          - dest: permanent
+            size: 260
+        state: merged
+
+    - name: Merged test - invalid config 1
+      tags: m_8
+      awplus_logging:
+        config:
+          - dest: permanent
+            size: 260
+            facility: mail
+            level: errors
+        state: merged
+
+    - name: Merged test - invalid config 2
+      tags: m_9
+      awplus_logging:
+        config:
+          - dest: host
+            level: critical
+        state: merged
+
+    - name: Merged test - invalid config 3
+      tags: m_10
+      awplus_logging:
+        config:
+          - dest: facility
+            size: 60
+        state: merged
+
+    - name: Merged test - invalid config 4
+      tags: m_11
+      awplus_logging:
+        config:
+          - dest: console
+            size: 60
+        state: merged
+
+    - name: Merged test - invalid config 5
+      tags: m_12
+      awplus_logging:
+        config:
+          - dest: facility
+            facility: mail
+            level: critical
+        state: merged
+
+    - name: Merged test - idempotency test
+      tags: m_13
+      awplus_logging:
+        config:
+          - dest: host
+            name: test_name
+            facility: ftp
+            level: critical
+
+          - dest: external
+            size: 200
+
+          - dest: facility
+            facility: kern
+
+          - dest: console
+            level: alerts
+            facility: ftp
+        state: merged
+
+    - name: Replaced test - replace empty config
+      tags: r_1
+      awplus_logging:
+        config:
+        state: replaced
+
+    - name: Replaced test - add new config with replaced
+      tags: r_2
+      awplus_logging:
+        config:
+          - dest: buffered
+            level: emergencies
+            facility: kern
+        state: replaced
+
+    - name: Replaced test - replace an existing external config
+      tags: r_3
+      awplus_logging:
+        config:
+          - dest: external
+            level: emergencies
+            facility: kern
+        state: replaced
+
+    - name: Replaced test - add new host config
+      tags: r_4
+      awplus_logging:
+        config:
+          - dest: host
+            name: new_host_log
+            level: critical
+            facility: daemon
+        state: replaced
+
+    - name: Replaced test - replace existing host config
+      tags: r_5
+      awplus_logging:
+        config:
+          - dest: host
+            name: test_name
+            level: critical
+            facility: daemon
+        state: replaced
+
+    - name: Replaced test - delete host config with replaced
+      tags: r_6
+      awplus_logging:
+        config:
+          - dest: host
+            name: test_name
+        state: replaced
+
+    - name: Replaced test - delete existing config with replaced
+      tags: r_7
+      awplus_logging:
+        config:
+          - dest: console
+        state: replaced
+
+    - name: Replaced test - idempotency test
+      tags: r_8
+      awplus_logging:
+        config:
+          - dest: host
+            name: test_name
+            facility: ftp
+            level: critical
+
+          - dest: external
+            size: 200
+
+          - dest: facility
+            facility: kern
+
+          - dest: console
+            level: alerts
+            facility: ftp
+        state: replaced
+
+    - name: Deleted test - delete empty config
+      tags: d_1
+      awplus_logging:
+        config:
+        state: deleted
+
+    - name: Deleted test - delete config
+      tags: d_2
+      awplus_logging:
+        config:
+          - dest: console
+            facility: ftp
+            level: alerts
+        state: deleted
+
+    - name: Deleted test - delete similar host config
+      tags: d_3
+      awplus_logging:
+        config:
+          - dest: host
+            facility: ftp
+            level: critical
+            name: some_test_name
+        state: deleted
+
+    - name: Deleted test - delete non-existing config
+      tags: d_4
+      awplus_logging:
+        config:
+          - dest: buffered
+            size: 100
+        state: deleted
+
+    - name: Overridden test - override empty config
+      tags: o_1
+      awplus_logging:
+        config:
+        state: overridden
+
+    - name: Overridden test - override with new config
+      tags: o_2
+      awplus_logging:
+        config:
+          - dest: permanent
+            size: 140
+
+          - dest: buffered
+            size: 100
+        state: overridden
+
+    - name: Overridden test - override current configs
+      tags: o_3
+      awplus_logging:
+        config:
+          - dest: facility
+            facility: mail
+
+
+          - dest: host
+            name: test_name
+            level: debugging
+        state: overridden
+# "log facility mail",
+#         "log host test_name level debugging",
+#         "no log facility",
+#         "no log console level alerts facility ftp",
+#         "no log host test_name level critical facility ftp",
+        # "no log external size"
+
+    - name: Overridden test - idempotency test
+      tags: o_4
+      awplus_logging:
+        config:
+          - dest: host
+            name: test_name
+            facility: ftp
+            level: critical
+
+          - dest: external
+            size: 200
+
+          - dest: facility
+            facility: kern
+
+          - dest: console
+            level: alerts
+            facility: ftp
+        state: overridden

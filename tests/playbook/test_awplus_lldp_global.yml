@@ -1,0 +1,156 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags: test_init
+      awplus_lldp_global:
+        config:
+          faststart_count: 5
+          holdtime_multiplier: 6
+          non_strict_med_tlv_order_check: true
+          notification_interval: 200
+          port_number_type: number
+          timer: 50
+          tx_delay: 10
+        state: replaced
+
+    - name: Merged test - merge empty config
+      tags: m_1
+      awplus_lldp_global:
+        config:
+        state: merged
+
+    - name: Merged test - merge and change everything
+      tags: m_2
+      awplus_lldp_global:
+        config:
+          faststart_count: 1
+          holdtime_multiplier: 9
+          non_strict_med_tlv_order_check: false
+          notification_interval: 3000
+          port_number_type: ifindex
+          reinit: 3
+          enabled: true
+          timer: 170
+          tx_delay: 40
+        state: merged
+
+    - name: Merged test - merge invalid value 1
+      tags: m_3
+      awplus_lldp_global:
+        config:
+          faststart_count: 11
+        state: merged
+
+    - name: Merged test - merge invalid value 2
+      tags: m_4
+      awplus_lldp_global:
+        config:
+          holdtime_multiplier: 11
+        state: merged
+
+    - name: Merged test - merge invalid value 3
+      tags: m_5
+      awplus_lldp_global:
+        config:
+          notification_interval: 3601
+        state: merged
+
+    - name: Merged test - merge invalid value 4
+      tags: m_6
+      awplus_lldp_global:
+        config:
+          reinit: 11
+        state: merged
+
+    - name: Merged test - merge invalid value 5
+      tags: m_7
+      awplus_lldp_global:
+        config:
+          timer: 32769
+        state: merged
+
+    - name: Merged test - idempotency test
+      tags: m_8
+      awplus_lldp_global:
+        config:
+          faststart_count: 5
+          holdtime_multiplier: 6
+          non_strict_med_tlv_order_check: true
+          notification_interval: 200
+          port_number_type: number
+          timer: 50
+          tx_delay: 10
+        state: merged
+
+    - name: Replaced test - replace empty config
+      tags: r_1
+      awplus_lldp_global:
+        config:
+        state: replaced
+
+    - name: Replaced test - partial replace of config
+      tags: r_2
+      awplus_lldp_global:
+        config:
+          faststart_count: 2
+          reinit: 1
+          non_strict_med_tlv_order_check: false
+          port_number_type: ifindex
+        state: replaced
+
+    - name: Replaced test - full replace of config
+      tags: r_3
+      awplus_lldp_global:
+        config:
+          faststart_count: 2
+          reinit: 1
+          non_strict_med_tlv_order_check: false
+          port_number_type: ifindex
+          notification_interval: 10
+          holdtime_multiplier: 6
+          enabled: true
+          timer: 340
+          tx_delay: 4
+        state: replaced
+
+    - name: Replaced test - replace timer and tx-delay
+      tags: r_4
+      awplus_lldp_global:
+        config:
+          timer: 34
+          tx_delay: 4
+        state: replaced
+
+    - name: Deleted test - delete empty config
+      tags: d_1
+      awplus_lldp_global:
+        config:
+        state: deleted
+
+    - name: Deleted test - delete some items
+      tags: d_2
+      awplus_lldp_global:
+        config:
+          faststart_count: 5
+          holdtime_multiplier: 6
+          non_strict_med_tlv_order_check: true
+        state: deleted
+
+    - name: Deleted test - delete some items
+      tags: d_3
+      awplus_lldp_global:
+        config:
+          enabled: false
+          faststart_count: 5
+          holdtime_multiplier: 6
+          non_strict_med_tlv_order_check: true
+          notification_interval: 200
+          port_number_type: number
+          reinit: 2
+          timer: 50
+          tx_delay: 10
+        state: deleted

@@ -1,0 +1,262 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: All tests - restore init conditions
+      tags:
+        - test_init
+      awplus_vlans:
+        config:
+          - name: test_vlan_1
+            vlan_id: 50
+            state: active
+          - name: test_vlan_2
+            vlan_id: 100
+            state: suspend
+        state: overridden
+
+    - name: Overidden test - override an empty config
+      tags:
+        - o_1
+      awplus_vlans:
+        config:
+        state: overridden
+
+    - name: Overidden test - add a new vlan via overwrite
+      tags:
+        - o_2
+      awplus_vlans:
+        config:
+          - name: new_test_vlan
+            vlan_id: 500
+            state: active
+        state: overridden
+
+    - name: Overidden test - overwrite an existing vlan
+      tags:
+        - o_3
+      awplus_vlans:
+        config:
+          - name: new_name
+            vlan_id: 50
+            state: suspend
+        state: overridden
+
+    - name: Overidden test - idempotency test
+      tags:
+        - o_4
+      awplus_vlans:
+        config:
+          - name: test_vlan_1
+            vlan_id: 50
+            state: active
+          - name: test_vlan_2
+            vlan_id: 100
+            state: suspend
+        state: overridden
+
+    - name: Overidden test - override multiple vlans
+      tags:
+        - o_5
+      awplus_vlans:
+        config:
+          - name: new_name_1
+            vlan_id: 50
+            state: active
+          - name: new_name_2
+            vlan_id: 1000
+            state: suspend
+        state: overridden
+
+    - name: Merged test - merge empty config
+      tags:
+        - m_1
+      awplus_vlans:
+        config:
+        state: merged
+
+    - name: Merged test - add new vlan
+      tags:
+        - m_2
+      awplus_vlans:
+        config:
+          - name: new_vlan
+            vlan_id: 502
+            state: suspend
+        state: merged
+
+    - name: Merged test - merge existing vlan
+      tags:
+        - m_3
+      awplus_vlans:
+        config:
+          - name: new_name_2
+            vlan_id: 100
+            state: active
+        state: merged
+
+    - name: Merged test - idempotency test
+      tags:
+        - m_4
+      awplus_vlans:
+        config:
+          - name: test_vlan_1
+            vlan_id: 50
+            state: active
+          - name: test_vlan_2
+            vlan_id: 100
+            state: suspend
+        state: merged
+
+    - name: Merged test - merge multiple vlans
+      tags:
+        - m_5
+      awplus_vlans:
+        config:
+          - name: new_name
+            vlan_id: 502
+          - name: new_vlan
+            vlan_id: 1002
+        state: merged
+
+    - name: Merged test - provide name only
+      tags:
+        - m_6
+      awplus_vlans:
+        config:
+          - name: something
+        state: merged
+
+    - name: Merged test - provide vlan_id only
+      tags:
+        - m_7
+      awplus_vlans:
+        config:
+          - vlan_id: 32
+        state: merged
+
+    - name: Merged test - provide out of range vlan_id
+      tags:
+        - m_8
+      awplus_vlans:
+        config:
+          - vlan_id: 20102
+        state: merged
+
+    - name: Merged test - merge new vlan using existing name
+      tags:
+        - m_9
+      awplus_vlans:
+        config:
+          - vlan_id: 102
+            name: test_vlan_1
+            state: active
+        state: merged
+
+    - name: Replaced test - replace empty config
+      tags:
+        - r_1
+      awplus_vlans:
+        config:
+        state: replaced
+
+    - name: Replaced test - add vlan using replaced
+      tags:
+        - r_2
+      awplus_vlans:
+        config:
+          - name: new_vlan
+            vlan_id: 231
+            state: active
+        state: replaced
+
+    - name: Replaced test - completely replace existing vlan
+      tags:
+        - r_3
+      awplus_vlans:
+        config:
+          - name: new_name
+            vlan_id: 50
+            state: suspend
+        state: replaced
+
+    - name: Replaced test - partialy replace existing vlan
+      tags:
+        - r_4
+      awplus_vlans:
+        config:
+          - vlan_id: 50
+            state: suspend
+        state: replaced
+
+    - name: Replaced test - only give vlan_id
+      tags:
+        - r_5
+      awplus_vlans:
+        config:
+          - vlan_id: 50
+        state: replaced
+
+    - name: Replaced test - replace multiple vlans
+      tags:
+        - r_6
+      awplus_vlans:
+        config:
+          - vlan_id: 50
+            name: new_name_2
+          - vlan_id: 101
+            state: active
+        state: replaced
+
+    - name: Deleted test - delete empty config
+      tags:
+        - d_1
+      awplus_vlans:
+        config:
+        state: deleted
+
+    - name: Deleted test - delete vlan using id
+      tags:
+        - d_2
+      awplus_vlans:
+        config:
+          - vlan_id: 50
+        state: deleted
+
+    - name: Deleted test - delete vlan entry
+      tags:
+        - d_3
+      awplus_vlans:
+        config:
+          - vlan_id: 50
+            name: test_vlan_1
+        state: deleted
+
+    - name: Deleted test - delete multiple vlans
+      tags:
+        - d_4
+      awplus_vlans:
+        config:
+          - vlan_id: 50
+          - vlan_id: 100
+            state: suspend
+        state: deleted
+
+    - name: Deleted test - delete from incorrect config
+      tags:
+        - d_5
+      awplus_vlans:
+        config:
+          - vlan_id: 50
+            state: suspend
+        state: deleted
+
+    - name: Deleted test - delete non-existing vlan
+      tags:
+        - d_6
+      awplus_vlans:
+        config:
+          - vlan_id: 2048
+        state: deleted
