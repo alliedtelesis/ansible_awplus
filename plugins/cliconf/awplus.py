@@ -153,6 +153,15 @@ class Cliconf(CliconfBase):
         diff["banner_diff"] = banners if banners else {}
         return diff
 
+    def is_info_message(self, msg):
+        known_info_msgs = (
+            "% This access-list is attached to an interface",
+        )
+        for m in known_info_msgs:
+            if msg.startswith(m):
+                return True
+        return False
+
     @enable_mode
     def edit_config(self, candidate=None, commit=True, replace=None, comment=None):
         resp = {}
@@ -180,7 +189,8 @@ class Cliconf(CliconfBase):
 
         for i in range(len(results)):
             if "%" in results[i] and (i + 1) == len(results) - 1:
-                raise ValueError(results[i])
+                if not self.is_info_message(results[i]):
+                    raise ValueError(results[i])
 
         resp["request"] = requests
         resp["response"] = results
