@@ -33,7 +33,7 @@ jobs:
         with:
           path: ansible_collections/alliedtelesis/awplus
       - name: Install netcommon module
-        run: ansible-galaxy collection install ansible.netcommon -p ${GITHUB_WORKSPACE}
+        run: ansible-galaxy collection install ansible.netcommon --force -p ${GITHUB_WORKSPACE}
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
