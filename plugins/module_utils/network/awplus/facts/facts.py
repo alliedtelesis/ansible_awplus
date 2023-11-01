@@ -31,6 +31,7 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplu
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.policy_interfaces.policy_interfaces import Policy_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.policy_maps.policy_maps import Policy_mapsFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.premark_dscps.premark_dscps import Premark_dscpsFacts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.static_route.static_route import Static_routeFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.static_lag_interfaces.static_lag_interfaces import (
     Static_lag_interfacesFacts,
 )
@@ -66,6 +67,7 @@ FACT_RESOURCE_SUBSETS = dict(
     policy_interfaces=Policy_interfacesFacts,
     policy_maps=Policy_mapsFacts,
     premark_dscps=Premark_dscpsFacts,
+    static_route=Static_routeFacts,
     static_lag_interfaces=Static_lag_interfacesFacts,
     user=UserFacts,
     vlans=VlansFacts,
