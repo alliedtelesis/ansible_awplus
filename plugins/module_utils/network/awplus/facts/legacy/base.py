@@ -183,7 +183,7 @@ class Interfaces(FactsBase):
         lldp_errs = ["Invalid input", "LLDP is not enabled"]
 
         if data and not any(err in data for err in lldp_errs):
-            neighbors = self.run(["show lldp"])
+            neighbors = self.run(["show lldp neighbors detail"])
             if neighbors:
                 self.facts["neighbors"].update(self.parse_neighbors(neighbors[0]))
 
@@ -251,14 +251,13 @@ class Interfaces(FactsBase):
 
     def parse_neighbors(self, neighbors):
         facts = dict()
-        for entry in neighbors.split(
-            "------------------------------------------------"
-        ):
+
+        for entry in neighbors.split("\n\nLocal "):
             if entry == "":
                 continue
             intf = self.parse_lldp_intf(entry)
             if intf is None:
-                return facts
+                continue
             intf = normalize_interface(intf)
             if intf not in facts:
                 facts[intf] = list()
@@ -358,16 +357,16 @@ class Interfaces(FactsBase):
             return match.group(1)
 
     def parse_lldp_intf(self, data):
-        match = re.search(r"^Local Intf: (.+)$", data, re.M)
+        match = re.search(r"^port(.+):$", data, re.M)
         if match:
             return match.group(1)
 
     def parse_lldp_host(self, data):
-        match = re.search(r"System Name: (.+)$", data, re.M)
+        match = re.search(r"System\sName\s\.+\s(.*)$", data, re.M)
         if match:
             return match.group(1)
 
     def parse_lldp_port(self, data):
-        match = re.search(r"Port id: (.+)$", data, re.M)
+        match = re.search(r"Port ID\s\.+\s(.*)$", data, re.M)
         if match:
             return match.group(1)
