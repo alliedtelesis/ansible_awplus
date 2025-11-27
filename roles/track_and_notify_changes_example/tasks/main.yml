@@ -1,0 +1,15 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Remove test user if they already exist
+  awplus_user:
+    name: track_and_notify_changes_example_user
+    configured_password: test
+    state: absent
+
+- name: Add test user
+  awplus_user:
+    name: track_and_notify_changes_example_user
+    configured_password: test
+    state: present
+
+# complete
