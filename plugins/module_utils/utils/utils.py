@@ -270,3 +270,7 @@ def get_sys_info(data):
             else:
                 return {"model": match.group(3), "serialnum": match.group(5)}
     return {"model": "--unknown--", "serialnum": "--unknown--"}
+
+
+def clean_address_string(address):
+    return str(address).translate({ord(x): "" for x in ["[", "]"]})

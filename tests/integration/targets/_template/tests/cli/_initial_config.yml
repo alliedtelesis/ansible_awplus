@@ -1,0 +1,12 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START <module_name> initialise config on connection={{ ansible_connection }}"
+
+- name: Initialise configuration
+  alliedtelesis.awplus.<module_name>:
+    config:
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END <module_name> initialise config on connection={{ ansible_connection }}"

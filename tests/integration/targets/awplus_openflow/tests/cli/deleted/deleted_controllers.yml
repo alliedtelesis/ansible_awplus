@@ -1,0 +1,115 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_openflow deleted integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    dc1_expected:
+      commands:
+        - no openflow controller bob
+      after: 
+        controllers:
+          - address: "192.168.1.100"
+            l4_port: "6654"
+            name: "fred"
+            protocol: "tcp"
+          - address: "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+            l4_port: "6655"
+            name: "dave"
+            protocol: "tcp"
+        datapath_id: "0000000000000123"
+        fail_mode: "secure_nre"
+        inactivity_timer: 20
+        native_vlan: 4090
+        trustpoint: "test"
+        peer_certificate: "bootstrap"
+        ports:
+          - port1.0.1
+    dc2_expected:
+      commands:
+    dc3_expected:
+      commands:
+        - no openflow controller bob
+        - no openflow controller dave
+        - no openflow controller fred
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config_complete.yml"
+
+    - name: Delete existing controller
+      alliedtelesis.awplus.awplus_openflow: &dc1
+        config:
+          controllers:
+            - name: "bob"
+        state: deleted
+      register: result
+    
+    - name: Assert controller deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ dc1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+          - "{{ dc1_expected.after | symmetric_difference(result['after']) | length == 0 }}"
+
+    - name: Delete existing controller (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *dc1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config_complete.yml"
+
+    - name: Delete non-existing controller
+      alliedtelesis.awplus.awplus_openflow: &dc2
+        config:
+          controllers:
+            - name: "joe"
+        state: deleted
+      register: result
+    
+    - name: Assert nothing happens
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - "{{ result['commands'] | length == 0 }}"
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config_complete.yml"
+
+    - name: Delete all controllers
+      alliedtelesis.awplus.awplus_openflow: &dc3
+        config:
+          controllers:
+            - name: "bob"
+            - name: "fred"
+            - name: "dave"
+        state: deleted
+      register: result
+    
+    - name: Assert controllers deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ dc3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete existing controller (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *dc3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_reset_config.yml"
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_openflow deleted integration tests on connection={{ ansible_connection }}"

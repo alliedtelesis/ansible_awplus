@@ -1,0 +1,61 @@
+- hosts: all
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  vars_files:
+    - "{{ playbook_dir }}/sensitive_data.yml"
+  vars:
+    current_file_path: "{{ ansible_host }}_current_config.txt"
+    previous_file_path: "{{ ansible_host }}_previous_config.txt"
+  tasks:
+    - name: Retrieve current config
+      alliedtelesis.awplus.awplus_command:
+        commands:
+          - show running-config
+      register: current_config
+
+    - name: Save current config to a file
+      ansible.builtin.copy:
+        content: "{{ current_config.stdout }}"
+        dest: "{{ current_file_path }}"
+
+    # - name: Remove test user if they already exist
+    #   alliedtelesis.awplus.awplus_user:
+    #     config:
+    #       - name: track_and_notify_changes_example_user
+    #     state: deleted
+
+    # - name: Add test user
+    #   alliedtelesis.awplus.awplus_user:
+    #     config:
+    #       - name: track_and_notify_changes_example_user
+    #         configured_password: test
+    #         privilege: 13
+    #     state: merged
+
+    - name: Compare current configuration with previous configuration
+      ansible.builtin.command: diff previous_file_path current_file_path
+      register: config_diff 
+      when: previous_file_path is exists
+    
+    - name: When there is no previous file, make a notification
+      ansible.builtin.set_fact:
+        config_diff: "{{ config_diff | combine({'stdout': 'not_empty'})}}"
+      when: previous_file_path is not exists
+
+    - name: Notify if there are configuration changes
+      community.general.mail: 
+        host: "{{ host_server }}"
+        port: "{{ host_port }}"
+        sender: "{{ sender_email }}"
+        to: "{{ to_email }}"
+        subject: "Configuration changes detected on {{ ansible_host }}"
+        body: "Configuration changes: "
+        username: "{{ sender_email }}"
+        password: "{{ sender_mail_app_password }}"
+      when: config_diff.stdout != ""
+    
+    - name: Update previous configuration file
+      ansible.builtin.copy:
+        src: "{{ current_file_path }}"
+        dest: "{{ previous_file_path }}"

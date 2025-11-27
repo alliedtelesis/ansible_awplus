@@ -1,0 +1,70 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Configure AMF network
+  awplus_config:
+    lines:
+      - atmf network-name Hybrid
+
+- name: Reset the connection to ensure that rest of configuration is possible
+  ansible.builtin.meta: reset_connection
+    
+- name: Create VLANs for the OpenFlow protocol's native VLAN and for native packets received on legacy ports
+  alliedtelesis.awplus.awplus_vlans:
+    config:
+      - vlan_id: "{{ native_vlan_id }}"
+      - vlan_id: "{{ legacy_ports_vlan_id }}"
+    state: merged
+
+- name: Configure AMF link, disable the ingress-filter, add management VLAN(s) to the hybrid port, and enable openflow
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - switchport atmf-link
+      - switchport mode trunk ingress-filter disable
+      - "switchport trunk allowed vlan add 1,{{ legacy_ports_vlan_id }}"
+      - openflow
+    parents: "{{ item }}"
+  with_items:
+    - "interface {{ amf_link_port }}"
+
+- name: Add OpenFlow controller
+  alliedtelesis.awplus.awplus_openflow:
+    config:
+      controllers:
+        - name: "{{ controller_name }}"
+          address: "{{ controller_ip }}"
+          protocol: "{{ openflow_protocol }}"
+          l4_port: "{{ controller_l4_port }}"
+    state: merged
+
+- name: Configure native VLAN 
+  alliedtelesis.awplus.awplus_openflow:
+    config:
+      native_vlan: "{{ native_vlan_id }}"
+    state: merged
+
+- name: Enable ports to be managed by the OpenFlow protocol
+  alliedtelesis.awplus.awplus_openflow:
+    config:
+      ports: "{{ openflow_ports }}"
+    state: merged
+
+- name: Disable RSTP and loop protection
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - no spanning-tree rstp enable
+      - no loop-protection loop-detect
+
+- name: Disable IGMP Snooping TCN Query Solicitation
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - no ip igmp snooping tcn query solicit
+    parents: "{{ item }}"
+  with_items:
+    - "interface vlan{{ native_vlan_id }}"
+
+- name: Configure inactivity timeout and behaviour
+  alliedtelesis.awplus.awplus_openflow:
+    config:
+      inactivity_timer: "{{ inactivity_timer }}"
+      fail_mode: "{{ fail_mode }}"
+    state: merged

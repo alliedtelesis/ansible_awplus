@@ -70,7 +70,7 @@ class TestAwplusOpenFlowModule(TestAwplusModule):
                         dict(
                             name="test_ssl1",
                             protocol="ssl",
-                            address="192.56.8.3",
+                            address="192.56.8.4",
                             l4_port=8,
                         )
                     ],
@@ -78,7 +78,7 @@ class TestAwplusOpenFlowModule(TestAwplusModule):
                 state="merged",
             )
         )
-        commands = ["no openflow controller test_ssl1", "openflow controller test_ssl1 ssl 192.56.8.3 8"]
+        commands = ["no openflow controller test_ssl1", "openflow controller test_ssl1 ssl 192.56.8.4 8"]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_openflow_add_new_controller(self):
@@ -148,9 +148,29 @@ class TestAwplusOpenFlowModule(TestAwplusModule):
         ]
         self.execute_module(failed=False, changed=True, commands=commands)
 
-    def test_awplus_openflow_replace_controllers(self):
+    def test_awplus_openflow_replace_existing_controllers(self):
         """
-        All existing controllers is overridden with the given config.
+        Existing controller is replaced with new controller
+        """
+        set_module_args(
+            dict(
+                config=dict(
+                    controllers=[
+                        dict(name="oc1", protocol="ssl", address="192.56.8.3", l4_port=8)
+                    ],
+                ),
+                state="replaced",
+            )
+        )
+        commands = [
+            "no openflow controller oc1",
+            "openflow controller oc1 ssl 192.56.8.3 8",
+        ]
+        self.execute_module(failed=False, changed=True, commands=commands)
+
+    def test_awplus_openflow_replace_nonexisting_controllers(self):
+        """
+        Nonexisting controller is not replaced with new controller
         """
         set_module_args(
             dict(
@@ -163,11 +183,7 @@ class TestAwplusOpenFlowModule(TestAwplusModule):
             )
         )
         commands = [
-            "no openflow controller test_ssl1",
-            "no openflow controller oc1",
-            "no openflow controller test_ssl",
-            "no openflow controller controller1",
-            "openflow controller oc2 ssl 192.56.8.3 8",
+            "openflow controller oc2 ssl 192.56.8.3 8"
         ]
         self.execute_module(failed=False, changed=True, commands=commands)
 
