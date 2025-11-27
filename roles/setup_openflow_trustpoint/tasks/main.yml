@@ -1,0 +1,10 @@
+#SPDX-License-Identifier: MIT-0
+---
+# assumes trustpoint and controller's CA certificate are setup on the device as this cannot be automated yet
+
+- name: Specify trustpoint to OpenFlow
+  alliedtelesis.awplus.awplus_openflow:
+    config:
+      trustpoint: "{{ trustpoint_name }}"
+      peer_certificate: "{{ controller_peer_certificate }}"
+    state: merged

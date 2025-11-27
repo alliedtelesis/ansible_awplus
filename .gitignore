@@ -113,3 +113,5 @@ venv
 venvs
 tests/output
 .env
+backup
+.vscode

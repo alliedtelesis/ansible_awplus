@@ -1,0 +1,183 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_openflow merged integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    mo1_expected:
+      commands:
+        - openflow datapath-id 456
+    mo2_expected:
+      commands:
+        - openflow failmode standalone
+    mo3_expected:
+      commands:
+        - openflow inactivity 30
+    mo4_expected:
+      commands:
+        - openflow native vlan 1234
+    mo5_expected:
+      commands:
+        - openflow ssl peer certificate bootstrap
+    mo6_expected:
+      commands:
+        - openflow ssl trustpoint test
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Merge to change datapath ID
+      alliedtelesis.awplus.awplus_openflow: &mo1
+        config:
+          datapath_id: "456"
+        state: merged
+      register: result
+
+    - name: Assert configurations are merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ mo1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to change datapath ID (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *mo1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Merge to change fail mode
+      alliedtelesis.awplus.awplus_openflow: &mo2
+        config:
+          fail_mode: "standalone"
+        state: merged
+      register: result
+
+    - name: Assert configurations are merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ mo2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to change fail mode (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *mo2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Merge to change inactivity timer
+      alliedtelesis.awplus.awplus_openflow: &mo3
+        config:
+          inactivity_timer: 30
+        state: merged
+      register: result
+
+    - name: Assert configurations are merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ mo3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to change inactivity timer (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *mo3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Merge to change native VLAN
+      alliedtelesis.awplus.awplus_openflow: &mo4
+        config:
+          native_vlan: 1234
+        state: merged
+      register: result
+
+    - name: Assert configurations are merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ mo4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to change native VLAN (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *mo4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Merge to change peer certificate
+      alliedtelesis.awplus.awplus_openflow: &mo5
+        config:
+          peer_certificate: "bootstrap"
+        state: merged
+      register: result
+
+    - name: Assert configurations are merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ mo5_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to change peer certificate (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *mo5
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Merge to change trustpoint
+      alliedtelesis.awplus.awplus_openflow: &mo6
+        config:
+          trustpoint: "test"
+        state: merged
+      register: result
+
+    - name: Assert configurations are merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ mo6_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to change trustpoint (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *mo6
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_reset_config.yml"
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_openflow merged integration tests on connection={{ ansible_connection }}"

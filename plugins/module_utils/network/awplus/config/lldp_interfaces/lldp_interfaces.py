@@ -16,8 +16,10 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.c
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
     to_list,
     param_list_to_dict,
-    iteritems,
     dict_diff,
+)
+from ansible.module_utils.six import (
+    iteritems
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.facts import Facts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.utils.utils import (
@@ -227,7 +229,7 @@ def _set_config(name, want, have):
                     else have.get(key, {}).get(tlv, False)
                 if have_stat != stat:
                     prefix = "" if stat else "no "
-                    commands.append(f"{prefix}lldp med-tlv-select {tlv.replace('_','-')}")
+                    commands.append(f"{prefix}lldp med-tlv-select {tlv.replace('_', '-')}")
 
     if commands:
         commands.insert(0, f"interface {name}")

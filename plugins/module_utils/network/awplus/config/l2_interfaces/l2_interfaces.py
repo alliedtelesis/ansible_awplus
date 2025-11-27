@@ -16,8 +16,10 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.c
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
     to_list,
     param_list_to_dict,
-    iteritems,
     dict_diff,
+)
+from ansible.module_utils.six import (
+    iteritems
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.facts import Facts
 import re

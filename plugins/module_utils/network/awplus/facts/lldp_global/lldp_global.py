@@ -12,9 +12,13 @@ based on the configuration.
 import re
 from copy import deepcopy
 
-from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import (
-    utils,
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
+    generate_dict,
+    validate_config,
+    remove_empties,
+    remove_empties
 )
+from ansible.module_utils.six import iteritems
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.lldp_global.lldp_global import Lldp_globalArgs
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.utils.utils import get_lldp_defaults
 
@@ -35,7 +39,7 @@ class Lldp_globalFacts(object):
         else:
             facts_argument_spec = spec
 
-        self.generated_spec = utils.generate_dict(facts_argument_spec)
+        self.generated_spec = generate_dict(facts_argument_spec)
 
     def get_device_data(self, connection):
         return connection.get('show running-config lldp')
@@ -61,8 +65,8 @@ class Lldp_globalFacts(object):
         ansible_facts['ansible_network_resources'].pop('lldp_global', None)
         facts = {}
         if objs:
-            params = utils.validate_config(self.argument_spec, {'config': objs})
-            facts['lldp_global'] = utils.remove_empties(params['config'])
+            params = validate_config(self.argument_spec, {'config': objs})
+            facts['lldp_global'] = remove_empties(params['config'])
 
         ansible_facts['ansible_network_resources'].update(facts)
         return ansible_facts
@@ -116,8 +120,8 @@ class Lldp_globalFacts(object):
             config['enabled'] = True
 
         defaults = get_lldp_defaults()
-        for key, value in utils.iteritems(config):
+        for key, value in iteritems(config):
             if not value:
                 config[key] = defaults[key]
 
-        return utils.remove_empties(config)
+        return remove_empties(config)

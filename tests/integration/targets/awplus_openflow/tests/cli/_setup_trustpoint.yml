@@ -1,0 +1,12 @@
+---
+- name: Setup trustpoint
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - crypto pki trustpoint test
+      - enrollment selfsigned 
+
+- name: Authenticate and enroll trustpoint
+  alliedtelesis.awplus.awplus_command:
+    commands:
+      - crypto pki authenticate test
+      - crypto pki enroll test 

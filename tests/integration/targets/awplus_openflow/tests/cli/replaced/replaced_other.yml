@@ -1,0 +1,183 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_openflow replaced integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    ro1_expected:
+      commands:
+        - openflow datapath-id 456
+    ro2_expected:
+      commands:
+        - openflow failmode standalone
+    ro3_expected:
+      commands:
+        - openflow inactivity 40
+    ro4_expected:
+      commands:
+        - openflow native vlan 1234
+    ro5_expected:
+      commands:
+        - openflow ssl peer certificate bootstrap
+    ro6_expected:
+      commands:
+        - openflow ssl trustpoint test
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Replace to change datapath ID
+      alliedtelesis.awplus.awplus_openflow: &ro1
+        config:
+          datapath_id: "456"
+        state: replaced
+      register: result
+
+    - name: Assert datapath ID is replaced
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ ro1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace to change datapath ID (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *ro1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Replace to change failmode
+      alliedtelesis.awplus.awplus_openflow: &ro2
+        config:
+          fail_mode: "standalone"
+        state: merged
+      register: result
+
+    - name: Assert failmode replaced
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ ro2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to change fail mode (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *ro2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Replace inactivity timer
+      alliedtelesis.awplus.awplus_openflow: &ro3
+        config:
+          inactivity_timer: 40
+        state: replaced
+      register: result
+
+    - name: Assert inactivity timer replaced 
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ ro3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace inactivity timer (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *ro3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Replace native VLAN
+      alliedtelesis.awplus.awplus_openflow: &ro4
+        config:
+          native_vlan: 1234
+        state: replaced
+      register: result
+
+    - name: Assert native VLAN replaced
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ ro4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace native VLAN (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *ro4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Replace peer certificate
+      alliedtelesis.awplus.awplus_openflow: &ro5
+        config:
+          peer_certificate: "bootstrap"
+        state: replaced
+      register: result
+
+    - name: Assert peer certificate replaced
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ ro5_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace peer certificate (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *ro5
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Replace trustpoint
+      alliedtelesis.awplus.awplus_openflow: &ro6
+        config:
+          trustpoint: "test"
+        state: merged
+      register: result
+
+    - name: Assert configurations are merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ ro6_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace trustpoint (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *ro6
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_reset_config.yml"
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_openflow replaced integration tests on connection={{ ansible_connection }}"

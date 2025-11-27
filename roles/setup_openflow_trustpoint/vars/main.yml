@@ -1,0 +1,5 @@
+#SPDX-License-Identifier: MIT-0
+---
+# configuration for ssl
+trustpoint_name: of
+controller_peer_certificate: flash:/.certs/pki/of/cacert.pem # filepath to CA certificate for the controller's CA or 'bootstrap'

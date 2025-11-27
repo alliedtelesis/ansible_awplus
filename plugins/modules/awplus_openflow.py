@@ -154,7 +154,7 @@ EXAMPLES = """
 #                 options: {ifindex="5604", mtu="1500", native_vlan="4090"}
 
 - name: Merge a new controller into the Openflow configuration
-  awplus_openflow:
+  alliedtelesis.awplus.awplus_openflow:
     config:
       controllers:
         - name: Faucet
@@ -231,7 +231,7 @@ EXAMPLES = """
 #                 options: {ifindex="5604", mtu="1500", native_vlan="4090"}
 
 - name: Override controller configuration
-  awplus_openflow:
+  alliedtelesis.awplus.awplus_openflow:
     config:
       controllers:
         - name: Faucet
@@ -306,7 +306,7 @@ EXAMPLES = """
 #                 options: {ifindex="5604", mtu="1500", native_vlan="4090"}
 
 - name: Override controller configuration
-  awplus_openflow:
+  alliedtelesis.awplus.awplus_openflow:
     config:
       controllers:
         - name: Faucet
@@ -365,7 +365,7 @@ EXAMPLES = """
 #                 options: {ifindex="5604", mtu="1500", native_vlan="4090"}
 
 - name: Delete an Openflow controller
-  awplus_openflow:
+  alliedtelesis.awplus.awplus_openflow:
     config:
       controllers:
         - name: Faucet
