@@ -1,0 +1,203 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_openflow overridden integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact: # can alternatively set this in a vars file
+    oc0_expected:
+      commands:
+        - no openflow controller bob
+        - no openflow controller fred
+        - no openflow controller dave
+        - interface port1.0.1
+        - no openflow
+        - interface port1.0.2
+        - no openflow
+        - no openflow inactivity
+        - no openflow native vlan
+        - no openflow datapath-id
+        - no openflow failmode
+        - no openflow ssl peer certificate
+        - no openflow ssl trustpoint
+    oc1_expected:
+      commands:
+        - no openflow controller bob
+        - no openflow controller fred
+        - no openflow controller dave
+        - openflow controller andy tcp 192.168.2.100 6654
+        - interface port1.0.1
+        - no openflow
+        - interface port1.0.2
+        - no openflow
+        - no openflow inactivity
+        - no openflow native vlan
+        - no openflow datapath-id
+        - no openflow failmode
+        - no openflow ssl peer certificate
+        - no openflow ssl trustpoint
+      after:
+        controllers:
+          - address: "192.168.2.100"
+            l4_port: "6654"
+            name: "andy"
+            protocol: "tcp"
+    oc2_expected:
+      commands:
+        - no openflow controller bob
+        - no openflow controller fred
+        - no openflow controller dave
+        - openflow controller bob tcp 192.168.2.100 6654
+        - interface port1.0.1
+        - no openflow
+        - interface port1.0.2
+        - no openflow
+        - no openflow inactivity
+        - no openflow native vlan
+        - no openflow datapath-id
+        - no openflow failmode
+        - no openflow ssl peer certificate
+        - no openflow ssl trustpoint
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config_complete.yml"
+
+    - name: Override with empty controller config
+      alliedtelesis.awplus.awplus_openflow: &oc0
+        config:
+          controllers:
+        state: overridden
+      register: result
+
+    - name: Assert everything removed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ oc0_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with empty controller config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *oc0
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config_complete.yml"
+
+    - name: Override with new controller
+      alliedtelesis.awplus.awplus_openflow: &oc1
+        config:
+          controllers:
+            - name: "andy"
+              address: "192.168.2.100"
+              protocol: "tcp"
+              l4_port: 6654
+        state: overridden
+      register: result
+
+    - name: Assert new controller added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ oc1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+          - "{{ oc1_expected.after | symmetric_difference(result['after']) | length == 0 }}"
+
+    - name: Override with new controller (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *oc1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config_complete.yml"
+
+    - name: Override existing controller
+      alliedtelesis.awplus.awplus_openflow: &oc2
+        config:
+          controllers:
+            - name: "bob"
+              address: "192.168.2.100"
+              protocol: "tcp"
+              l4_port: 6654
+        state: overridden
+      register: result
+
+    - name: Assert config overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ oc2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override existing controller (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *oc2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Override new controller without protocol fails
+      alliedtelesis.awplus.awplus_openflow:
+        config:
+          controllers:
+            - name: "andy"
+              address: "192.168.2.100"
+              l4_port: 1234
+        state: overridden
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == "New controller protocol missing"
+
+    - name: Override new controller without address fails
+      alliedtelesis.awplus.awplus_openflow:
+        config:
+          controllers:
+            - name: "andy"
+              protocol: tcp
+              l4_port: 1234
+        state: overridden
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == "New controller address missing"
+
+    - name: Override new controller without port fails
+      alliedtelesis.awplus.awplus_openflow:
+        config:
+          controllers:
+            - name: "andy"
+              protocol: tcp
+              address: "192.168.2.100"
+        state: overridden
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == "New controller port missing"
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_reset_config.yml"
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_openflow overridden integration tests on connection={{ ansible_connection }}"

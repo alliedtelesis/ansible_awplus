@@ -1,0 +1,102 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_openflow replaced integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    rp0_expected:
+      commands:
+    rp1_expected:
+      commands:
+        - interface port1.0.3
+        - openflow
+    rp2_expected:
+      commands:
+        - interface port1.0.3
+        - openflow
+
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config_complete.yml"
+
+    - name: Replace ports with nothing
+      alliedtelesis.awplus.awplus_openflow: &rp0
+        config:
+          ports:
+        state: replaced
+      register: result
+
+    - name: Assert ports replaced by nothing
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - "{{ result['commands'] | length == 0 }}"
+
+    - name: Replace ports with nothing (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *rp0
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Replace with new port
+      alliedtelesis.awplus.awplus_openflow: &rp1
+        config:
+          ports:
+            - port1.0.3
+        state: replaced
+      register: result
+
+    - name: Assert controller config replaced
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ rp1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace existing controller (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *rp1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config_complete.yml"
+
+    - name: Replace with existing and new ports
+      alliedtelesis.awplus.awplus_openflow: &rp2
+        config:
+          ports:
+            - port1.0.1
+            - port1.0.2
+            - port1.0.3
+        state: replaced
+      register: result
+
+    - name: Assert controller config replaced
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ rp2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace existing controller (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *rp2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_reset_config.yml"
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_openflow replaced integration tests on connection={{ ansible_connection }}"

@@ -1,0 +1,35 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_openflow initialise config on connection={{ ansible_connection }}"
+
+- name: Initialise openflow
+  alliedtelesis.awplus.awplus_openflow: # TODO replace with awplus_config
+    config:
+      controllers:
+        - name: "bob"
+          address: "192.168.1.100"
+          protocol: "tcp"
+          l4_port: 6653
+        - name: "fred"
+          address: "192.168.1.100"
+          protocol: "tcp"
+          l4_port: 6654
+        - name: "dave"
+          address: "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+          protocol: "tcp"
+          l4_port: 6655
+      native_vlan: 4090
+      inactivity_timer: 20
+      datapath_id: 123
+      fail_mode: "secure_nre"
+      ports:
+        - port1.0.1
+        - port1.0.2
+      trustpoint: "test"
+      peer_certificate: "bootstrap"
+    state: overridden
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_openflow initialise config on connection={{ ansible_connection }}"
