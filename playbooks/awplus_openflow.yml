@@ -3,11 +3,5 @@
   connection: network_cli
   collections:
     - alliedtelesis.awplus
-  tasks:
-    - name: Test openflow module
-      awplus_openflow:
-        controllers:
-          - protocol: tcp
-            address: 192.168.1.2
-            ssl_port: 10
-        state: present
+  roles:
+    - configure_openflow_with_hybrid_port_and_amf

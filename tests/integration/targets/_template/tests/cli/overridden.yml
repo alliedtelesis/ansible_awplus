@@ -1,0 +1,36 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START <module_name> overridden integration tests on connection={{ ansible_connection }}"
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Overridden <task>
+      alliedtelesis.awplus.<module_name>: &o1
+        config:
+        state: overridden
+      register: result
+
+    - name: Assert <task>
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+
+    - name: Overridden <task> (IDEMPOTENT)
+      alliedtelesis.awplus.<module_name>: *o1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END <module_name> overridden integration tests on connection={{ ansible_connection }}"
