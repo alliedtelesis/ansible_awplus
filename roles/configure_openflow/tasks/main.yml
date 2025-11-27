@@ -1,0 +1,50 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Create VLANs for the OpenFlow protocol's native VLAN
+  awplus_vlans:
+    config:
+      - vlan_id: "{{ native_vlan_id }}"
+    state: merged
+
+- name: Add OpenFlow controller
+  awplus_openflow:
+    config:
+      controllers:
+        - name: "{{ controller_name }}"
+          address: "{{ controller_ip }}"
+          protocol: "{{ openflow_protocol }}"
+          l4_port: "{{ controller_l4_port }}"
+    state: merged
+
+- name: Configure native VLAN 
+  awplus_openflow:
+    config:
+      native_vlan: "{{ native_vlan_id }}"
+    state: merged
+
+- name: Enable ports to be managed by the OpenFlow protocol
+  awplus_openflow:
+    config:
+      ports: "{{ openflow_ports }}"
+    state: merged
+
+- name: Disable RSTP and loop protection
+  awplus_config:
+    lines:
+      - no spanning-tree rstp enable
+      - no loop-protection loop-detect
+
+- name: Disable IGMP Snooping TCN Query Solicitation
+  awplus_config:
+    lines:
+      - no ip igmp snooping tcn query solicit
+    parents: "{{ item }}"
+  with_items:
+    - "interface vlan{{ native_vlan_id }}"
+
+- name: Configure inactivity timeout and behaviour
+  awplus_openflow:
+    config:
+      inactivity_timer: "{{ inactivity_timer }}"
+      fail_mode: "{{ fail_mode }}"
+    state: merged
