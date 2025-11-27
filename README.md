@@ -6,7 +6,7 @@ The Ansible Allied Telesis AW+ collection includes a variety of Ansible content 
 
 This collection has been tested against AW+ 5.5.2.
 
-This collection has been tested against Ansible version: **>=2.9.10**.
+This collection has been tested against Ansible version: **>=2.19.4**.
 
 <!--
 A collection may contain metadata that identifies these versions.
