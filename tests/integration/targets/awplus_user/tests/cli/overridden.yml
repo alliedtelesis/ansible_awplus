@@ -1,0 +1,207 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_user overridden integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    o1_expected:
+      commands:
+        - no username tonyp
+        - no username bill
+        - no username test_user
+    o2_expected:
+      commands:
+        - no username tonyp
+        - no username bill
+        - no username test_user
+        - username new_user privilege 12 password 8 $5$nABt9VDrIVdrHht/$/3a1c3ZK9TQ4c1oi47mDnWRSsS5t6MbCH3PwV39qdq7
+    o3_expected:
+      commands:
+        - no username bill
+        - no username test_user
+    o4_expected:
+      commands:
+        - no username bill
+        - no username test_user
+        - username tonyp privilege 5
+    o5_expected:
+      commands:
+        - no username bill
+        - no username test_user
+        - no username tonyp
+        - username John privilege 1 password 8 $5$nABt9VDrIVdrHht/$/3a1c3ZK9TQ4c1oi47mDnWRSsS5t6MbCH3PwV39qdq7
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with empty config
+      alliedtelesis.awplus.awplus_user: &o1
+        config:
+        state: overridden
+      register: result
+
+    - name: Assert existing config overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with empty config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *o1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with new user
+      alliedtelesis.awplus.awplus_user: &o2
+        config:
+          - name: new_user
+            hashed_password: $5$nABt9VDrIVdrHht/$/3a1c3ZK9TQ4c1oi47mDnWRSsS5t6MbCH3PwV39qdq7
+            privilege: 12
+        state: overridden
+      register: result
+
+    - name: Assert new user added and others removed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with new user (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *o2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override existing user with same details
+      alliedtelesis.awplus.awplus_user: &o3
+        config:
+          - name: tonyp
+            configured_password: tonyptonyp
+            privilege: 15
+        state: overridden
+      register: result
+
+    - name: Assert existing user remains and others removed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override existing user with same details (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *o3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override existing user with new details
+      alliedtelesis.awplus.awplus_user: &o4
+        config:
+          - name: tonyp
+            configured_password: tonyptonyp
+            privilege: 5
+        state: overridden
+      register: result
+
+    - name: Assert existing user remains and others removed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override existing user with new details (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *o4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override new user without privilege level
+      alliedtelesis.awplus.awplus_user: &o5
+        config:
+          - name: John
+            hashed_password: $5$nABt9VDrIVdrHht/$/3a1c3ZK9TQ4c1oi47mDnWRSsS5t6MbCH3PwV39qdq7
+        state: overridden
+      register: result
+
+    - name: Assert existing user remains and others removed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o5_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override new user without privilege level (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *o5
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override both configured and hashed passwords
+      alliedtelesis.awplus.awplus_user: 
+        config:
+          - name: John
+            privilege: 15
+            configured_password: test
+            hashed_password: test
+        state: overridden
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == "configured_password and hashed_password are mutually exclusive."
+
+    - name: Override without password
+      alliedtelesis.awplus.awplus_user: 
+        config:
+          - name: John
+            privilege: 15
+        state: overridden
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == "Password is required."
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_user overridden integration tests on connection={{ ansible_connection }}"

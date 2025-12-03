@@ -1,0 +1,288 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_user merged integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    m1_expected:
+      commands:
+    m2_expected:
+      commands:
+        - username John privilege 15 password 8 $5$beWs4hWrHY4RGTl4$ju8Nt.r6yl72AfqkKIc1VW72R4ra9X3nM2UzyrHLer5
+    m3_expected:
+      commands:
+        - username John privilege 1 password 8 $5$beWs4hWrHY4RGTl4$ju8Nt.r6yl72AfqkKIc1VW72R4ra9X3nM2UzyrHLer5
+    m4_expected:
+      commands:
+        - username tonyp password 8 $5$tyJEkgQkzIaAcGnv$CzkPF7BaYENp/QJWR.qrL2TcmF9JXfRzyiExIzZYn81
+    m5_expected:
+      commands:
+        - username tonyp password 8 $5$tyJEkgQkzIaAcGnv$CzkPF7BaYENp/QJWR.qrL2TcmF9JXfRzyiExIzZYn81
+    m6_expected:
+      commands:
+        - username tonyp privilege 0
+    m7_expected:
+      commands:
+        - username tonyp password 8 $1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G9
+    m8_expected:
+      commands:
+        - username bob1 privilege 15 password 8 $5$beWs4hWrHY4RGTl4$ju8Nt.r6yl72AfqkKIc1VW72R4ra9X3nM2UzyrHLer5
+        - username bob2 privilege 15 password 8 $5$beWs4hWrHY4RGTl4$ju8Nt.r6yl72AfqkKIc1VW72R4ra9X3nM2UzyrHLer5
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge empty config
+      alliedtelesis.awplus.awplus_user: &m1
+        config:
+        state: merged
+      register: result
+
+    - name: Assert nothing happens
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - "{{ result['commands'] | length == 0 }}"
+
+    - name: Merge empty config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *m1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge to add new user
+      alliedtelesis.awplus.awplus_user: &m2
+        config:
+          - name: John
+            hashed_password: $5$beWs4hWrHY4RGTl4$ju8Nt.r6yl72AfqkKIc1VW72R4ra9X3nM2UzyrHLer5
+            privilege: 15
+        state: merged
+      register: result
+
+    - name: Assert new user added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to add new user (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *m2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge to add new user without privilege
+      alliedtelesis.awplus.awplus_user: &m3
+        config:
+          - name: John
+            hashed_password: $5$beWs4hWrHY4RGTl4$ju8Nt.r6yl72AfqkKIc1VW72R4ra9X3nM2UzyrHLer5
+        state: merged
+      register: result
+
+    - name: Assert user added with default privilege
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to add new user without privilege (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *m3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    # currently cannot do this test since we cannot inject a seed for the random salt
+    # - name: Initialise configuration
+    #   ansible.builtin.include_tasks: _initial_config.yml
+
+    # - name: Merge to change existing user's configured password
+    #   alliedtelesis.awplus.awplus_user: &m4
+    #     config:
+    #       - name: tonyp
+    #         configured_password: password
+    #     state: merged
+    #   register: result
+
+    # - name: Assert password changed
+    #   ansible.builtin.assert:
+    #     that:
+    #       - result.changed == True
+    #       - "{{ m4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    # - name: Merge to change existing user's configured password (IDEMPOTENT)
+    #   alliedtelesis.awplus.awplus_user: *m4
+    #   register: result
+
+    # - name: Assert idempotency
+    #   ansible.builtin.assert:
+    #     that: 
+    #       - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge to change existing user's hashed password
+      alliedtelesis.awplus.awplus_user: &m5
+        config:
+          - name: tonyp
+            hashed_password: $5$tyJEkgQkzIaAcGnv$CzkPF7BaYENp/QJWR.qrL2TcmF9JXfRzyiExIzZYn81
+        state: merged
+      register: result
+
+    - name: Assert password changed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m5_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to change existing user's hashed password (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *m5
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge to change existing user's privilege to zero
+      alliedtelesis.awplus.awplus_user: &m6
+        config:
+          - name: tonyp
+            privilege: 0
+        state: merged
+      register: result
+
+    - name: Assert password changed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m6_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to change existing user's privilege to zero (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *m6
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge to change existing user's hashed password to MD5
+      alliedtelesis.awplus.awplus_user: &m7
+        config:
+          - name: tonyp
+            hashed_password: $1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G9
+        state: merged
+      register: result
+
+    - name: Assert password changed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m7_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to change existing user's hashed password to MD5 (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *m7
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge to add multiple users
+      alliedtelesis.awplus.awplus_user: &m8
+        config:
+          - name: bob1
+            hashed_password: $5$beWs4hWrHY4RGTl4$ju8Nt.r6yl72AfqkKIc1VW72R4ra9X3nM2UzyrHLer5
+            privilege: 15
+          - name: bob2
+            hashed_password: $5$beWs4hWrHY4RGTl4$ju8Nt.r6yl72AfqkKIc1VW72R4ra9X3nM2UzyrHLer5
+            privilege: 15
+        state: merged
+      register: result
+
+    - name: Assert multiple users added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m8_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to add multiple users (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *m8
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge to add new user with both passwords
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: John
+            hashed_password: $5$beWs4hWrHY4RGTl4$ju8Nt.r6yl72AfqkKIc1VW72R4ra9X3nM2UzyrHLer5
+            configured_password: test
+        state: merged
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == "configured_password and hashed_password are mutually exclusive."
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge to add new user without password
+      alliedtelesis.awplus.awplus_user: 
+        config:
+          - name: John
+            privilege: 15
+        state: merged
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == "Password is required."
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_user merged integration tests on connection={{ ansible_connection }}"

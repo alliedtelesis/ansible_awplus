@@ -107,7 +107,10 @@ class TestAwplusUserModule(TestAwplusModule):
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_user_replaced_idempotent(self):
-        set_module_args(dict(config=[dict(name="ansible", privilege=8)], state="replaced"))
+        set_module_args(dict(
+            config=[
+                dict(name="ansible", privilege=8, hashed_password="$1$PObJROou$Zm2Gl325pWzbym0ngEAWf1"),
+            ], state="replaced"))
         self.execute_module(changed=False)
 
     def test_awplus_user_overridden(self):
@@ -119,7 +122,11 @@ class TestAwplusUserModule(TestAwplusModule):
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_user_overridden_idempotent(self):
-        set_module_args(dict(config=[dict(name="ansible", privilege=8), dict(name="jin", privilege=3)], state="overridden"))
+        set_module_args(dict(
+            config=[
+                dict(name="ansible", privilege=8, hashed_password="$1$PObJROou$Zm2Gl325pWzbym0ngEAWf1"),
+                dict(name="jin", privilege=3, hashed_password="$1$PObJROou$875m0onEp1PH4nYt0N1ghT")
+            ], state="overridden"))
         self.execute_module(changed=False)
 
     def test_awplus_user_delete(self):

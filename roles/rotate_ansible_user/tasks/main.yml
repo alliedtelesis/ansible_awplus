@@ -1,0 +1,31 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Create new user
+  alliedtelesis.awplus.awplus_user:
+    config:
+      - name: "{{ new_username }}"
+        configured_password: "{{ new_password }}"
+        privilege: 15
+    state: merged
+
+- name: Allow new user on ssh server
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - "ssh server allow-users {{ new_username }}"
+  
+- name: Set user and password facts
+  ansible.builtin.set_fact:
+    old_user: "{{ ansible_user }}"
+    ansible_user: "{{ new_username }}"
+    ansible_password: "{{ new_password }}"
+
+- name: Delete current user
+  alliedtelesis.awplus.awplus_user:
+    config:
+      - name: "{{ old_user }}"
+    state: deleted
+
+- name: Disallow old user on ssh server
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - "no ssh server allow-users {{ old_user }}"
