@@ -2,4 +2,3 @@
 - name: Prepare tests
   awplus_config:
     lines: |-
-    

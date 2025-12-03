@@ -4,7 +4,7 @@
     msg: "START <module_name> reset config on connection={{ ansible_connection }}"
 
 - name: Delete the current config
-  alliedtelesis.awplus.<module_name>: # TODO replace with awplus_config eventually
+  alliedtelesis.awplus.<module_name>:
     config:
     state: overridden
 
