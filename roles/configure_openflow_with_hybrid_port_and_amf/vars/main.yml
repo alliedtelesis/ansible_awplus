@@ -1,0 +1,15 @@
+#SPDX-License-Identifier: MIT-0
+---
+# main configuration
+controller_name: test
+controller_ip: 192.168.1.10
+controller_l4_port: 6653
+native_vlan_id: 4089
+legacy_ports_vlan_id: 10
+openflow_ports:
+  - port1.0.2
+  - port1.0.3
+amf_link_port: port1.0.18
+inactivity_timer: 60
+fail_mode: secure_nre # secure, standalone, or secure_nre
+openflow_protocol: tcp # tcp or ssl

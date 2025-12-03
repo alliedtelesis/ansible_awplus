@@ -1,0 +1,58 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_openflow overridden integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact: # can alternatively set this in a vars file
+    op1_expected:
+      commands:
+        - no openflow controller bob
+        - no openflow controller fred
+        - no openflow controller dave
+        - interface port1.0.1
+        - no openflow
+        - interface port1.0.2
+        - no openflow
+        - no openflow inactivity
+        - no openflow native vlan
+        - no openflow datapath-id
+        - no openflow failmode
+        - no openflow ssl peer certificate
+        - no openflow ssl trustpoint
+        - interface port1.0.3
+        - openflow
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config_complete.yml"
+
+    - name: Override with new ports
+      alliedtelesis.awplus.awplus_openflow: &op1
+        config:
+          ports:
+            - port1.0.3
+        state: overridden
+      register: result
+
+    - name: Assert ports overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ op1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with new ports (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *op1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_reset_config.yml"
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_openflow overridden integration tests on connection={{ ansible_connection }}"

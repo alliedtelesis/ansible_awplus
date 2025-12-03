@@ -1,0 +1,5 @@
+---
+- name: Destroy trustpoint
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - no crypto pki trustpoint test

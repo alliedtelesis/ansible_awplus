@@ -16,11 +16,15 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
     to_list,
 )
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.facts import Facts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.utils.utils import clean_address_string
 
 parm_to_keyword = {'inactivity_timer': 'inactivity',
                    'native_vlan': 'native vlan',
                    'fail_mode': 'failmode',
-                   'datapath_id': 'datapath-id'}
+                   'datapath_id': 'datapath-id',
+                   'peer_certificate': 'ssl peer certificate',
+                   'trustpoint': 'ssl trustpoint'
+                   }
 fail_mode_commands = {'standalone': "openflow failmode standalone",
                       'secure': "no openflow failmode",
                       'secure_nre': "openflow failmode secure non-rule-expired"}
@@ -62,7 +66,6 @@ class Openflow(ConfigBase):
         :returns: The result from module execution
         """
         result = {'changed': False}
-        warnings = list()
         commands = list()
 
         existing_openflow_facts = self.get_openflow_facts()
@@ -79,7 +82,6 @@ class Openflow(ConfigBase):
         if result['changed']:
             result['after'] = changed_openflow_facts
 
-        result['warnings'] = warnings
         return result
 
     def set_config(self, existing_openflow_facts):
@@ -206,10 +208,29 @@ class Openflow(ConfigBase):
                 if cont_w['l4_port'] is None:
                     self._module.fail_json(msg="New controller port missing")
 
+        # Ignore names where the want and have are the exact same as this breaks idempotency
+        ignore_names = []
+        if state in ('overridden', 'replaced'):
+            for h_name in haves:
+                if h_name in wants \
+                        and wants[h_name]['protocol'] == haves[h_name]['protocol'] \
+                        and clean_address_string(wants[h_name]['address']) == clean_address_string(haves[h_name]['address']) \
+                        and str(wants[h_name]['l4_port']) == str(haves[h_name]['l4_port']):
+                    ignore_names.append(h_name)
+        elif state == 'merged':
+            for h_name in haves:
+                if h_name in wants \
+                        and (wants[h_name]['protocol'] is None or wants[h_name]['protocol'] == haves[h_name]['protocol']) \
+                        and (wants[h_name]['address'] is None or
+                             clean_address_string(wants[h_name]['address']) == clean_address_string(haves[h_name]['address'])) \
+                        and (wants[h_name]['l4_port'] is None or str(wants[h_name]['l4_port']) == str(haves[h_name]['l4_port'])):
+                    ignore_names.append(h_name)
+
         # Delete controllers based on parameters.
         for h_name in haves:
-            if state in ("overridden", "replaced") or h_name in wants:
-                commands.append(f"no openflow controller {h_name}")
+            if h_name not in ignore_names:
+                if state == 'overridden' or h_name in wants:
+                    commands.append(f"no openflow controller {h_name}")
 
         # That's it for deleted.
         if state == 'deleted':
@@ -218,24 +239,26 @@ class Openflow(ConfigBase):
         # New controllers for overridden and replaced
         if state in ('overridden', 'replaced'):
             for w_name in wants:
-                cont_w = wants[w_name]
-                commands.append(
-                    f"openflow controller {w_name} {cont_w['protocol']} "
-                    f"{cont_w['address']} {cont_w['l4_port']}"
-                )
+                if w_name not in ignore_names:
+                    cont_w = wants[w_name]
+                    commands.append(
+                        f"openflow controller {w_name} {cont_w['protocol']} "
+                        f"{cont_w['address']} {cont_w['l4_port']}"
+                    )
             return
 
         # Merge - may need parameters from haves as well as wants.
         for w_name in wants:
-            cont_w = wants[w_name]
-            cont_h = haves.get(w_name)
-            nc = {}
-            for p in ('address', 'protocol', 'l4_port'):
-                nc[p] = cont_w[p] if cont_w[p] is not None else cont_h[p]
-            commands.append(
-                f"openflow controller {w_name} {nc['protocol']} "
-                f"{nc['address']} {nc['l4_port']}"
-            )
+            if w_name not in ignore_names:
+                cont_w = wants[w_name]
+                cont_h = haves.get(w_name)
+                nc = {}
+                for p in ('address', 'protocol', 'l4_port'):
+                    nc[p] = cont_w[p] if cont_w[p] is not None else cont_h[p]
+                commands.append(
+                    f"openflow controller {w_name} {nc['protocol']} "
+                    f"{nc['address']} {nc['l4_port']}"
+                )
 
     def _do_ports(self, want, have, state, commands):
         """
@@ -268,19 +291,25 @@ class Openflow(ConfigBase):
         "overridden", "merged" and "deleted".
         Need special cases for all parameters.
         """
-        # inactivity_timer, native_vlan, datapath_id - no default
-        for p in ("inactivity_timer", "native_vlan", "datapath_id"):
-            want_val = want.get(p)
-            if (state == "deleted" and want_val is not None) or \
-               (state == "overridden" and want_val is None):
-                commands.append(f"no openflow {parm_to_keyword[p]}")
-            elif want_val is not None:
-                commands.append(f"openflow {parm_to_keyword[p]} {want_val}")
+        params_and_comparisons = (
+            ("datapath_id", lambda w, h: str(w).lstrip("0") != str(h).lstrip("0")),
+            ("fail_mode", lambda w, h: w != h),
+            ("inactivity_timer", lambda w, h: w != h),
+            ("native_vlan", lambda w, h: w != h),
+            ("peer_certificate", lambda w, h: w != h),
+            ("trustpoint", lambda w, h: w != h)
+        )
 
-        # fail_mode - has a default but commands are irregular
-        want_val = want.get("fail_mode")
-        if (state == "deleted" and want_val is not None) or \
-           (state == "overridden" and want_val is None):
-            commands.append('no openflow failmode')
-        elif want_val is not None:
-            commands.append(fail_mode_commands[want_val])
+        # inactivity_timer, native_vlan, datapath_id - no default
+        for p, compare in params_and_comparisons:
+            want_val = want.get(p)
+            have_val = have.get(p)
+            if (state == "deleted" and want_val is not None and have_val is not None) or \
+               (state == "overridden" and want_val is None and have_val is not None):
+                commands.append(f"no openflow {parm_to_keyword[p]}")
+            elif state != "deleted" and want_val is not None and compare(want_val, have_val):
+                if p == "fail_mode":
+                    # fail_mode - has a default but commands are irregular
+                    commands.append(fail_mode_commands[want_val])
+                else:
+                    commands.append(f"openflow {parm_to_keyword[p]} {want_val}")

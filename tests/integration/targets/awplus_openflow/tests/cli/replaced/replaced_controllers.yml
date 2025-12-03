@@ -1,0 +1,131 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_openflow replaced integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    rc1_expected:
+      commands:
+        - openflow controller andy tcp 192.168.2.100 6653
+    rc2_expected:
+      commands:
+        - no openflow controller bob
+        - openflow controller bob tcp 192.168.2.100 6653
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Replace new controller
+      alliedtelesis.awplus.awplus_openflow: &rc1
+        config:
+          controllers:
+            - name: "andy"
+              address: "192.168.2.100"
+              protocol: "tcp"
+              l4_port: 6653
+        state: replaced
+      register: result
+
+    - name: Assert controller config added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ rc1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace eisting controller (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *rc1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Replace existing controller
+      alliedtelesis.awplus.awplus_openflow: &rc2
+        config:
+          controllers:
+            - name: "bob"
+              address: "192.168.2.100"
+              protocol: "tcp"
+              l4_port: 6653
+        state: replaced
+      register: result
+
+    - name: Assert controller config replaced
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ rc2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace eisting controller (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *rc2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Replace controller without protocol fails
+      alliedtelesis.awplus.awplus_openflow:
+        config:
+          controllers:
+            - name: "andy"
+              address: "192.168.2.100"
+              l4_port: 1234
+        state: replaced
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == "New controller protocol missing"
+
+    - name: Replace controller without address fails
+      alliedtelesis.awplus.awplus_openflow:
+        config:
+          controllers:
+            - name: "andy"
+              protocol: tcp
+              l4_port: 1234
+        state: replaced
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == "New controller address missing"
+
+    - name: Replace controller without port fails
+      alliedtelesis.awplus.awplus_openflow:
+        config:
+          controllers:
+            - name: "andy"
+              protocol: tcp
+              address: "192.168.2.100"
+        state: replaced
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == "New controller port missing"
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_reset_config.yml"
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_openflow replaced integration tests on connection={{ ansible_connection }}"

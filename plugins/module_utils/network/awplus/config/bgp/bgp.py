@@ -17,8 +17,10 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
     to_list,
     param_list_to_dict,
     dict_diff,
-    iteritems,
     remove_empties,
+)
+from ansible.module_utils.six import (
+    iteritems
 )
 from ansible.module_utils.common.network import (
     is_netmask,

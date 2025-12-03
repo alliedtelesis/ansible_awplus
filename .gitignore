@@ -112,4 +112,6 @@ dmypy.json
 venv
 venvs
 tests/output
-.env
+.*env
+backup
+.vscode

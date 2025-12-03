@@ -1,0 +1,72 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_openflow merged integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    mp0_expected:
+      commands: 
+    mp1_expected:
+      commands:
+        - interface port1.0.5
+        - openflow
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Merge empty ports
+      alliedtelesis.awplus.awplus_openflow: &mp0
+        config:
+          ports:
+        state: merged
+      register: result
+
+    - name: Assert configurations are merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - "{{ result['commands'] | length == 0 }}"
+
+    - name: Merge empty ports (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *mp0
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config.yml"
+
+    - name: Merge new complete ports
+      alliedtelesis.awplus.awplus_openflow: &mp1
+        config:
+          ports:
+            - port1.0.5
+        state: merged
+      register: result
+
+    - name: Assert configurations are merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ mp1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge new complete ports (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *mp1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_reset_config.yml"
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_openflow merged integration tests on connection={{ ansible_connection }}"

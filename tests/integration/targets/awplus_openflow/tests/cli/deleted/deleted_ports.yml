@@ -1,0 +1,97 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_openflow deleted integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    dp1_expected:
+      commands:
+        - interface port1.0.1
+        - no openflow
+    dp2_expected:
+      commands:
+    dp3_expected:
+      commands:
+        - interface port1.0.1
+        - no openflow
+        - interface port1.0.2
+        - no openflow
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config_complete.yml"
+
+    - name: Delete existing port
+      alliedtelesis.awplus.awplus_openflow: &dp1
+        config:
+          ports:
+            - "port1.0.1"
+        state: deleted
+      register: result
+    
+    - name: Assert port deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ dp1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete existing port (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *dp1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config_complete.yml"
+
+    - name: Delete non-existing port
+      alliedtelesis.awplus.awplus_openflow: &dp2
+        config:
+          ports:
+            - "port1.0.3"
+        state: deleted
+      register: result
+    
+    - name: Assert nothing happens
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - "{{ result['commands'] | length == 0 }}"
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_initial_config_complete.yml"
+
+    - name: Delete all ports
+      alliedtelesis.awplus.awplus_openflow: &dp3
+        config:
+          ports:
+            - "port1.0.1"
+            - "port1.0.2"
+        state: deleted
+      register: result
+    
+    - name: Assert ports deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ dp3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete all ports (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_openflow: *dp3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: "{{ shared_tasks_path }}_reset_config.yml"
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_openflow deleted integration tests on connection={{ ansible_connection }}"

@@ -10,11 +10,12 @@
         lines:
           - hostname aw1
 
-    - name: configure interface settings
+    - name: Configure interface settings
       awplus_config:
         lines:
           - description test interface
-        parents: interface port1.0.2
+        parents: 
+          - interface port1.0.2
 
     - name: configure ip helpers on multiple interfaces
       awplus_config:
