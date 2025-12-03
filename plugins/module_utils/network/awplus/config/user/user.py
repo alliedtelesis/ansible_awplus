@@ -10,7 +10,7 @@ is compared to the provided configuration (as dict) and the command set
 necessary to bring the current configuration to it's desired end-state is
 created
 """
-from passlib.hash import sha256_crypt
+from passlib.hash import sha512_crypt
 
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base import (
     ConfigBase,
@@ -55,13 +55,11 @@ class User(ConfigBase):
         return user_facts
 
     def execute_module(self):
-        """ Execute the module
-
+        """ Execute the module get_user_facts
         :rtype: A dictionary
         :returns: The result from module execution
         """
         result = {'changed': False}
-        warnings = list()
         commands = list()
 
         existing_user_facts = self.get_user_facts()
@@ -78,7 +76,6 @@ class User(ConfigBase):
         if result['changed']:
             result['after'] = changed_user_facts
 
-        result['warnings'] = warnings
         return result
 
     def set_config(self, existing_user_facts):
@@ -130,7 +127,7 @@ class User(ConfigBase):
                   to the desired configuration
         """
         commands = []
-        commands.extend(self._set_config(want, have))
+        commands.extend(self._set_config(want, have, 'replaced'))
         return commands
 
     @staticmethod
@@ -164,7 +161,7 @@ class User(ConfigBase):
                   the current configuration
         """
         commands = []
-        commands.extend(self._set_config(want, have))
+        commands.extend(self._set_config(want, have, 'merged'))
         return commands
 
     @staticmethod
@@ -182,17 +179,23 @@ class User(ConfigBase):
             commands.extend(self._clear_config(want, have))
         return commands
 
-    def _set_config(self, want, have):
+    def _set_config(self, want, have, state):
         # set config
         commands = []
         for name, value in iteritems(want):
             command = ""
-            if name not in have and (not value.get('configured_password') and not value.get('hashed_password')):
+            if state == 'merged' and ((not value.get('configured_password') and not value.get('hashed_password')) and name not in have):
+                self._module.fail_json(msg='Password is required.')
+            elif state == 'replaced' and (not value.get('configured_password') and not value.get('hashed_password')):
                 self._module.fail_json(msg='Password is required.')
             if value.get('configured_password') and value.get('hashed_password'):
                 self._module.fail_json(msg='configured_password and hashed_password are mutually exclusive.')
-            privilege = value['privilege'] if value['privilege'] else have.get(name, {}).get('privilege', 1)
+            if state == 'replaced':
+                privilege = value['privilege'] if value['privilege'] is not None else 1
+            elif state == 'merged':
+                privilege = value['privilege'] if value['privilege'] is not None else have.get(name, {}).get('privilege', 1)
             command += f"username {name}"
+
             if not have.get(name) or privilege != have.get(name)['privilege']:
                 command += f" privilege {privilege}"
             if not have.get(name) or not self._compare_hashes(have, value, name):
@@ -206,11 +209,14 @@ class User(ConfigBase):
         return commands
 
     def encrypt(self, password):
-        """ Encrypts the given password to sha256_crypt
-        Refer to https://passlib.readthedocs.io/en/stable/lib/passlib.hash.sha256_crypt.html
+        """ Encrypts the given password to sha512_crypt
+        Refer to https://passlib.readthedocs.io/en/stable/lib/passlib.hash.sha512_crypt.html
         for full documentation
+
+        Crypt module is no longer available in python3.13+, but passlib has a pure
+        python fallback which produces the same result.
         """
-        return sha256_crypt.using(rounds=5000).hash(password)
+        return sha512_crypt.using(rounds=5000).hash(password)
 
     def _compare_hashes(self, have, value, name):
         # compare hashes from want (name, value) and have
@@ -218,19 +224,24 @@ class User(ConfigBase):
         result = True
         if have.get(name) and value['configured_password'] is not None:
             have_hashed = have.get(name)['hashed_password']
-            # checks if a valid sha256_crypt hash is used
-            if have_hashed is not None and have_hashed[0:3] == '$5$':
-                result = sha256_crypt.verify(value['configured_password'], have_hashed)
+            # checks if a valid sha512_crypt hash is used
+            if have_hashed is not None and have_hashed[0:3] == '$6$':
+                result = sha512_crypt.verify(value['configured_password'], have_hashed)
             else:
-                result = False  # update password to use sha256_crypt
+                result = False  # update password to use sha512_crypt
         elif not (have.get(name)['hashed_password'] == value['hashed_password']):
             result = False
         return result
 
     def _clear_config(self, to_delete, have):
+        protected_accounts = ['manager']
+        user_account = self._module.params['ansible_user']
+        if user_account:
+            protected_accounts.append(user_account)
+
         # clear config
         commands = []
         for name, value in iteritems(to_delete):
-            if name != 'manager' and name in have:
+            if name not in protected_accounts and name in have:
                 commands.append(f"no username {name}")
         return commands
