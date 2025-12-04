@@ -1,3 +1,15 @@
+#
+# -*- coding: utf-8 -*-
+# Copyright 2023 Allied Telesis
+# GNU General Public License v3.0+
+# (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+"""
+Action module class for awplus_user
+This is used to automatically inject the current ansible_user into
+the args of the awplus_user module so that the user does
+not have to specify which user Ansible is using to connect.
+"""
+
 import copy
 from ansible.plugins.action import ActionBase
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.user.user import UserArgs
