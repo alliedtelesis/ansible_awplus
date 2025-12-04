@@ -4,7 +4,7 @@
     msg: "START awplus_openflow initialise config on connection={{ ansible_connection }}"
 
 - name: Initialise openflow
-  alliedtelesis.awplus.awplus_openflow: # TODO replace with awplus_config
+  alliedtelesis.awplus.awplus_openflow:
     config:
       controllers:
         - name: "bob"

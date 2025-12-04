@@ -1,0 +1,156 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_user deleted integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    d1_expected:
+      commands:
+    d2_expected:
+      commands:
+        - no username test_user
+    d3_expected:
+      commands:
+    d4_expected:
+      commands:
+        - no username test_user
+        - no username bill
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete empty config
+      alliedtelesis.awplus.awplus_user: &d1
+        config:
+        state: deleted
+      register: result
+
+    - name: Assert user deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Delete user by name (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *d1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete existing user by name
+      alliedtelesis.awplus.awplus_user: &d2
+        config:
+          - name: test_user
+        state: deleted
+      register: result
+
+    - name: Assert user deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete existing user by name (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *d2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete non-existing user by name
+      alliedtelesis.awplus.awplus_user: &d3
+        config:
+          - name: peter
+        state: deleted
+      register: result
+
+    - name: Assert user deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Delete non-existing user by name (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *d3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete multiple existing and non-existing users
+      alliedtelesis.awplus.awplus_user: &d4
+        config:
+          - name: test_user
+          - name: bill
+          - name: peter
+          - name: bob
+        state: deleted
+      register: result
+
+    - name: Assert mutliple users deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete non-existing user by name (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *d4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete manager
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: manager
+        state: deleted
+      register: result
+
+    - name: Assert manager is not deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete user running ansible
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: "{{ ansible_user }}"
+        state: deleted
+      register: result
+
+    - name: Assert user running ansible is not deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_user deleted integration tests on connection={{ ansible_connection }}"

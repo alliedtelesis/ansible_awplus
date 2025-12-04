@@ -1,0 +1,112 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_user replaced integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    r1_expected:
+      commands:
+        - username test_user privilege 0 password 8 $5$nABt9VDrIVdrHht/$/3a1c3ZK9TQ4c1oi47mDnWRSsS5t6MbCH3PwV39qdq7
+    r2_expected:
+      commands:
+        - username John privilege 1 password 8 $5$nABt9VDrIVdrHht/$/3a1c3ZK9TQ4c1oi47mDnWRSsS5t6MbCH3PwV39qdq7
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace existing user
+      alliedtelesis.awplus.awplus_user: &r1
+        config:
+          - name: test_user
+            hashed_password: $5$nABt9VDrIVdrHht/$/3a1c3ZK9TQ4c1oi47mDnWRSsS5t6MbCH3PwV39qdq7
+            privilege: 0
+        state: replaced
+      register: result
+
+    - name: Assert users password replaced
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replaced users password (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *r1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace existing user without specifying privilege
+      alliedtelesis.awplus.awplus_user: &r2
+        config:
+          - name: John
+            hashed_password: $5$nABt9VDrIVdrHht/$/3a1c3ZK9TQ4c1oi47mDnWRSsS5t6MbCH3PwV39qdq7
+        state: replaced
+      register: result
+
+    - name: Assert user given default privilege
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replaced users password (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_user: *r2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace existing user without specifying password
+      alliedtelesis.awplus.awplus_user: 
+        config:
+          - name: John
+            privilege: 15
+        state: replaced
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == "Password is required."
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace existing user using both configured and hashed passwords
+      alliedtelesis.awplus.awplus_user: 
+        config:
+          - name: John
+            privilege: 15
+            configured_password: test
+            hashed_password: test
+        state: replaced
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == "configured_password and hashed_password are mutually exclusive."
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_user replaced integration tests on connection={{ ansible_connection }}"

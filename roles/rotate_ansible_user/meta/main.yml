@@ -1,0 +1,9 @@
+#SPDX-License-Identifier: MIT-0
+galaxy_info:
+  author: Allied Telesis
+  description: Replaces the currently used ansible user with a new user
+  company: Allied Telesis
+  license: GPLv3
+  min_ansible_version: 2.19
+  galaxy_tags: []
+dependencies: []

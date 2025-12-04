@@ -1,0 +1,25 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_user initialise config on connection={{ ansible_connection }}"
+
+- name: Initialise configuration
+  alliedtelesis.awplus.awplus_user:
+    config:
+      - name: manager
+        hashed_password: "$1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G1"
+        privilege: 15
+      - name: tonyp
+        configured_password: tonyptonyp
+        privilege: 15
+      - name: bill
+        hashed_password: $1$uWpOyAfS$3PAKGZRtk44xYWFsIhJ8G1
+        privilege: 2
+      - name: test_user
+        configured_password: test_password
+        privilege: 10
+    state: overridden
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_user initialise config on connection={{ ansible_connection }}"
