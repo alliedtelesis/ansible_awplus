@@ -1,0 +1,70 @@
+
+LLDP Detailed Neighbor Information:
+
+Local port1.0.17:
+  Neighbors table last updated 0 hrs 1 mins 57 secs ago
+
+  Chassis ID Type .................. MAC address
+  Chassis ID ....................... 001a.eb9f.bd4f
+  Port ID Type ..................... Interface name
+  Port ID .......................... port1.0.7
+  TTL .............................. 120 (secs)
+  Port Description ................. [not advertised]
+  System Name ...................... [not advertised]
+  System Description ............... [not advertised]
+  System Capabilities .............. [not advertised]
+  Management Addresses ............. [not advertised]
+  Port VLAN ID (PVID) .............. [not advertised]
+  Port & Protocol VLAN ............. [not advertised]
+  VLAN Names ....................... [not advertised]
+  Protocol IDs ..................... [not advertised]
+  MAC/PHY Auto-negotiation ......... [not advertised]
+  Power Via MDI (PoE) .............. [not advertised]
+  Link Aggregation ................. [not advertised]
+  Maximum Frame Size ............... [not advertised]
+  LLDP-MED Capabilities ............ [not advertised]
+  Network Policy ................... [not advertised]
+  Location Identification .......... [not advertised]
+  Extended Power Via MDI (PoE) ..... [not advertised]
+  Inventory Management:  
+       Hardware Revision ........... [not advertised]
+       Firmware Revision ........... [not advertised]
+       Software Revision ........... [not advertised]
+       Serial Number ............... [not advertised]
+       Manufacturer Name ........... [not advertised]
+       Model Name .................. [not advertised]
+       Asset ID .................... [not advertised]
+
+Local port1.0.18:
+  Neighbors table last updated 0 hrs 1 mins 57 secs ago
+
+  Chassis ID Type .................. MAC address
+  Chassis ID ....................... 001a.eb9f.bd4f
+  Port ID Type ..................... Interface name
+  Port ID .......................... port1.0.11
+  TTL .............................. 120 (secs)
+  Port Description ................. [not advertised]
+  System Name ...................... [not advertised]
+  System Description ............... [not advertised]
+  System Capabilities .............. [not advertised]
+  Management Addresses ............. [not advertised]
+  Port VLAN ID (PVID) .............. [not advertised]
+  Port & Protocol VLAN ............. [not advertised]
+  VLAN Names ....................... [not advertised]
+  Protocol IDs ..................... [not advertised]
+  MAC/PHY Auto-negotiation ......... [not advertised]
+  Power Via MDI (PoE) .............. [not advertised]
+  Link Aggregation ................. [not advertised]
+  Maximum Frame Size ............... [not advertised]
+  LLDP-MED Capabilities ............ [not advertised]
+  Network Policy ................... [not advertised]
+  Location Identification .......... [not advertised]
+  Extended Power Via MDI (PoE) ..... [not advertised]
+  Inventory Management:  
+       Hardware Revision ........... [not advertised]
+       Firmware Revision ........... [not advertised]
+       Software Revision ........... [not advertised]
+       Serial Number ............... [not advertised]
+       Manufacturer Name ........... [not advertised]
+       Model Name .................. [not advertised]
+       Asset ID .................... [not advertised]
