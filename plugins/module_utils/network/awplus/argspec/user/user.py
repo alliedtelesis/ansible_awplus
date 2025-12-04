@@ -35,6 +35,7 @@ class UserArgs(object):  # pylint: disable=R0903
         pass
 
     argument_spec = {
+        'ansible_user': {'type': 'str'},
         'config': {'elements': 'dict', 'options': {
             'configured_password': {},
             'hashed_password': {'type': 'str'},

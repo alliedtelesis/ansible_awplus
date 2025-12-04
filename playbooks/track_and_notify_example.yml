@@ -19,19 +19,19 @@
         content: "{{ current_config.stdout }}"
         dest: "{{ current_file_path }}"
 
-    # - name: Remove test user if they already exist
-    #   alliedtelesis.awplus.awplus_user:
-    #     config:
-    #       - name: track_and_notify_changes_example_user
-    #     state: deleted
+    - name: Remove test user if they already exist
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: track_and_notify_changes_example_user
+        state: deleted
 
-    # - name: Add test user
-    #   alliedtelesis.awplus.awplus_user:
-    #     config:
-    #       - name: track_and_notify_changes_example_user
-    #         configured_password: test
-    #         privilege: 13
-    #     state: merged
+    - name: Add test user
+      alliedtelesis.awplus.awplus_user:
+        config:
+          - name: track_and_notify_changes_example_user
+            configured_password: test
+            privilege: 13
+        state: merged
 
     - name: Compare current configuration with previous configuration
       ansible.builtin.command: diff previous_file_path current_file_path
