@@ -8,7 +8,6 @@
     config:
     state: overridden
 
-
 - name: Debug task
   ansible.builtin.debug:
     msg: "END awplus_user reset config on connection={{ ansible_connection }}"
