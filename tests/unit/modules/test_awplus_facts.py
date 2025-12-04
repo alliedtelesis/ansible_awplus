@@ -93,7 +93,13 @@ class TestAwplusFactsModule(TestAwplusModule):
         )
 
     def test_awplus_facts_neighbors(self):
-        pass
+        set_module_args(dict(gather_subset="interfaces"))
+        result = self.execute_module()
+        net_neighbors = result["ansible_facts"]["ansible_net_neighbors"]
+        self.assertEqual(net_neighbors["port1.0.17"][0]["host"], "[not advertised]")
+        self.assertEqual(net_neighbors["port1.0.17"][0]["port"], "port1.0.7")
+        self.assertEqual(net_neighbors["port1.0.18"][0]["host"], "[not advertised]")
+        self.assertEqual(net_neighbors["port1.0.18"][0]["port"], "port1.0.11")
 
     def test_awplus_facts_hostname(self):
         set_module_args(dict(gather_subset="default"))
