@@ -1,4 +1,4 @@
-# (c) 2020 Allied Telesis
+# (c) 2023 Allied Telesis
 #
 # This file is part of Ansible
 #
@@ -33,67 +33,370 @@ class TestAwplusStaticRouteModule(TestAwplusModule):
     def setUp(self):
         super(TestAwplusStaticRouteModule, self).setUp()
 
-        self.mock_load_config = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_static_route.load_config"
+        self.mock_get_resource_connection_config = patch(
+            "ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base.get_resource_connection"
         )
-        self.load_config = self.mock_load_config.start()
+        self.get_resource_connection_config = self.mock_get_resource_connection_config.start()
 
-        self.mock_get_config = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.modules.awplus_static_route.get_config"
+        self.mock_execute_show_static_route_conf = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.static_route."
+            "static_route.Static_routeFacts.get_static_route_conf"
         )
-        self.get_config = self.mock_get_config.start()
+        self.execute_show_static_route_conf = self.mock_execute_show_static_route_conf.start()
+
+        self.mock_check_vrf = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.config.static_route.static_route.Static_route._check_vrf"
+        )
+        self.check_vrf = self.mock_check_vrf.start()
 
     def tearDown(self):
         super(TestAwplusStaticRouteModule, self).tearDown()
-        self.mock_load_config.stop()
-        self.mock_get_config.stop()
+        self.mock_get_resource_connection_config.stop()
+        self.mock_check_vrf.stop()
+        self.mock_execute_show_static_route_conf.stop()
 
-    def load_fixtures(self, commands=None, transport="cli"):
-        self.get_config.return_value = load_fixture("awplus_static_route.cfg")
-        self.load_config.return_value = None
+    def load_fixtures(self, commands=None):
+        def load_from_file(*args, **kwargs):
+            return load_fixture("awplus_static_route.cfg")
 
-    def test_awplus_static_route_present(self):
-        set_module_args(dict(prefix="192.168.20.64", mask=25, next_hop="192.0.2.3"))
-        self.execute_module(
-            changed=True, commands=["ip route 192.168.20.64/25 192.0.2.3"]
-        )
+        self.execute_show_static_route_conf.side_effect = load_from_file
+        self.check_vrf.return_value = True
 
-    def test_awplus_static_route_present_no_defaults(self):
+    def test_awplus_merge_new_IPv4_static_route_1(self):
         set_module_args(
             dict(
-                prefix="192.168.20.64",
-                mask=24,
-                next_hop="192.0.2.3",
-                interface="vlan2",
-                admin_distance=100,
+                config=[
+                    dict(
+                        afi="IPv4",
+                        address="168.144.2.0/24",
+                        next_hop="vlan2",
+                        description="a new static route",
+                        admin_distance=21,
+                        vrf="test"
+                    )
+                ],
+                state="merged"
             )
         )
-        self.execute_module(
-            changed=True, commands=["ip route 192.168.20.64/24 192.0.2.3 vlan2 100"]
-        )
+        commands = [
+            "ip route vrf test 168.144.2.0/24 vlan2 21 description a new static route"
+        ]
+        self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_static_route_present_vrf(self):
+    def test_awplus_merge_new_IPv4_static_route_2(self):
         set_module_args(
-            dict(prefix="192.168.20.64", mask=24, next_hop="192.0.2.3", vrf="test")
+            dict(
+                config=[
+                    dict(
+                        afi="IPv4",
+                        address="192.168.3.0 255.255.255.0",
+                        next_hop="vlan2",
+                        admin_distance=21
+                    )
+                ],
+                state="merged"
+            )
         )
-        self.execute_module(
-            changed=True,
-            sort=False,
-            commands=["ip route vrf test 192.168.20.64/24 192.0.2.3"],
-        )
+        commands = [
+            "ip route 192.168.3.0/24 vlan2 21"
+        ]
+        self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_static_route_no_change(self):
-        set_module_args(dict(prefix="10.0.0.0", mask=8, next_hop="10.37.7.1"))
-        self.execute_module(changed=False, commands=[])
-
-    def test_awplus_static_route_absent(self):
+    def test_awplus_merge_new_IPv6_static_route(self):
         set_module_args(
-            dict(prefix="10.0.0.0", mask=8, next_hop="10.37.7.1", state="absent")
+            dict(
+                config=[
+                    dict(
+                        afi="IPv6",
+                        address="2100:db8::1/128",
+                        next_hop="vlan2",
+                        source_address="2010::1",
+                        description="a new description",
+                        admin_distance=111
+                    )
+                ],
+                state="merged"
+            )
         )
-        self.execute_module(changed=True, commands=["no ip route 10.0.0.0/8 10.37.7.1"])
+        commands = [
+            "ipv6 route 2100:db8::1/128 2010::1 vlan2 111 description a new description"
+        ]
+        self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_static_route_absent_no_change(self):
+    def test_awplus_merge_change_IPv4_static_route_config(self):
         set_module_args(
-            dict(prefix="192.168.20.6", mask=24, next_hop="192.0.2.3", state="absent")
+            dict(
+                config=[
+                    dict(
+                        afi="IPv4",
+                        address="191.144.2.0 255.255.255.0",
+                        next_hop="vlan1",
+                        description="a new description for a route",
+                        vrf="test_2"
+                    )
+                ],
+                state="merged"
+            )
         )
-        self.execute_module(changed=False, commands=[])
+        commands = [
+            "no ip route vrf test 191.144.2.0/24  vlan1",
+            "ip route vrf test_2 191.144.2.0/24 vlan1 112 description a new description for a route"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_merge_idempotent_config(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(
+                        afi="IPv4",
+                        address="191.144.2.0/24",
+                        next_hop="vlan1",
+                        admin_distance=112,
+                        vrf="test"
+                    ),
+                    dict(
+                        afi="IPv6",
+                        address="2001:db8::1/128",
+                        next_hop="vlan2",
+                        source_address="2001::1",
+                        description="description"
+                    ),
+                    dict(
+                        afi="IPv4",
+                        address="190.144.2.0/24",
+                        next_hop="vlan2",
+                        admin_distance=12
+                    ),
+                    dict(
+                        afi="IPv4",
+                        address="190.144.2.0/24",
+                        next_hop="vlan1",
+                        admin_distance=121
+                    )
+                ],
+                state="merged"
+            )
+        )
+        self.execute_module(changed=False)
+
+    def test_awplus_replace_nothing_with_new_config(self):
+        set_module_args(dict(config=[dict(afi="IPv4", address="168.144.2.0/24", next_hop="vlan2", description="something")], state="replaced"))
+        self.execute_module(changed=False)
+
+    def test_awplus_replace_IPv4_config(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(
+                        afi="IPv4",
+                        address="191.144.2.0/24",
+                        next_hop="vlan1",
+                        description="a new item",
+                        admin_distance=1
+                    )
+                ],
+                state="replaced"
+            )
+        )
+        commands = [
+            "no ip route vrf test 191.144.2.0/24  vlan1",
+            "ip route 191.144.2.0/24 vlan1 1 description a new item"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_replace_IPv6_config(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(
+                        afi="IPv6",
+                        address="2001:db8::1/128",
+                        next_hop="vlan2",
+                        source_address="2101::1",
+                        admin_distance=11
+                    )
+                ],
+                state="replaced"
+            )
+        )
+        commands = [
+            "no ipv6 route 2001:db8::1/128 2001::1 vlan2",
+            "ipv6 route 2001:db8::1/128 2101::1 vlan2 11"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_replace_idempotent_config(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(
+                        afi="IPv4",
+                        address="191.144.2.0/24",
+                        next_hop="vlan1",
+                        admin_distance=112,
+                        vrf="test"
+                    ),
+                    dict(
+                        afi="IPv6",
+                        address="2001:db8::1/128",
+                        next_hop="vlan2",
+                        source_address="2001::1",
+                        description="description"
+                    ),
+                    dict(
+                        afi="IPv4",
+                        address="190.144.2.0/24",
+                        next_hop="vlan2",
+                        admin_distance=12
+                    ),
+                    dict(
+                        afi="IPv4",
+                        address="190.144.2.0/24",
+                        next_hop="vlan1",
+                        admin_distance=121
+                    )
+                ],
+                state="replaced"
+            )
+        )
+        self.execute_module(changed=False)
+
+    def test_awplus_delete_items_multiple_configs(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(
+                        afi="IPv6",
+                        address="2001:db8::1/128",
+                        next_hop="vlan2",
+                        source_address="2001::1"
+                    ),
+                    dict(
+                        afi="IPv4",
+                        address="191.144.2.0/24",
+                        next_hop="vlan1",
+                        vrf="test"
+                    )
+                ],
+                state="deleted"
+            )
+        )
+        commands = [
+            "no ip route vrf test 191.144.2.0/24  vlan1",
+            "ip route 191.144.2.0/24 vlan1 112",
+            "no ipv6 route 2001:db8::1/128 2001::1 vlan2",
+            "ipv6 route 2001:db8::1/128 vlan2 description description"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_delete_single_route(self):
+        set_module_args(dict(config=[dict(afi="IPv4", address="191.144.2.0/24", next_hop="vlan1")], state="deleted"))
+        commands = [
+            "no ip route vrf test 191.144.2.0/24 vlan1"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_delete_all_routes_using_same_address(self):
+        set_module_args(dict(config=[dict(afi="IPv4", address="190.144.2.0/24")], state="deleted"))
+        commands = [
+            "no ip route 190.144.2.0/24"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_delete_all_vrf_routes_using_same_address(self):
+        set_module_args(dict(config=[dict(afi="IPv4", address="191.144.2.0/24", vrf="test")], state="deleted"))
+        self.execute_module(changed=False)
+
+    def test_awplus_overridden_add_new_route_remove_others(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(
+                        afi="IPv4",
+                        address="172.144.2.0 255.255.255.255",
+                        admin_distance=21,
+                        description="overwritten desp",
+                        next_hop="vlan2"
+                    )
+                ],
+                state="overridden"
+            )
+        )
+        commands = [
+            "no ip route 190.144.2.0/24 vlan2",
+            "no ip route 190.144.2.0/24 vlan1",
+            "no ip route vrf test 191.144.2.0/24 vlan1",
+            "no ipv6 route 2001:db8::1/128 2001::1 vlan2",
+            "ip route 172.144.2.0/32 vlan2 21 description overwritten desp"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_overridden_add_update_remove_configs(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(
+                        afi="IPv4",
+                        address="191.144.2.0 255.255.255.0",
+                        next_hop="vlan1",
+                        description="a static route",
+                        admin_distance=12,
+                        vrf="test_2"
+                    ),
+                    dict(
+                        afi="IPv6",
+                        address="2001:db8::1/128",
+                        next_hop="vlan1",
+                        source_address="2001::1",
+                        description="description of something"
+                    )
+                ],
+                state="overridden"
+            )
+        )
+        commands = [
+            "no ip route 190.144.2.0/24 vlan2",
+            "no ip route 190.144.2.0/24 vlan1",
+            "no ip route vrf test 191.144.2.0/24  vlan1",
+            "ip route vrf test_2 191.144.2.0/24 vlan1 12 description a static route",
+            "no ipv6 route 2001:db8::1/128 2001::1 vlan2",
+            "ipv6 route 2001:db8::1/128 2001::1 vlan1 description description of something"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_override_idempotent_config(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(
+                        afi="IPv4",
+                        address="191.144.2.0/24",
+                        next_hop="vlan1",
+                        admin_distance=112,
+                        vrf="test"
+                    ),
+                    dict(
+                        afi="IPv6",
+                        address="2001:db8::1/128",
+                        next_hop="vlan2",
+                        source_address="2001::1",
+                        description="description"
+                    ),
+                    dict(
+                        afi="IPv4",
+                        address="190.144.2.0/24",
+                        next_hop="vlan2",
+                        admin_distance=12
+                    ),
+                    dict(
+                        afi="IPv4",
+                        address="190.144.2.0/24",
+                        next_hop="vlan1",
+                        admin_distance=121
+                    )
+                ],
+                state="overridden"
+            )
+        )
+        self.execute_module(changed=False)

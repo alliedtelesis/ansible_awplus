@@ -1,0 +1,461 @@
+---
+- hosts: aw1
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: test_setup_create_vrfs
+      tags:
+        - test_setup
+      awplus_vrfs:
+        config:
+          - name: test
+            id: 1
+          - name: test_2
+            id: 2
+        state: merged
+
+    - name: All tests - restore init conditions
+      tags: test_init
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 191.144.2.0/24
+            next_hop: vlan1
+            admin_distance: 112
+            vrf: test
+          - afi: IPv6
+            address: 2001:db8::1/128
+            next_hop: vlan2
+            source_address: 2001::1
+            description: description
+          - afi: IPv4
+            address: 190.144.2.0/24
+            next_hop: vlan2
+            admin_distance: 12
+          - afi: IPv4
+            address: 190.144.2.0/24
+            next_hop: 'NULL'
+            admin_distance: 121
+        state: overridden
+
+    - name: Merged Test - Merge empty config
+      tags: m_1
+      awplus_static_route:
+        config:
+        state: merged
+
+    - name: Merged Test - add new IPv4 static route 1
+      tags: m_2
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 168.144.2.0/24
+            next_hop: vlan2
+            description: a new static route
+            admin_distance: 21
+            vrf: test
+        state: merged
+
+    - name: Merged Test - add new IPv4 static route 2
+      tags: m_3
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 192.168.3.0 255.255.255.0
+            next_hop: 'null'
+            admin_distance: 21
+        state: merged
+
+    - name: Merged Test - add new IPv6 static route
+      tags: m_4
+      awplus_static_route:
+        config:
+          - afi: IPv6
+            address: 2100:db8::1/128
+            next_hop: vlan2
+            source_address: 2010::1
+            description: a new description
+            admin_distance: 111
+        state: merged
+
+    - name: Merged Test - change config in IPv4 static route 1
+      tags: m_5
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 191.144.2.0/24
+            next_hop: vlan1
+            description: a new description for a route
+            vrf: test_2
+        state: merged
+
+    - name: Merged Test - change config in IPv4 static route 2
+      tags: m_6
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 191.144.2.0 255.255.255.0
+            next_hop: vlan1
+            description: a new description for a route
+            vrf: test_2
+        state: merged
+
+    - name: Merged Test - change config in IPv6 static route
+      tags: m_7
+      awplus_static_route:
+        config:
+          - afi: IPv6
+            address: 2001:db8::1/128
+            next_hop: vlan2
+            source_address: 2010::1
+            admin_distance: 11
+        state: merged
+
+    - name: Merged Test - merge idempotant config
+      tags: m_8
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 191.144.2.0/24
+            next_hop: vlan1
+            admin_distance: 112
+            vrf: test
+          - afi: IPv6
+            address: 2001:db8::1/128
+            next_hop: vlan2
+            source_address: 2001::1
+            description: description
+          - afi: IPv4
+            address: 190.144.2.0/24
+            next_hop: vlan2
+            admin_distance: 12
+          - afi: IPv4
+            address: 190.144.2.0/24
+            next_hop: 'NULL'
+            admin_distance: 121
+        state: merged
+
+    - name: Merged Test - change config in blackhole static route
+      tags: m_9
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 190.144.2.0/24
+            next_hop: 'null'
+            description: a blackhole
+            admin_distance: 111
+        state: merged
+
+    - name: Replaced test - replace with empty configs
+      tags: r_1
+      awplus_static_route:
+        config:
+        state: replaced
+
+    - name: Replaced test - replace nothing with new config
+      tags: r_2
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 168.144.2.0/24
+            next_hop: vlan2
+            description: something
+        state: replaced
+
+    - name: Replaced test - replace items in IPv4 config 1
+      tags: r_3
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 191.144.2.0/24
+            next_hop: vlan1
+            description: a new item
+            admin_distance: 1
+        state: replaced
+
+    - name: Merged Test - replace items in IPv4 config 2
+      tags: r_4
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 191.144.2.0 255.255.255.0
+            next_hop: vlan1
+            description: a new item
+            admin_distance: 1
+        state: replaced
+
+    - name: Replaced test - replace items in IPv6 config
+      tags: r_5
+      awplus_static_route:
+        config:
+          - afi: IPv6
+            address: 2001:db8::1/128
+            next_hop: vlan2
+            source_address: 2101::1
+            admin_distance: 11
+        state: replaced
+
+    - name: Replaced Test - replace idempotant config
+      tags: r_6
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 191.144.2.0/24
+            next_hop: vlan1
+            admin_distance: 112
+            vrf: test
+          - afi: IPv6
+            address: 2001:db8::1/128
+            next_hop: vlan2
+            source_address: 2001::1
+            description: description
+          - afi: IPv4
+            address: 190.144.2.0/24
+            next_hop: vlan2
+            admin_distance: 12
+          - afi: IPv4
+            address: 190.144.2.0/24
+            next_hop: 'NULL'
+            admin_distance: 121
+        state: replaced
+
+    - name: replace items in blackhole route
+      tags: r_7
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 190.144.2.0/24
+            next_hop: 'null'
+            description: a blackhole
+        state: merged
+
+    - name: Deleted test - delete empty config
+      tags: d_1
+      awplus_static_route:
+        config:
+        state: deleted
+
+    - name: Deleted test - delete non existing static route
+      tags: d_2
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 153.144.2.0/24
+            next_hop: vlan7
+        state: deleted
+
+    - name: Deleted test - delete items in multiple configs
+      tags: d_3
+      awplus_static_route:
+        config:
+          - afi: IPv6
+            address: 2001:db8::1/128
+            next_hop: vlan2
+            source_address: 2001::1
+          - afi: IPv4
+            address: 191.144.2.0 255.255.255.0
+            next_hop: vlan1
+            vrf: test
+        state: deleted
+
+    - name: Deleted test - delete single IPv4 static route
+      tags: d_4
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 191.144.2.0/24
+            next_hop: vlan1
+        state: deleted
+
+    - name: Deleted test - delete single IPv6 static route
+      tags: d_5
+      awplus_static_route:
+        config:
+          - afi: IPv6
+            address: 2001:db8::1/128
+            next_hop: vlan2
+        state: deleted
+
+    - name: Deleted test - delete all static routes using same address
+      tags: d_6
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 190.144.2.0/24
+        state: deleted
+
+    - name: Deleted test - delete a blackhole route
+      tags: d_7
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 190.144.2.0/24
+            next_hop: 'null'
+        state: deleted
+
+    - name: Overridden test - override empty config
+      tags: o_1
+      awplus_static_route:
+        config:
+        state: overridden
+
+    - name: Overridden test - add new static route and remove others
+      tags: o_2
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 172.144.2.0 255.255.255.255
+            admin_distance: 21
+            description: overwritten desp
+            next_hop: vlan2
+        state: overridden
+
+    - name: Overridden test - add, update and remove configs
+      tags: o_3
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 191.144.2.0 255.255.255.255
+            next_hop: vlan1
+            description: a static route
+            admin_distance: 12
+            vrf: test_2
+          - afi: IPv6
+            address: 2001:db8::1/128
+            next_hop: vlan1
+            source_address: 2001::1
+            description: description of something
+        state: overridden
+
+    - name: Overridden test - override idempotant config
+      tags: o_4
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 191.144.2.0/24
+            next_hop: vlan1
+            admin_distance: 112
+            vrf: test
+          - afi: IPv6
+            address: 2001:db8::1/128
+            next_hop: vlan2
+            source_address: 2001::1
+            description: description
+          - afi: IPv4
+            address: 190.144.2.0/24
+            next_hop: vlan2
+            admin_distance: 12
+          - afi: IPv4
+            address: 190.144.2.0/24
+            next_hop: 'NULL'
+            admin_distance: 121
+
+        state: overridden
+
+    - name: Config test - IPv6 afi with IPv4 address 1
+      tags: c_1
+      awplus_static_route:
+        config:
+          - afi: IPv6
+            address: 192.144.2.0/24
+            next_hop: vlan1
+        state: merged
+
+    - name: Config test - IPv6 afi with IPv4 address 2
+      tags: c_2
+      awplus_static_route:
+        config:
+          - afi: IPv6
+            address: 192.144.2.0 255.255.255.0
+            next_hop: vlan1
+        state: merged
+
+    - name: Config test - invalid IPv4 address 1
+      tags: c_3
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: '192.144.2.0'
+            next_hop: vlan1
+        state: merged
+
+    - name: Config test - invalid IPv4 address 2
+      tags: c_4
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: '192.144.2/24'
+            next_hop: vlan1
+        state: merged
+
+    - name: Config test - invalid IPv4 address 3
+      tags: c_5
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: '255.255.255.0'
+            next_hop: vlan1
+        state: merged
+
+    - name: Config test - IPv4 afi with IPv6 address
+      tags: c_6
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 2001:db8::1/128
+            next_hop: vlan2
+        state: merged
+
+    - name: Config test - give source address for IPv4 static route
+      tags: c_7
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 191.144.2.0/24
+            next_hop: vlan1
+            admin_distance: 112
+            source_address: 192.142.123.4/24
+            vrf: test
+        state: replaced
+
+    - name: Config test - give vrf for IPv6 static route
+      tags: c_8
+      awplus_static_route:
+        config:
+          - afi: IPv6
+            address: 2001:db8::1/128
+            next_hop: vlan2
+            description: description
+            source_address: 2001::1
+            vrf: test
+        state: replaced
+
+    - name: Config test - out of range admin_distance
+      tags: c_9
+      awplus_static_route:
+        config:
+          - afi: IPv6
+            address: 2001:db8::1/128
+            next_hop: vlan2
+            admin_distance: 300
+        state: merged
+
+    - name: Config test - supply non-existing vrf
+      tags: c_10
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 191.144.2.0/24
+            next_hop: vlan1
+            vrf: something
+        state: merged
+
+    - name: Config test - supply incorrect netmask
+      tags: c_11
+      awplus_static_route:
+        config:
+          - afi: IPv4
+            address: 190.144.2.0 255.255.255.232
+            next_hop: vlan1
+        state: merged
