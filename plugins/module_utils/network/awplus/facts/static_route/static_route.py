@@ -47,9 +47,6 @@ class Static_routeFacts(object):
         :rtype: dictionary
         :returns: facts
         """
-        if connection:  # just for linting purposes, remove
-            pass
-
         if not data:
             # typically data is populated from the current device configuration
             # data = connection.get('show running-config | section ^interface')
