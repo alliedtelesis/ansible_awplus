@@ -1,0 +1,161 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lag_interfaces merged integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    m1_expected:
+      commands:
+    m2_expected:
+      commands:
+        - interface port1.0.8
+        - channel-group 44 mode active
+    m3_expected:
+      commands:
+        - interface port1.0.1
+        - channel-group 44 mode passive
+    m3_expected:
+      commands:
+        - interface port1.0.1
+        - channel-group 44 mode passive
+        - interface port1.0.1
+        - channel-group 66 mode passive
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge nothing
+      alliedtelesis.awplus.awplus_lag_interfaces: &m1
+        config:
+        state: merged
+      register: result
+
+    - name: Assert nothing changes
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Merge nothing (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *m1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge new port
+      alliedtelesis.awplus.awplus_lag_interfaces: &m2
+        config:
+          - name: 44
+            members:
+              - member: port1.0.8
+                mode: active
+        state: merged
+      register: result
+
+    - name: Assert new port added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge new port (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *m2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge new mode
+      alliedtelesis.awplus.awplus_lag_interfaces: &m3
+        config:
+          - name: 44
+            members:
+              - member: port1.0.1
+                mode: passive
+        state: merged
+      register: result
+
+    - name: Assert new port added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge new mode (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *m3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge swap ports and change modes
+      alliedtelesis.awplus.awplus_lag_interfaces: &m4
+        config:
+          - name: 66
+            members:
+              - member: port1.0.4
+                mode: passive
+          - name: 44
+            members:
+              - member: port1.0.1
+                mode: passive
+        state: merged
+      register: result
+
+    - name: Assert new port added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge swap ports and change modes (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *m4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge non-existing port without mode
+      alliedtelesis.awplus.awplus_lag_interfaces:
+        config:
+          - name: 44
+            members:
+              - member: port1.0.10
+        state: merged
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == 'missing required arguments ":" mode found in config -> members'
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lag_interfaces merged integration tests on connection={{ ansible_connection }}"

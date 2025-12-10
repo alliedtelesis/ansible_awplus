@@ -1,0 +1,219 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lag_interfaces overridden integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    o1_expected:
+      commands:
+        - interface port1.0.1
+        - no channel-group
+        - interface port1.0.2
+        - no channel-group
+        - interface port1.0.3
+        - no channel-group
+        - interface port1.0.4
+        - no channel-group
+        - interface port1.0.5
+        - no channel-group
+        - interface port1.0.6
+        - no channel-group
+    o2_expected:
+      commands:
+        - interface port1.0.1
+        - no channel-group
+        - interface port1.0.2
+        - no channel-group
+        - interface port1.0.3
+        - no channel-group
+        - interface port1.0.4
+        - no channel-group
+        - interface port1.0.5
+        - no channel-group
+        - interface port1.0.6
+        - no channel-group
+        - interface port1.0.10
+        - channel-group 44 mode active
+    o3_expected:
+      commands:
+        - interface port1.0.1
+        - channel-group 44 mode passive
+        - interface port1.0.4
+        - channel-group 66 mode passive
+    o4_expected:
+      commands:
+        - interface port1.0.1
+        - no channel-group
+        - channel-group 66 mode passive
+        - interface port1.0.2
+        - no channel-group
+        - channel-group 66 mode passive
+        - interface port1.0.3
+        - no channel-group
+        - channel-group 66 mode active
+        - interface port1.0.4
+        - no channel-group
+        - channel-group 44 mode passive
+        - interface port1.0.5
+        - no channel-group
+        - channel-group 44 mode active
+        - interface port1.0.6
+        - no channel-group
+        - channel-group 44 mode active
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with empty config
+      alliedtelesis.awplus.awplus_lag_interfaces: &o1
+        config:
+        state: overridden
+      register: result
+
+    - name: Assert everything is removed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with empty config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *o1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with new member
+      alliedtelesis.awplus.awplus_lag_interfaces: &o2
+        config:
+          - name: 44
+            members:
+              - member: port1.0.10
+                mode: active
+        state: overridden
+      register: result
+
+    - name: Assert only new member exists
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with new member (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *o2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with changed modes
+      alliedtelesis.awplus.awplus_lag_interfaces: &o3
+        config:
+          - name: 44
+            members:
+              - member: port1.0.1
+                mode: passive
+              - member: port1.0.2
+                mode: active
+              - member: port1.0.3
+                mode: passive
+          - name: 66  
+            members:
+              - member: port1.0.4
+                mode: passive
+              - member: port1.0.5
+                mode: passive
+              - member: port1.0.6
+                mode: passive
+        state: overridden
+      register: result
+
+    - name: Assert modes changed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with changed modes (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *o3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with swapped ports
+      alliedtelesis.awplus.awplus_lag_interfaces: &o4
+        config:
+          - name: 44
+            members:
+              - member: port1.0.4
+                mode: passive
+              - member: port1.0.5
+                mode: passive
+              - member: port1.0.6
+                mode: active
+          - name: 66  
+            members:
+              - member: port1.0.1
+                mode: passive
+              - member: port1.0.2
+                mode: active
+              - member: port1.0.3
+                mode: active
+        state: overridden
+      register: result
+
+    - name: Assert ports swapped
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with swapped ports (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *o4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Override non-existing port without mode
+      alliedtelesis.awplus.awplus_lag_interfaces:
+        config:
+          - name: 44
+            members:
+              - member: port1.0.10
+        state: overridden
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == 'missing required arguments ":" mode found in config -> members'
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lag_interfaces overridden integration tests on connection={{ ansible_connection }}"

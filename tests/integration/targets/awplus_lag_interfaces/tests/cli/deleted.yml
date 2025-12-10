@@ -1,0 +1,219 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lag_interfaces deleted integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    d1_expected:
+      commands:
+    d2_expected:
+      commands:
+        - interface port1.0.1
+        - no channel-group
+    d3_expected:
+      commands:
+        - interface port1.0.1
+        - no channel-group
+        - interface port1.0.2
+        - no channel-group
+        - interface port1.0.3
+        - no channel-group
+    d4_expected:
+      commands:
+        - interface port1.0.1
+        - no channel-group
+        - interface port1.0.2
+        - no channel-group
+        - interface port1.0.3
+        - no channel-group
+        - interface port1.0.4
+        - no channel-group
+        - interface port1.0.5
+        - no channel-group
+        - interface port1.0.6
+        - no channel-group
+    d5_expected:
+      commands:
+        - interface port1.0.1
+        - no channel-group
+        - interface port1.0.2
+        - no channel-group
+        - interface port1.0.3
+        - no channel-group
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete nothing
+      alliedtelesis.awplus.awplus_lag_interfaces: &d1
+        config:
+        state: deleted
+      register: result
+
+    - name: Assert port deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Delete nothing (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *d1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete port by name
+      alliedtelesis.awplus.awplus_lag_interfaces: &d2
+        config:
+          - name: 44
+            members:
+              - member: port1.0.1
+                mode: active
+        state: deleted
+      register: result
+
+    - name: Assert port deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    # - name: Delete port by name (IDEMPOTENT)
+    #   alliedtelesis.awplus.awplus_lag_interfaces: *d2
+    #   register: result
+
+    # - name: Assert idempotency
+    #   ansible.builtin.assert:
+    #     that: 
+    #       - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete multiple ports by name
+      alliedtelesis.awplus.awplus_lag_interfaces: &d3
+        config:
+          - name: 44
+            members:
+              - member: port1.0.1
+                mode: active
+              - member: port1.0.2
+                mode: active
+              - member: port1.0.3
+                mode: active
+        state: deleted
+      register: result
+
+    - name: Assert port deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    # - name: Delete multiple ports by name (IDEMPOTENT)
+    #   alliedtelesis.awplus.awplus_lag_interfaces: *d3
+    #   register: result
+
+    # - name: Assert idempotency
+    #   ansible.builtin.assert:
+    #     that: 
+    #       - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete all ports
+      alliedtelesis.awplus.awplus_lag_interfaces: &d4
+        config:
+          - name: 44
+            members:
+              - member: port1.0.1
+                mode: active
+              - member: port1.0.2
+                mode: active
+              - member: port1.0.3
+                mode: active
+          - name: 66
+            members:
+              - member: port1.0.4
+                mode: active
+              - member: port1.0.5
+                mode: active
+              - member: port1.0.6
+                mode: active
+        state: deleted
+      register: result
+
+    - name: Assert port deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    # - name: Delete all ports (IDEMPOTENT)
+    #   alliedtelesis.awplus.awplus_lag_interfaces: *d4
+    #   register: result
+
+    # - name: Assert idempotency
+    #   ansible.builtin.assert:
+    #     that: 
+    #       - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete entire group
+      alliedtelesis.awplus.awplus_lag_interfaces: &d5
+        config:
+          - name: 44
+            members:
+        state: deleted
+      register: result
+
+    - name: Assert port deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d5_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    # - name: Delete all ports (IDEMPOTENT)
+    #   alliedtelesis.awplus.awplus_lag_interfaces: *d5
+    #   register: result
+
+    # - name: Assert idempotency
+    #   ansible.builtin.assert:
+    #     that: 
+    #       - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete port without mode
+      alliedtelesis.awplus.awplus_lag_interfaces:
+        config:
+          - name: 44
+            members:
+              - member: port1.0.1
+        state: deleted
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == 'missing required arguments ":" mode found in config -> members'
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lag_interfaces deleted integration tests on connection={{ ansible_connection }}"

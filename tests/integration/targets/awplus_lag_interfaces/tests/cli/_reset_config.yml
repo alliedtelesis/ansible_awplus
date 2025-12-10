@@ -1,0 +1,13 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lag_interfaces reset config on connection={{ ansible_connection }}"
+
+- name: Delete the current config
+  alliedtelesis.awplus.awplus_lag_interfaces:
+    config:
+    state: overridden
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lag_interfaces reset config on connection={{ ansible_connection }}"
