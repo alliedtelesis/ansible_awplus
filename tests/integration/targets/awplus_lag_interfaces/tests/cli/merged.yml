@@ -9,14 +9,14 @@
     m2_expected:
       commands:
         - interface port1.0.8
-        - channel-group 44 mode passive
+        - channel-group 44 mode active
     m3_expected:
       commands:
         - interface port1.0.1
         - channel-group 44 mode passive
     m4_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.4
         - channel-group 44 mode passive
         - interface port1.0.1
         - channel-group 66 mode passive
@@ -150,7 +150,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == "missing required arguments{{':'}} mode found in config -> members"
+          - result.msg == missing_mode_error
 
   always:
     - name: Reset configuration

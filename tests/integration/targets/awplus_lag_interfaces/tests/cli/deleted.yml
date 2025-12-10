@@ -74,7 +74,6 @@
           - name: 44
             members:
               - member: port1.0.1
-                mode: active
         state: deleted
       register: result
 
@@ -102,11 +101,8 @@
           - name: 44
             members:
               - member: port1.0.1
-                mode: active
               - member: port1.0.2
-                mode: active
               - member: port1.0.3
-                mode: active
         state: deleted
       register: result
 
@@ -134,19 +130,13 @@
           - name: 44
             members:
               - member: port1.0.1
-                mode: active
               - member: port1.0.2
-                mode: active
               - member: port1.0.3
-                mode: active
           - name: 66
             members:
               - member: port1.0.4
-                mode: active
               - member: port1.0.5
-                mode: active
               - member: port1.0.6
-                mode: active
         state: deleted
       register: result
 
@@ -190,25 +180,6 @@
       ansible.builtin.assert:
         that: 
           - result.changed == False
-
-    - name: Initialise configuration
-      ansible.builtin.include_tasks: _initial_config.yml
-
-    - name: Delete port without mode
-      alliedtelesis.awplus.awplus_lag_interfaces:
-        config:
-          - name: 44
-            members:
-              - member: port1.0.1
-        state: deleted
-      register: result
-      ignore_errors: True
-
-    - name: Assert failure
-      ansible.builtin.assert:
-        that:
-          - result.changed == False
-          - result.msg == "missing required arguments{{':'}} mode found in config -> members"
 
   always:
     - name: Reset configuration

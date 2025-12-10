@@ -40,7 +40,6 @@ class Lag_interfacesArgs(object):  # pylint: disable=R0903
                                                          'type': 'str'},
                                                          'mode': {'choices': ['active',
                                                                   'passive'],
-                                                                  'required': True,
                                                                   'type': 'str'}},
                                              'type': 'list'},
                                  'name': {'required': True, 'type': 'str'}},
