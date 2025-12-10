@@ -113,7 +113,7 @@
         state: replaced
       register: result
 
-    - name: Assert new port added
+    - name: Assert ports swapped and modes changed
       ansible.builtin.assert:
         that:
           - result.changed == True
@@ -141,7 +141,7 @@
         state: replaced
       register: result
 
-    - name: Assert new port added
+    - name: Assert port moved
       ansible.builtin.assert:
         that:
           - result.changed == True
