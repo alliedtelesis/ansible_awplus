@@ -175,6 +175,30 @@
           - result.changed == False
           - result.msg == missing_mode_error
 
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace with port in multiple groups
+      alliedtelesis.awplus.awplus_lag_interfaces:
+        config:
+          - name: 44
+            members:
+              - member: port1.0.10
+                mode: active
+          - name: 66
+            members:
+              - member: port1.0.10
+                mode: active
+        state: replaced
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == port_in_multiple_groups_error
+
   always:
     - name: Reset configuration
       ansible.builtin.include_tasks: _reset_config.yml
