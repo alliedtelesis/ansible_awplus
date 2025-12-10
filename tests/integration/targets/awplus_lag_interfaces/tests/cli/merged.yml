@@ -150,7 +150,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == 'missing required arguments ":" mode found in config -> members'
+          - result.msg == 'missing required arguments":" mode found in config -> members'
 
   always:
     - name: Reset configuration
