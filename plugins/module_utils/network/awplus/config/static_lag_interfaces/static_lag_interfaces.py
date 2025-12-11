@@ -244,7 +244,7 @@ class Static_lag_interfaces(ConfigBase):
                 if w_b_p[port] == g:
                     ports_to_delete.append(port)
 
-            # if no ports are specified to be deleted for a specified group, 
+            # if no ports are specified to be deleted for a specified group,
             # delete all ports
             if len(ports_to_delete) == 0:
                 for port in h_b_p:
