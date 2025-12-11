@@ -27,6 +27,9 @@ description:
       on awplus devices. It provides an option to configure host system
       parameters or remove those parameters from the device active
       configuration.
+deprecated:
+    why: Out of date with current versions of AW+ and Ansible
+    removed_at_version: 1.2.4
 options:
     network:
         description:

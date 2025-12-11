@@ -1,1 +1,7 @@
 requires_ansible: ">=2.19"
+plugin_routing:
+  modules:
+    awplus_rip:
+      deprecation:
+        removal_version: 1.2.4
+        warning_text: See the plugin documentation for more details
