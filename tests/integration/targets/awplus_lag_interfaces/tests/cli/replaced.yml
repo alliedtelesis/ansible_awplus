@@ -1,0 +1,208 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lag_interfaces replaced integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    r1_expected:
+      commands:
+    r2_expected:
+      commands:
+        - interface port1.0.8
+        - channel-group 44 mode passive
+        - interface port1.0.1
+        - no channel-group
+        - interface port1.0.2
+        - no channel-group
+        - interface port1.0.3
+        - no channel-group
+    r3_expected:
+      commands:
+        - interface port1.0.1
+        - no channel-group
+        - channel-group 66 mode passive
+        - interface port1.0.2
+        - no channel-group
+        - interface port1.0.3
+        - no channel-group
+        - interface port1.0.4
+        - no channel-group
+        - channel-group 44 mode passive
+        - interface port1.0.5
+        - no channel-group
+        - interface port1.0.6
+        - no channel-group
+    r4_expected:
+      commands:
+        - interface port1.0.1
+        - no channel-group
+        - interface port1.0.2
+        - no channel-group
+        - interface port1.0.3
+        - no channel-group
+        - interface port1.0.4
+        - no channel-group
+        - channel-group 44 mode active
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace nothing
+      alliedtelesis.awplus.awplus_lag_interfaces: &r1
+        config:
+        state: replaced
+      register: result
+
+    - name: Assert new port added
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Replace nothing (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *r1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace to add new port
+      alliedtelesis.awplus.awplus_lag_interfaces: &r2
+        config:
+          - name: 44
+            members:
+              - member: port1.0.8
+                mode: passive
+        state: replaced
+      register: result
+
+    - name: Assert new port added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace to add new port (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *r2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace to swap ports and change modes
+      alliedtelesis.awplus.awplus_lag_interfaces: &r3
+        config:
+          - name: 44
+            members:
+              - member: port1.0.4
+                mode: passive
+          - name: 66
+            members:
+              - member: port1.0.1
+                mode: passive
+        state: replaced
+      register: result
+
+    - name: Assert ports swapped and modes changed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace to swap ports and change modes (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *r3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace to move port between channel-groups
+      alliedtelesis.awplus.awplus_lag_interfaces: &r4
+        config:
+          - name: 44
+            members:
+              - member: port1.0.4
+                mode: active
+        state: replaced
+      register: result
+
+    - name: Assert port moved
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace to move port between channel-groups (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *r4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace non-existing port without mode
+      alliedtelesis.awplus.awplus_lag_interfaces:
+        config:
+          - name: 44
+            members:
+              - member: port1.0.10
+        state: replaced
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == missing_mode_error
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace with port in multiple groups
+      alliedtelesis.awplus.awplus_lag_interfaces:
+        config:
+          - name: 44
+            members:
+              - member: port1.0.10
+                mode: active
+          - name: 66
+            members:
+              - member: port1.0.10
+                mode: active
+        state: replaced
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == port_in_multiple_groups_error
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lag_interfaces replaced integration tests on connection={{ ansible_connection }}"

@@ -55,7 +55,6 @@ class Lag_interfaces(ConfigBase):
         :returns: The result from module execution
         """
         result = {'changed': False}
-        warnings = list()
         commands = list()
 
         existing_lag_interfaces_facts = self.get_lag_interfaces_facts()
@@ -72,7 +71,6 @@ class Lag_interfaces(ConfigBase):
         if result['changed']:
             result['after'] = changed_lag_interfaces_facts
 
-        result['warnings'] = warnings
         return result
 
     def set_config(self, existing_lag_interfaces_facts):
@@ -178,8 +176,6 @@ class Lag_interfaces(ConfigBase):
                         w_port = member.get("member")
                         if w_port in current_ports and current_ports[w_port] == w_name:
                             delete_ports.append(w_port)
-                        else:
-                            self._module.fail_json(msg="trying to delete port not in group")
 
         # Now have list of ports to delete, do it.
         for port in delete_ports:
@@ -211,13 +207,17 @@ class Lag_interfaces(ConfigBase):
                 if group.get("members"):
                     for member in group.get("members"):
                         port = member.get("member")
+                        mode = member.get("mode")
+                        if mode is None:
+                            self._module.fail_json(msg="argument 'mode' is required")
+
                         if port not in ret_member:
-                            ret_member[port] = {"want": {"group": group.get("name"), "mode": member.get("mode")}}
+                            ret_member[port] = {"want": {"group": group.get("name"), "mode": mode}}
                         else:
                             if "want" in ret_member[port]:
                                 self._module.fail_json(msg="duplicate port in desired config")
                                 return None, None, None
-                            ret_member[port].update({"want": {"group": group.get("name"), "mode": member.get("mode")}})
+                            ret_member[port].update({"want": {"group": group.get("name"), "mode": mode}})
         return ret_member, ret_want_group, ret_have_group
 
     def gen_commands(self, by_member, want_groups, merge=False):
