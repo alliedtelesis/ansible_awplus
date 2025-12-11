@@ -55,7 +55,6 @@ class Static_lag_interfaces(ConfigBase):
         :returns: The result from module execution
         """
         result = {'changed': False}
-        warnings = list()
         commands = list()
 
         existing_static_lag_interfaces_facts = self.get_static_lag_interfaces_facts()
@@ -72,7 +71,6 @@ class Static_lag_interfaces(ConfigBase):
         if result['changed']:
             result['after'] = changed_static_lag_interfaces_facts
 
-        result['warnings'] = warnings
         return result
 
     def set_config(self, existing_static_lag_interfaces_facts):
@@ -98,6 +96,13 @@ class Static_lag_interfaces(ConfigBase):
                   to the desired configuration
         """
         state = self._module.params['state']
+
+        # ensure that member-filters is specified for non-deleted states
+        if state in ['merged', 'overridden', 'replaced']:
+            for group in have:
+                if group.get("member-filters") is None:
+                    self._module.fail_json("argument 'member-filters' is required")
+
         if state == 'overridden':
             commands = self._state_overridden(have, want)
         elif state == 'deleted':
@@ -233,22 +238,26 @@ class Static_lag_interfaces(ConfigBase):
         h_b_p, w_b_p, h_g, w_g = self.gen_action_lists(have, want)
         ports_cleared = []
         for g in w_g:
-            clear_count = 0
+            # find ports which are required to be deleted in this group
+            ports_to_delete = []
             for port in w_b_p:
-                if w_b_p[port] == g and port in h_b_p and h_b_p[port] == g:
-                    if port not in ports_cleared:
-                        commands.append(f"interface {port}")
-                        commands.append("no static-channel-group")
-                        ports_cleared.append(port)
-                        clear_count += 1
-            if clear_count == 0:
+                if w_b_p[port] == g:
+                    ports_to_delete.append(port)
+
+            if len(ports_to_delete) == 0:
                 for port in h_b_p:
                     if h_b_p[port] == g:
                         if port not in ports_cleared:
                             commands.append(f"interface {port}")
                             commands.append("no static-channel-group")
                             ports_cleared.append(port)
-                            clear_count += 1
+            else:
+                for port in ports_to_delete:
+                    if port in h_b_p and h_b_p[port] == g:
+                        if port not in ports_cleared:
+                            commands.append(f"interface {port}")
+                            commands.append("no static-channel-group")
+                            ports_cleared.append(port)
         return commands
 
     def gen_action_lists(self, have, want):

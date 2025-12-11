@@ -1,0 +1,232 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_static_lag_interfaces overridden integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    o1_expected:
+      commands:
+        - interface port1.0.1
+        - no static-channel-group
+        - interface port1.0.2
+        - no static-channel-group
+        - interface port1.0.3
+        - no static-channel-group
+        - interface port1.0.4
+        - no static-channel-group
+        - interface port1.0.5
+        - no static-channel-group
+        - interface port1.0.6
+        - no static-channel-group
+        - interface port1.0.7
+        - no static-channel-group
+    o2_expected:
+      commands:
+        - interface port1.0.8
+        - static-channel-group 33
+    o3_expected:
+      commands:
+        - interface port1.0.2
+        - no static-channel-group
+        - static-channel-group 33
+    o4_expected:
+      commands:
+        - interface port1.0.1
+        - no static-channel-group
+        - static-channel-group 33 member-filters
+        - interface port1.0.3
+        - no static-channel-group
+        - static-channel-group 33 member-filters
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with empty config
+      alliedtelesis.awplus.awplus_static_lag_interfaces: &o1
+        config:
+        state: overridden
+      register: result
+
+    - name: Assert everything is removed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with empty config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_static_lag_interfaces: *o1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override to add new port
+      alliedtelesis.awplus.awplus_static_lag_interfaces: &o2
+        config:
+          - name: 33
+            members:
+              - port1.0.1
+              - port1.0.3
+              - port1.0.8
+            member-filters: false
+          - name: 55
+            members:
+              - port1.0.2
+              - port1.0.4
+              - port1.0.5
+              - port1.0.6
+              - port1.0.7
+            member-filters: True
+        state: overridden
+      register: result
+
+    - name: Assert new port added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override to add new port (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_static_lag_interfaces: *o2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override to move existing port between groups
+      alliedtelesis.awplus.awplus_static_lag_interfaces: &o3
+        config:
+          - name: 33
+            members:
+              - port1.0.1
+              - port1.0.3
+              - port1.0.2
+            member-filters: false
+          - name: 55
+            members:
+              - port1.0.4
+              - port1.0.5
+              - port1.0.6
+              - port1.0.7
+            member-filters: True
+        state: overridden
+      register: result
+
+    - name: Assert port moved between groups
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override to move existing port between groups (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_static_lag_interfaces: *o3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override to change member-filters
+      alliedtelesis.awplus.awplus_static_lag_interfaces: &o4
+        config:
+          - name: 33
+            members:
+              - port1.0.1
+              - port1.0.3
+            member-filters: True
+          - name: 55
+            members:
+              - port1.0.2
+              - port1.0.4
+              - port1.0.5
+              - port1.0.6
+              - port1.0.7
+            member-filters: True
+        state: overridden
+      register: result
+
+    - name: Assert member-filters changed for group
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override to change member-filters (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_static_lag_interfaces: *o4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with port in multiple groups
+      alliedtelesis.awplus.awplus_static_lag_interfaces:
+        config:
+          - name: 33
+            members:
+              - member: port1.0.10
+            member-filters: False
+          - name: 55
+            members:
+              - member: port1.0.10
+            member-filters: False
+        state: overridden
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == port_in_multiple_groups_error
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with multiple of the same group
+      alliedtelesis.awplus.awplus_static_lag_interfaces:
+        config:
+          - name: 33
+            members:
+              - member: port1.0.9
+            member-filters: False
+          - name: 33
+            members:
+              - member: port1.0.10
+            member-filters: True
+        state: overridden
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == multiple_of_same_group_error
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_static_lag_interfaces overridden integration tests on connection={{ ansible_connection }}"

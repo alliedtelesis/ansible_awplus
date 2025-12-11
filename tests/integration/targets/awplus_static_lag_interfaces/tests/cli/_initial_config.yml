@@ -1,0 +1,26 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_static_lag_interfaces initialise config on connection={{ ansible_connection }}"
+
+- name: Initialise configuration
+  alliedtelesis.awplus.awplus_static_lag_interfaces:
+    config:
+      - name: 33
+        members:
+          - port1.0.1
+          - port1.0.3
+        member-filters: false
+      - name: 55
+        members:
+          - port1.0.2
+          - port1.0.4
+          - port1.0.5
+          - port1.0.6
+          - port1.0.7
+        member-filters: True
+    state: overridden
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_static_lag_interfaces initialise config on connection={{ ansible_connection }}"

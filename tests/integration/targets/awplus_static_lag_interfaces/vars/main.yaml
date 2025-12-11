@@ -1,0 +1,3 @@
+---
+port_in_multiple_groups_error: "duplicate port in desired config"
+multiple_of_same_group_error: "duplicate group in desired config"
