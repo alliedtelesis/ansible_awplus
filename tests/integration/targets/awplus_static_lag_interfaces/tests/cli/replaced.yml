@@ -139,7 +139,7 @@
         state: replaced
       register: result
 
-    - name: Assert existing group replaced
+    - name: Assert member-filters replaced
       ansible.builtin.assert:
         that:
           - result.changed == True
