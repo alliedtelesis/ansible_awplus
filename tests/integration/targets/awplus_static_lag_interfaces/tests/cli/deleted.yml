@@ -1,0 +1,181 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_static_lag_interfaces deleted integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    d1_expected:
+      commands:
+    d2_expected:
+      commands:
+        - interface port1.0.1
+        - no static-channel-group
+    d3_expected:
+      commands:
+        - interface port1.0.1
+        - no static-channel-group
+        - interface port1.0.3
+        - no static-channel-group
+    d4_expected:
+      commands:
+        - interface port1.0.1
+        - no static-channel-group
+        - interface port1.0.3
+        - no static-channel-group
+    d5_expected:
+       commands:
+        - interface port1.0.1
+        - no static-channel-group
+        - interface port1.0.2
+        - no static-channel-group
+        - interface port1.0.3
+        - no static-channel-group
+        - interface port1.0.4
+        - no static-channel-group
+        - interface port1.0.5
+        - no static-channel-group
+        - interface port1.0.6
+        - no static-channel-group
+        - interface port1.0.7
+        - no static-channel-group
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete nothing
+      alliedtelesis.awplus.awplus_static_lag_interfaces: &d1
+        config:
+        state: deleted
+      register: result
+
+    - name: Assert nothing changed
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Delete nothing (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_static_lag_interfaces: *d1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete a single port
+      alliedtelesis.awplus.awplus_static_lag_interfaces: &d2
+        config:
+          - name: 33
+            members:
+              - port1.0.1
+        state: deleted
+      register: result
+
+    - name: Assert single port is deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete a single port (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_static_lag_interfaces: *d2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete multiple ports
+      alliedtelesis.awplus.awplus_static_lag_interfaces: &d3
+        config:
+          - name: 33
+            members:
+              - port1.0.1
+              - port1.0.3
+        state: deleted
+      register: result
+
+    - name: Assert multiple ports are deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete multiple ports (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_static_lag_interfaces: *d3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete entire group
+      alliedtelesis.awplus.awplus_static_lag_interfaces: &d4
+        config:
+          - name: 33
+            members:
+        state: deleted
+      register: result
+
+    - name: Assert entire group deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete entire group (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_static_lag_interfaces: *d4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete multiple groups
+      alliedtelesis.awplus.awplus_static_lag_interfaces: &d5
+        config:
+          - name: 33
+            members:
+          - name: 55
+            members:
+        state: deleted
+      register: result
+
+    - name: Assert multiple groups deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d5_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete multiple groups (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_static_lag_interfaces: *d5
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_static_lag_interfaces deleted integration tests on connection={{ ansible_connection }}"
