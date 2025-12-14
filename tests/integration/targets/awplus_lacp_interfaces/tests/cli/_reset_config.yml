@@ -1,0 +1,18 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lacp_interfaces reset config on connection={{ ansible_connection }}"
+
+- name: Delete the channel groups
+  alliedtelesis.awplus.awplus_lag_interfaces:
+    config:
+    state: overridden
+
+- name: Delete the current config
+  alliedtelesis.awplus.awplus_lacp_interfaces:
+    config:
+    state: overridden
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lacp_interfaces reset config on connection={{ ansible_connection }}"

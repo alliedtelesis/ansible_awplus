@@ -1,0 +1,43 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lacp_interfaces overridden integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    o1_expected:
+      commands:
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override existing interface
+      alliedtelesis.awplus.awplus_lacp_interfaces: &o1
+        config:
+          - name: port1.0.1
+            port_priority: 5000
+            timeout: long
+        state: overridden
+      register: result
+
+    - name: Assert existing interface overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+
+    - name: Overridden existing interface (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *o1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lacp_interfaces overridden integration tests on connection={{ ansible_connection }}"

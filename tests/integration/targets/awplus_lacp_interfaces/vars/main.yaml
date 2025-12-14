@@ -1,0 +1,4 @@
+---
+invalid_timeout_error: "value of timeout must be one of: long, short, got: medium found in config"
+invalid_port_priority_error: "argument 'port_priority' must be between 1 and 65535 inclusively"
+invalid_args_error: "one of 'port_priority' or 'timeout' is required"

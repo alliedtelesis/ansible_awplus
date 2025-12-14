@@ -1,0 +1,243 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lacp_interfaces merged integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    m1_expected:
+      commands:
+    m2_expected:
+      commands:
+        - interface port1.0.3
+        - lacp port-priority 50
+        - lacp timeout short
+    m3_expected:
+      commands:
+        - interface port1.0.3
+        - lacp port-priority 50
+        - lacp timeout short
+        - interface port1.0.4
+        - lacp port-priority 50
+        - lacp timeout short
+    m4_expected:
+      commands:
+        - interface port1.0.1
+        - lacp port-priority 50
+        - interface port1.0.2
+        - lacp port-priority 50
+        - lacp timeout long
+    m5_expected:
+      commands:
+        - interface port1.0.1
+        - lacp port-priority 50
+        - interface port1.0.2
+        - lacp timeout long
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge empty config
+      alliedtelesis.awplus.awplus_lacp_interfaces: &m1
+        config:
+        state: merged
+      register: result
+
+    - name: Assert nothing merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Merge empty config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *m1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge add new interface
+      alliedtelesis.awplus.awplus_lacp_interfaces: &m2
+        config:
+          - name: port1.0.3
+            port_priority: 50
+            timeout: short
+        state: merged
+      register: result
+
+    - name: Assert new interface added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge add new interface (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *m2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge add multiple new interfaces
+      alliedtelesis.awplus.awplus_lacp_interfaces: &m3
+        config:
+          - name: port1.0.3
+            port_priority: 50
+            timeout: short
+          - name: port1.0.4
+            port_priority: 50
+            timeout: short
+        state: merged
+      register: result
+
+    - name: Assert new interfaces added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge add multiple new interfaces (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *m3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge change existing interfaces full args
+      alliedtelesis.awplus.awplus_lacp_interfaces: &m4
+        config:
+          - name: port1.0.1
+            port_priority: 50
+            timeout: short
+          - name: port1.0.2
+            port_priority: 50
+            timeout: long
+        state: merged
+      register: result
+
+    - name: Assert new interfaces added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge add multiple new interface (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *m4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge change existing interfaces partial args
+      alliedtelesis.awplus.awplus_lacp_interfaces: &m5
+        config:
+          - name: port1.0.1
+            port_priority: 50
+          - name: port1.0.2
+            timeout: long
+        state: merged
+      register: result
+
+    - name: Assert new interfaces added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m5_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge add multiple new interface (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *m5
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge above range port priority
+      alliedtelesis.awplus.awplus_lacp_interfaces:
+        config:
+          - name: port1.0.1
+            port_priority: 0
+        state: merged
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == invalid_port_priority_error
+
+    - name: Merge below range port priority
+      alliedtelesis.awplus.awplus_lacp_interfaces:
+        config:
+          - name: port1.0.1
+            port_priority: 65536
+        state: merged
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == invalid_port_priority_error
+
+    - name: Merge invalid timeout value
+      alliedtelesis.awplus.awplus_lacp_interfaces:
+        config:
+          - name: port1.0.1
+            timeout: medium
+        state: merged
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == invalid_timeout_error
+
+    - name: Merge invalid args
+      alliedtelesis.awplus.awplus_lacp_interfaces:
+        config:
+          - name: port1.0.3
+        state: merged
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == invalid_args_error
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lacp_interfaces merged integration tests on connection={{ ansible_connection }}"
