@@ -6,26 +6,51 @@
 - ansible.builtin.set_fact:
     r1_expected:
       commands:
+    r2_expected:
+      commands:
+        - interface port1.0.3
+        - lacp port-priority 50
+        - lacp timeout short
+    r3_expected:
+      commands:
+        - interface port1.0.3
+        - lacp port-priority 50
+        - lacp timeout short
+        - interface port1.0.4
+        - lacp port-priority 50
+        - lacp timeout short
+    r4_expected:
+      commands:
+        - interface port1.0.1
+        - lacp port-priority 50
+        - interface port1.0.2
+        - lacp port-priority 50
+        - lacp timeout long
+    r5_expected:
+      commands:
+        - interface port1.0.1
+        - lacp timeout long
+        - lacp port-priority 50
+        - interface port1.0.2
+        - no lacp port-priority
+        - lacp timeout long
 
 - block:
     - name: Initialise configuration
       ansible.builtin.include_tasks: _initial_config.yml
 
-    - name: Replace existing interface
+    - name: Replace empty config
       alliedtelesis.awplus.awplus_lacp_interfaces: &r1
         config:
-          - name: port1.0.1
-            port_priority: 102
-            timeout: long
         state: replaced
       register: result
 
-    - name: Assert existing interface replaced
+    - name: Assert nothing replaced
       ansible.builtin.assert:
         that:
-          - result.changed == True
+          - result.changed == False
 
-    - name: Replace existing interface (IDEMPOTENT)
+    - name: Replace empty config (IDEMPOTENT)
       alliedtelesis.awplus.awplus_lacp_interfaces: *r1
       register: result
 
@@ -33,6 +58,183 @@
       ansible.builtin.assert:
         that: 
           - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace add new interface
+      alliedtelesis.awplus.awplus_lacp_interfaces: &r2
+        config:
+          - name: port1.0.3
+            port_priority: 50
+            timeout: short
+        state: replaced
+      register: result
+
+    - name: Assert new interface added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace add new interface (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *r2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace add multiple new interfaces
+      alliedtelesis.awplus.awplus_lacp_interfaces: &r3
+        config:
+          - name: port1.0.3
+            port_priority: 50
+            timeout: short
+          - name: port1.0.4
+            port_priority: 50
+            timeout: short
+        state: replaced
+      register: result
+
+    - name: Assert new interfaces added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace add multiple new interfaces (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *r3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace change existing interfaces full args
+      alliedtelesis.awplus.awplus_lacp_interfaces: &r4
+        config:
+          - name: port1.0.1
+            port_priority: 50
+            timeout: short
+          - name: port1.0.2
+            port_priority: 50
+            timeout: long
+        state: replaced
+      register: result
+
+    - name: Assert new interfaces added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace add multiple new interface (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *r4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace change existing interfaces partial args
+      alliedtelesis.awplus.awplus_lacp_interfaces: &r5
+        config:
+          - name: port1.0.1
+            port_priority: 50
+          - name: port1.0.2
+            timeout: long
+        state: replaced
+      register: result
+
+    - name: Assert new interfaces added
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r5_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace add multiple new interface (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *r5
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace below range port priority
+      alliedtelesis.awplus.awplus_lacp_interfaces:
+        config:
+          - name: port1.0.1
+            port_priority: 0
+        state: replaced
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == invalid_port_priority_error
+
+    - name: Replace above range port priority
+      alliedtelesis.awplus.awplus_lacp_interfaces:
+        config:
+          - name: port1.0.1
+            port_priority: 65536
+        state: replaced
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == invalid_port_priority_error
+
+    - name: Replace invalid timeout value
+      alliedtelesis.awplus.awplus_lacp_interfaces:
+        config:
+          - name: port1.0.1
+            timeout: medium
+        state: replaced
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == invalid_timeout_error
+
+    - name: Replace invalid args
+      alliedtelesis.awplus.awplus_lacp_interfaces:
+        config:
+          - name: port1.0.3
+        state: replaced
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == invalid_args_error
 
   always:
     - name: Reset configuration
