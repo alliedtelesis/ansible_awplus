@@ -1,16 +1,37 @@
 #!/bin/bash
 
-# Setup constants
-COLLECTION_NAMESPACE="alliedtelesis"
-COLLECTION_NAME="awplus"
-COLLECTION_FQCN="${COLLECTION_NAMESPACE}.${COLLECTION_NAME}"
+# Change the umask so jenkins can delete all files we create (rwx-rwx-rwx)
+# This will be inherited by our children
+umask 0000
 
+# Parse program arguments
+for i in "$@"
+do
+  case $i in
+    --env-file=*)
+      ENV_FILE="${i#*=}"
+      shift
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+# Test parameters
+HOST_ADDRESS="${POSITIONAL_ARGS[0]}"
+HOST_USER="${POSITIONAL_ARGS[1]}"
+HOST_PASSWORD="${POSITIONAL_ARGS[2]}"
+PYTHON_VERSION="${POSITIONAL_ARGS[3]}"
+ANSIBLE_VERSION="${POSITIONAL_ARGS[4]}"
+
+# File paths
 ROOT_DIR="./"
-SETUP_ENV_DIR="${ROOT_DIR}setup_integration"
+SETUP_ENV_DIR="${ROOT_DIR}integration_test"
 INTEGRATION_TEST_DIR="${ROOT_DIR}tests/integration"
 REQUIREMENTS_FILE="${SETUP_ENV_DIR}/requirements.txt"
 VENV_DIR="${SETUP_ENV_DIR}/.venv"
-
 TESTS_FILE="${SETUP_ENV_DIR}/integration.list"
 
 # Helper functions for colour-coded logging.
@@ -24,6 +45,22 @@ log_error() {
 }
 
 # Functions for setup
+setup_pyenv() {
+    export PYENV_ROOT=$HOME/.pyenv
+    export PATH="$PATH:$PYENV_ROOT/bin"
+    eval "$(pyenv init -)"
+
+    # Show installed versions
+    eval "pyenv versions"
+
+    export SWTEST_PYTHON_VERSION=${PYTHON_VERSION}
+
+    # Set global Python version (for current user) by setting ~/.pyenv/version
+    eval "pyenv global $SWTEST_PYTHON_VERSION"
+    # Set Python version for current shell (which is sourcing this file)
+    eval "pyenv shell $SWTEST_PYTHON_VERSION"
+}
+
 setup_venv() {
     if [ -z "${PYTHON_VERSION}" ]; then
         PYTHON_VERSION="3.12"
