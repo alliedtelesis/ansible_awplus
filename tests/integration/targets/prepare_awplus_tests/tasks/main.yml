@@ -1,4 +1,39 @@
 ---
-- name: Prepare tests
-  awplus_config:
-    lines: |-
+# Ensure that the entire config is empty incase the device has 
+# already had configuration setup
+
+# lag interfaces
+- name: Delete the lag interfaces config
+  alliedtelesis.awplus.awplus_lag_interfaces:
+    config:
+    state: overridden
+
+# static lag interfaces
+- name: Delete the static lag interfaces config
+  alliedtelesis.awplus.awplus_static_lag_interfaces:
+    config:
+    state: overridden
+
+# user config
+- name: Delete the user config
+  alliedtelesis.awplus.awplus_user:
+    config:
+    state: overridden
+
+# openflow config
+- name: Delete the openflow config
+  alliedtelesis.awplus.awplus_openflow:
+    config:
+      controllers:
+    state: overridden
+
+- name: Check if trustpoint exists
+  cisco.ios.ios_command:
+    commands: "show running-config | include crypto pki trustpoint test"
+  register: trustpoint_output
+
+- name: Remove trustpoint if it exists
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - no crypto pki trustpoint test
+  when: "{{ 'crypto pki trustpoint test' in trustpoint_output.stdout[0] }}"
