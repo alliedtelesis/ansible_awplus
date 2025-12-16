@@ -1,6 +1,6 @@
 ---
 - name: Check if trustpoint exists
-  cisco.ios.ios_command:
+  alliedtelesis.awplus.awplus_command:
     commands: "show running-config | include crypto pki trustpoint test"
   register: trustpoint_output
 
