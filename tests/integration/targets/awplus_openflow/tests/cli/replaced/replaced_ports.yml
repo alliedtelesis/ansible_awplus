@@ -72,9 +72,9 @@
       alliedtelesis.awplus.awplus_openflow: &rp2
         config:
           ports:
-            - port1.0.1
             - port1.0.2
             - port1.0.3
+            - port1.0.4
         state: replaced
       register: result
 

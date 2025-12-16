@@ -18,11 +18,9 @@
         - no static-channel-group
         - interface port1.0.6
         - no static-channel-group
-        - interface port1.0.7
-        - no static-channel-group
     o2_expected:
       commands:
-        - interface port1.0.8
+        - interface port1.0.7
         - static-channel-group 33
     o3_expected:
       commands:
@@ -73,7 +71,7 @@
             members:
               - port1.0.1
               - port1.0.3
-              - port1.0.8
+              - port1.0.7
             member-filters: false
           - name: 55
             members:
@@ -81,7 +79,6 @@
               - port1.0.4
               - port1.0.5
               - port1.0.6
-              - port1.0.7
             member-filters: True
         state: overridden
       register: result
@@ -118,7 +115,6 @@
               - port1.0.4
               - port1.0.5
               - port1.0.6
-              - port1.0.7
             member-filters: True
         state: overridden
       register: result
@@ -155,7 +151,6 @@
               - port1.0.4
               - port1.0.5
               - port1.0.6
-              - port1.0.7
             member-filters: True
         state: overridden
       register: result
@@ -183,11 +178,11 @@
         config:
           - name: 33
             members:
-              - member: port1.0.10
+              - member: port1.0.7
             member-filters: False
           - name: 55
             members:
-              - member: port1.0.10
+              - member: port1.0.7
             member-filters: False
         state: overridden
       register: result
@@ -207,11 +202,11 @@
         config:
           - name: 33
             members:
-              - member: port1.0.9
+              - member: port1.0.7
             member-filters: False
           - name: 33
             members:
-              - member: port1.0.10
+              - member: port1.0.8
             member-filters: True
         state: overridden
       register: result

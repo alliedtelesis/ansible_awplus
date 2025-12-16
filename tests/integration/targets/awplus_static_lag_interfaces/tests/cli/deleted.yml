@@ -36,8 +36,6 @@
         - no static-channel-group
         - interface port1.0.6
         - no static-channel-group
-        - interface port1.0.7
-        - no static-channel-group
 
 - block:
     - name: Initialise configuration

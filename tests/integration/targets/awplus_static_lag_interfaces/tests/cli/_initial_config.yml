@@ -17,7 +17,6 @@
           - port1.0.4
           - port1.0.5
           - port1.0.6
-          - port1.0.7
         member-filters: True
     state: overridden
 

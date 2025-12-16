@@ -24,8 +24,8 @@
       datapath_id: 123
       fail_mode: "secure_nre"
       ports:
-        - port1.0.1
         - port1.0.2
+        - port1.0.3
       trustpoint: "test"
       peer_certificate: "bootstrap"
     state: overridden

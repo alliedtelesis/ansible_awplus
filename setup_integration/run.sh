@@ -25,7 +25,7 @@ log_error() {
 
 # Functions for setup
 setup_venv() {
-    if [ -z "${PYTHON_VERSION}"]; then
+    if [ -z "${PYTHON_VERSION}" ]; then
         PYTHON_VERSION="3.12"
     fi
     python"${PYTHON_VERSION}" -m venv "${VENV_DIR}" || log_error "Failed to create virtual environment."
@@ -36,7 +36,7 @@ setup_venv() {
 }
 
 install_dependencies() {
-    if [ -z "${ANSIBLE_VERSION}"]; then
+    if [ -z "${ANSIBLE_VERSION}" ]; then
         ANSIBLE_VERSION="12.2.0"
     fi
     pip install ansible=="${ANSIBLE_VERSION}" || log_error "Failed to install ansible version ${ANSIBLE_VERSION}."
@@ -76,7 +76,7 @@ run_integration_tests() {
 
     while IFS= read -r module_name
     do
-        ansible-test network-integration "awplus_${module_name}" || log_error "Failed to run ansible network integration tests."
+        ansible-test network-integration "awplus_${module_name}" -vvvvv || log_error "Failed to run ansible network integration tests."
     done < "${TESTS_FILE}"
 
     log_info "Integration tests complete."

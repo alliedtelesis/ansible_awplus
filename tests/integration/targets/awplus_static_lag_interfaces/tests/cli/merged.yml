@@ -8,7 +8,7 @@
       commands:
     m2_expected:
       commands:
-        - interface port1.0.8
+        - interface port1.0.7
         - static-channel-group 33
     m3_expected:
       commands:
@@ -59,7 +59,7 @@
         config:
           - name: 33
             members:
-              - port1.0.8
+              - port1.0.7
             member-filters: False
         state: merged
       register: result

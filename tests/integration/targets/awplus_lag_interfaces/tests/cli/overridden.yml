@@ -32,7 +32,7 @@
         - no channel-group
         - interface port1.0.6
         - no channel-group
-        - interface port1.0.10
+        - interface port1.0.7
         - channel-group 44 mode active
     o3_expected:
       commands:
@@ -94,7 +94,7 @@
         config:
           - name: 44
             members:
-              - member: port1.0.10
+              - member: port1.0.7
                 mode: active
         state: overridden
       register: result
