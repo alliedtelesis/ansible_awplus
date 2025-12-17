@@ -62,10 +62,7 @@ setup_pyenv() {
 }
 
 setup_venv() {
-    if [ -z "${PYTHON_VERSION}" ]; then
-        PYTHON_VERSION="3.12"
-    fi
-    python"${PYTHON_VERSION}" -m venv "${VENV_DIR}" || log_error "Failed to create virtual environment."
+    python3 -m venv "${VENV_DIR}" || log_error "Failed to create virtual environment."
     source "${VENV_DIR}/bin/activate" || log_error "Failed to activate virtual environment."
     pip install --upgrade pip
 
