@@ -45,22 +45,6 @@ log_error() {
 }
 
 # Functions for setup
-setup_pyenv() {
-    export PYENV_ROOT=$HOME/.pyenv
-    export PATH="$PATH:$PYENV_ROOT/bin"
-    eval "$(pyenv init -)"
-
-    # Show installed versions
-    eval "pyenv versions"
-
-    export SWTEST_PYTHON_VERSION=${PYTHON_VERSION}
-
-    # Set global Python version (for current user) by setting ~/.pyenv/version
-    eval "pyenv global $SWTEST_PYTHON_VERSION"
-    # Set Python version for current shell (which is sourcing this file)
-    eval "pyenv shell $SWTEST_PYTHON_VERSION"
-}
-
 setup_venv() {
     python3 -m venv "${VENV_DIR}" || log_error "Failed to create virtual environment."
     source "${VENV_DIR}/bin/activate" || log_error "Failed to activate virtual environment."
