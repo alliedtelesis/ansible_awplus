@@ -83,6 +83,7 @@ build_inventory() {
     echo "ansible_become_method=enable" >> "${INVENTORY_FILE}"
 
     log_info "Inventory file built."    
+    cat "${INVENTORY_FILE}"
 }
 
 run_integration_tests() {
