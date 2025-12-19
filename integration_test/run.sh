@@ -34,6 +34,11 @@ REQUIREMENTS_FILE="${SETUP_ENV_DIR}/requirements.txt"
 VENV_DIR="${SETUP_ENV_DIR}/.venv"
 TESTS_FILE="${SETUP_ENV_DIR}/integration.list"
 
+# Paths to go to the testbox
+TB_DIRECTORY="../../../tb"
+ANSIBLE_OUTFILE="${TB_DIRECTORY}/ansible_logs.txt"
+JUNIT_OUTFILE="${TB_DIRECTORY}/junit.xml"
+
 # Helper functions for colour-coded logging.
 log_info() {
     echo -e "\n\033[1;34m--> $1\033[0m"
@@ -83,7 +88,6 @@ build_inventory() {
     echo "ansible_become_method=enable" >> "${INVENTORY_FILE}"
 
     log_info "Inventory file built."    
-    cat "${INVENTORY_FILE}"
 }
 
 run_integration_tests() {
@@ -91,14 +95,27 @@ run_integration_tests() {
         log_error "Integration test list file not found."
     fi
 
+    if [ -f "${ANSIBLE_OUTFILE}" ]; then
+        rm ${ANSIBLE_OUTFILE}
+    fi
+
     log_info "Starting integration tests."
 
     while IFS= read -r module_name
     do
-        ansible-test network-integration "awplus_${module_name}" -vvvvv || log_error "Failed to run ansible network integration tests."
+        ansible-test network-integration "awplus_${module_name}" >> ${ANSIBLE_OUTFILE} \
+            || log_error "Failed to run ansible network integration tests."
     done < "${TESTS_FILE}"
 
     log_info "Integration tests complete."
+}
+
+generate_junit_file() {
+    if [ -f "${JUNIT_OUTFILE}" ]; then
+        rm ${JUNIT_OUTFILE}
+    fi
+
+    python3 ${SETUP_ENV_DIR}/parse_results.py ${ANSIBLE_OUTFILE} ${JUNIT_OUTFILE}
 }
 
 cleanup_environment() {
@@ -121,6 +138,7 @@ setup_venv
 install_dependencies
 build_inventory
 run_integration_tests
+generate_junit_file
 cleanup_environment
 
 exit 0

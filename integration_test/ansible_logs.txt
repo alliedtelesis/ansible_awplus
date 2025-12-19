@@ -1,0 +1,436 @@
+WARNING: Using locale "C.UTF-8" instead of "en_US.UTF-8". Tests which depend on the locale may behave unexpectedly.
+Running awplus_lag_interfaces integration test role
+
+PLAY [awplus] ******************************************************************
+
+TASK [prepare_awplus_tests : Delete the lag interfaces config] *****************
+ok: [awplus]
+
+TASK [prepare_awplus_tests : Delete the static lag interfaces config] **********
+ok: [awplus]
+
+TASK [prepare_awplus_tests : Delete the user config] ***************************
+ok: [awplus]
+
+TASK [prepare_awplus_tests : Delete the openflow config] ***********************
+[ERROR]: Task failed: Module failed: b"no openflow controller dave\r\r\n% Error deleting controller - doesn't exist\r\nhost_0000_f427_d520(config)#"
+Origin: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-a9fsv9s3-ÅÑŚÌβŁÈ/tests/integration/targets/prepare_awplus_tests/tasks/main.yml:24:3
+
+22
+23 # openflow config
+24 - name: Delete the openflow config
+     ^ column 3
+
+fatal: [awplus]: FAILED! => {"changed": false, "msg": "Task failed: Module failed: b\"no openflow controller dave\\r\\r\\n% Error deleting controller - doesn't exist\\r\\nhost_0000_f427_d520(config)#\""}
+
+PLAY RECAP *********************************************************************
+awplus                     : ok=3    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+
+NOTICE: To resume at this test target, use the option: --start-at awplus_lag_interfaces
+WARNING: Using locale "C.UTF-8" instead of "en_US.UTF-8". Tests which depend on the locale may behave unexpectedly.
+Running awplus_lag_interfaces integration test role
+
+PLAY [awplus] ******************************************************************
+
+TASK [prepare_awplus_tests : Delete the lag interfaces config] *****************
+ok: [awplus]
+
+TASK [prepare_awplus_tests : Delete the static lag interfaces config] **********
+ok: [awplus]
+
+TASK [prepare_awplus_tests : Delete the user config] ***************************
+ok: [awplus]
+
+TASK [prepare_awplus_tests : Delete the openflow config] ***********************
+ok: [awplus]
+
+TASK [prepare_awplus_tests : Check if trustpoint exists] ***********************
+ok: [awplus]
+
+TASK [prepare_awplus_tests : Remove trustpoint if it exists] *******************
+skipping: [awplus]
+
+TASK [awplus_lag_interfaces : Invoke cli tasks] ********************************
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tasks/cli.yml for awplus
+
+TASK [awplus_lag_interfaces : Collect all cli test cases] **********************
+ok: [awplus -> localhost]
+
+TASK [awplus_lag_interfaces : Set test_items] **********************************
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Run test cases (connection=network_cli)] *********
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/replaced.yml for awplus => (item=/ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/replaced.yml)
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/deleted.yml for awplus => (item=/ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/deleted.yml)
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/overridden.yml for awplus => (item=/ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/overridden.yml)
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/merged.yml for awplus => (item=/ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/merged.yml)
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "START awplus_lag_interfaces replaced integration tests on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : ansible.builtin.set_fact] ************************
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/_initial_config.yml for awplus
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "START awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "END awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Replace nothing] *********************************
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Assert new port added] ***************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Replace nothing (IDEMPOTENT)] ********************
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Assert idempotency] ******************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/_initial_config.yml for awplus
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "START awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "END awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Replace to add new port] *************************
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Assert new port added] ***************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Replace to add new port (IDEMPOTENT)] ************
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Assert idempotency] ******************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/_initial_config.yml for awplus
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "START awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "END awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Replace to swap ports and change modes] **********
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Assert ports swapped and modes changed] **********
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Replace to swap ports and change modes (IDEMPOTENT)] ***
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Assert idempotency] ******************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/_initial_config.yml for awplus
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "START awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "END awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Replace to move port between channel-groups] *****
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Assert port moved] *******************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Replace to move port between channel-groups (IDEMPOTENT)] ***
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Assert idempotency] ******************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/_initial_config.yml for awplus
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "START awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "END awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Replace non-existing port without mode] **********
+[ERROR]: Task failed: Module failed: argument 'mode' is required
+Origin: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/replaced.yml:162:7
+
+160       ansible.builtin.include_tasks: _initial_config.yml
+161
+162     - name: Replace non-existing port without mode
+          ^ column 7
+
+fatal: [awplus]: FAILED! => {"changed": false, "msg": "argument 'mode' is required"}
+...ignoring
+
+TASK [awplus_lag_interfaces : Assert failure] **********************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/_initial_config.yml for awplus
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "START awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "END awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Replace with port in multiple groups] ************
+[ERROR]: Task failed: Module failed: duplicate port in desired config
+Origin: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/replaced.yml:181:7
+
+179       ansible.builtin.include_tasks: _initial_config.yml
+180
+181     - name: Replace with port in multiple groups
+          ^ column 7
+
+fatal: [awplus]: FAILED! => {"changed": false, "msg": "duplicate port in desired config"}
+...ignoring
+
+TASK [awplus_lag_interfaces : Assert failure] **********************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Reset configuration] *****************************
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/_reset_config.yml for awplus
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "START awplus_lag_interfaces reset config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Delete the current config] ***********************
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "END awplus_lag_interfaces reset config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "END awplus_lag_interfaces replaced integration tests on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "START awplus_lag_interfaces deleted integration tests on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : ansible.builtin.set_fact] ************************
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/_initial_config.yml for awplus
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "START awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "END awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Delete nothing] **********************************
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Assert port deleted] *****************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Delete nothing (IDEMPOTENT)] *********************
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Assert idempotency] ******************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/_initial_config.yml for awplus
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "START awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "END awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Delete port by name] *****************************
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Assert port deleted] *****************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Delete port by name (IDEMPOTENT)] ****************
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Assert idempotency] ******************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/_initial_config.yml for awplus
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "START awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "END awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Delete multiple ports by name] *******************
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Assert port deleted] *****************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Delete multiple ports by name (IDEMPOTENT)] ******
+ok: [awplus]
+
+TASK [awplus_lag_interfaces : Assert idempotency] ******************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+included: /ansible_collections/alliedtelesis/awplus/tests/output/.tmp/integration/awplus_lag_interfaces-gmdzemcq-ÅÑŚÌβŁÈ/tests/integration/targets/awplus_lag_interfaces/tests/cli/_initial_config.yml for awplus
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "START awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Initialise configuration] ************************
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Debug task] **************************************
+ok: [awplus] => {
+    "msg": "END awplus_lag_interfaces initialise config on connection=ansible.netcommon.network_cli"
+}
+
+TASK [awplus_lag_interfaces : Delete all ports] ********************************
+changed: [awplus]
+
+TASK [awplus_lag_interfaces : Assert port deleted] *****************************
+ok: [awplus] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [awplus_lag_interfaces : Delete all ports (IDEMPOTENT)] *******************
