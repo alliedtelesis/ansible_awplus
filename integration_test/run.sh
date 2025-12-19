@@ -100,9 +100,6 @@ generate_junit_file() {
     python3 ${SETUP_ENV_DIR}/parse_results.py ${ANSIBLE_OUTFILE} ${JUNIT_OUTFILE}
 }
 
-# Immediately exit if we recieve a non-zero status
-set -e
-
 # Setup, run tests, cleanup
 setup_venv
 install_dependencies
