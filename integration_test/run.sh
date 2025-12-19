@@ -100,9 +100,7 @@ generate_junit_file() {
     python3 ${SETUP_ENV_DIR}/parse_results.py ${ANSIBLE_OUTFILE} ${JUNIT_OUTFILE}
 }
 
-# Setup, run tests, cleanup
-setup_venv
-install_dependencies
+# Setup and run tests
 build_inventory
 run_integration_tests
 generate_junit_file
