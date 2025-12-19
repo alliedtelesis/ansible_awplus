@@ -21,3 +21,4 @@ WORKDIR /ansible_collections/alliedtelesis/awplus
 
 RUN pip install --upgrade pip && \
     pip install --upgrade -i https://pypi.atlnz.lc/atlnz/pypi/+simple/ -r ./integration_test/requirements.txt
+	pip install ansible==12.2.0
