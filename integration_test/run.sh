@@ -48,6 +48,27 @@ log_error() {
 }
 
 # Functions for setup
+setup_venv() {
+    if [ -z "${PYTHON_VERSION}" ]; then
+        PYTHON_VERSION="3.12"
+    fi
+    python"${PYTHON_VERSION}" -m venv "${VENV_DIR}" || log_error "Failed to create virtual environment."
+    source "${VENV_DIR}/bin/activate" || log_error "Failed to activate virtual environment."
+    pip install --upgrade pip
+
+    log_info "Virtual environment created."
+}
+
+install_dependencies() {
+    if [ -z "${ANSIBLE_VERSION}" ]; then
+        ANSIBLE_VERSION="12.2.0"
+    fi
+    pip install ansible=="${ANSIBLE_VERSION}" || log_error "Failed to install ansible version ${ANSIBLE_VERSION}."
+    pip install -r "${REQUIREMENTS_FILE}" || log_error "Failed to install requirements."
+
+    log_info "Dependencies installed."
+}
+
 build_inventory() {
     INVENTORY_FILE="${INTEGRATION_TEST_DIR}/inventory.networking"
     if [ -f "${INVENTORY_FILE}" ]; then
@@ -99,6 +120,8 @@ generate_junit_file() {
 }
 
 # Setup and run tests
+setup_venv
+install_dependencies
 build_inventory
 run_integration_tests
 generate_junit_file
