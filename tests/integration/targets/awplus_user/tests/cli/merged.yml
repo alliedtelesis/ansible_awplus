@@ -61,6 +61,8 @@
       alliedtelesis.awplus.awplus_user: &m2
         config:
           - name: John
+            hashed_password: $5$beWs4hWrHY4RGTl4$ju8Nt.r6yl72AfqkKIc1VW72R4ra9X3nM2UzyrHLer5
+            privilege: 15
         state: merged
       register: result
 
