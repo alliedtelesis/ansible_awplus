@@ -115,3 +115,5 @@ tests/output
 .*env
 backup
 .vscode
+integration_test/ansible_logs.txt
+integration_test/junit.xml
