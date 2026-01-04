@@ -99,7 +99,6 @@
           - priority: 0
         state: merged
       register: result
-      register: result
 
     - name: Assert failure
       ansible.builtin.assert:
