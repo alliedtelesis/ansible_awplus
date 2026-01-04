@@ -6,21 +6,23 @@
 - ansible.builtin.set_fact:
     d1_expected:
       commands:
+        - no lacp system-priority
 
 - block:
     - name: Initialise configuration
       ansible.builtin.include_tasks: _initial_config.yml
 
-    - name: Delete nothing
+    - name: Delete LACP priority
       alliedtelesis.awplus.awplus_lacp: &d1
         config:
         state: deleted
       register: result
 
-    - name: Assert port deleted
+    - name: Assert priority deleted
       ansible.builtin.assert:
         that:
-          - result.changed == False
+          - result.changed == True
+          - "{{ d1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
     - name: Delete nothing (IDEMPOTENT)
       alliedtelesis.awplus.awplus_lacp: *d1

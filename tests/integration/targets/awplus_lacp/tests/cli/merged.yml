@@ -1,29 +1,38 @@
 ---
 - name: Debug task
   ansible.builtin.debug:
-    msg: "START awplus_lag_interfaces merged integration tests on connection={{ ansible_connection }}"
+    msg: "START awplus_lacp merged integration tests on connection={{ ansible_connection }}"
 
 - ansible.builtin.set_fact:
     m1_expected:
       commands:
+        - lacp system-priority 2
+    m2_expected:
+      commands:
+        - lacp system-priority 32768
+    m3_expected:
+      commands:
+        - lacp system-priority 2
 
 - block:
     - name: Initialise configuration
       ansible.builtin.include_tasks: _initial_config.yml
 
-    - name: Merge nothing
-      alliedtelesis.awplus.awplus_lag_interfaces: &m1
+    - name: Merge existing priority
+      alliedtelesis.awplus.awplus_lacp: &m1
         config:
+          - priority: 2
         state: merged
       register: result
 
-    - name: Assert nothing changes
+    - name: Assert priority merged
       ansible.builtin.assert:
         that:
-          - result.changed == False
+          - result.changed == True
+          - "{{ m1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
     - name: Merge nothing (IDEMPOTENT)
-      alliedtelesis.awplus.awplus_lag_interfaces: *m1
+      alliedtelesis.awplus.awplus_lacp: *m1
       register: result
 
     - name: Assert idempotency
@@ -31,26 +40,89 @@
         that: 
           - result.changed == False
 
-    - name: Merge with port in multiple groups
-      alliedtelesis.awplus.awplus_lag_interfaces:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge default priority
+      alliedtelesis.awplus.awplus_lacp: &m2
         config:
-          - name: 44
-            members:
-              - member: port1.0.10
-                mode: active
-          - name: 66
-            members:
-              - member: port1.0.10
-                mode: active
+          - priority: 32768
         state: merged
       register: result
-      ignore_errors: True
+
+    - name: Assert priority merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge nothing (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp: *m2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration (to default state)
+      ansible.builtin.include_tasks: _reset_config.yml
+
+    - name: Merge default priority
+      alliedtelesis.awplus.awplus_lacp: &m3
+        config:
+          - priority: 2
+        state: merged
+      register: result
+
+    - name: Assert priority merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge nothing (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp: *m3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge invalid priority below bounds
+      alliedtelesis.awplus.awplus_lacp:
+        config:
+          - priority: 0
+        state: merged
+      register: result
+      register: result
 
     - name: Assert failure
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == port_in_multiple_groups_error
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge invalid priority above bounds
+      alliedtelesis.awplus.awplus_lacp:
+        config:
+          - priority: 65536
+        state: merged
+      register: result
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
 
   always:
     - name: Reset configuration
@@ -58,4 +130,4 @@
 
 - name: Debug task
   ansible.builtin.debug:
-    msg: "END awplus_lag_interfaces merged integration tests on connection={{ ansible_connection }}"
+    msg: "END awplus_lacp merged integration tests on connection={{ ansible_connection }}"
