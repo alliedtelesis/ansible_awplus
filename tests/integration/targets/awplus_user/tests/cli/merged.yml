@@ -272,10 +272,6 @@
         state: merged
       register: result
       ignore_errors: True
-    
-    - name: Debug result
-      ansible.builtin.debug:
-        var: result
 
     - name: Assert failure
       ansible.builtin.assert:

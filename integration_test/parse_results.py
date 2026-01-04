@@ -75,7 +75,7 @@ def parse_results():
 
             check_failure(assert_block[1], assert_block, test_case)
     
-    ts = TestSuite("my test suite", test_cases)
+    ts = TestSuite("Ansible Integration Test Suite", test_cases)
     xml = TestSuite.to_xml_string([ts])
     
     with open(JUNIT_FILE, "w") as f:
