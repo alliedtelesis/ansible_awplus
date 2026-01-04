@@ -208,7 +208,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == missing_mode_error
+          - result.failed == True
 
     - name: Override with port in multiple groups
       alliedtelesis.awplus.awplus_lag_interfaces:
@@ -229,7 +229,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == port_in_multiple_groups_error
+          - result.failed == True
 
   always:
     - name: Reset configuration

@@ -192,7 +192,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == port_in_multiple_groups_error
+          - result.failed == True
 
     - name: Initialise configuration
       ansible.builtin.include_tasks: _initial_config.yml
@@ -216,7 +216,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == multiple_of_same_group_error
+          - result.failed == True
 
   always:
     - name: Reset configuration

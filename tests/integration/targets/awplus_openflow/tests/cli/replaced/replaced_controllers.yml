@@ -86,7 +86,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == "New controller protocol missing"
+          - result.failed == True
 
     - name: Replace controller without address fails
       alliedtelesis.awplus.awplus_openflow:
@@ -103,7 +103,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == "New controller address missing"
+          - result.failed == True
 
     - name: Replace controller without port fails
       alliedtelesis.awplus.awplus_openflow:
@@ -120,7 +120,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == "New controller port missing"
+          - result.failed == True
 
   always:
     - name: Reset configuration

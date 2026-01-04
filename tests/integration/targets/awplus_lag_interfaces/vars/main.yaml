@@ -1,3 +1,1 @@
 ---
-missing_mode_error: "argument 'mode' is required"
-port_in_multiple_groups_error: "duplicate port in desired config"

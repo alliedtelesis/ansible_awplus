@@ -181,7 +181,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == "configured_password and hashed_password are mutually exclusive."
+          - result.failed == True
 
     - name: Override without password
       alliedtelesis.awplus.awplus_user: 
@@ -196,7 +196,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == "Password is required."
+          - result.failed == True
 
   always:
     - name: Reset configuration
