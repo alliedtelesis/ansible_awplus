@@ -1,0 +1,61 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lag_interfaces merged integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    m1_expected:
+      commands:
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge nothing
+      alliedtelesis.awplus.awplus_lag_interfaces: &m1
+        config:
+        state: merged
+      register: result
+
+    - name: Assert nothing changes
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Merge nothing (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lag_interfaces: *m1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Merge with port in multiple groups
+      alliedtelesis.awplus.awplus_lag_interfaces:
+        config:
+          - name: 44
+            members:
+              - member: port1.0.10
+                mode: active
+          - name: 66
+            members:
+              - member: port1.0.10
+                mode: active
+        state: merged
+      register: result
+      ignore_errors: True
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.msg == port_in_multiple_groups_error
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lag_interfaces merged integration tests on connection={{ ansible_connection }}"

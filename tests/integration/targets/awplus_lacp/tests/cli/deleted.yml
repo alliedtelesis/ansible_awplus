@@ -1,0 +1,40 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lacp deleted integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    d1_expected:
+      commands:
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete nothing
+      alliedtelesis.awplus.awplus_lacp: &d1
+        config:
+        state: deleted
+      register: result
+
+    - name: Assert port deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Delete nothing (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp: *d1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lacp deleted integration tests on connection={{ ansible_connection }}"
