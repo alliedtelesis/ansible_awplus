@@ -30,7 +30,7 @@
           - result.changed == True
           - "{{ r1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Replaced users password (IDEMPOTENT)
+    - name: Replace existing user (IDEMPOTENT)
       alliedtelesis.awplus.awplus_user: *r1
       register: result
 
@@ -56,7 +56,7 @@
           - result.changed == True
           - "{{ r2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Replaced users password (IDEMPOTENT)
+    - name: Replace existing user without specifying privilege (IDEMPOTENT)
       alliedtelesis.awplus.awplus_user: *r2
       register: result
 

@@ -172,7 +172,7 @@
           - result.changed == True
           - "{{ d5_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Delete all ports (IDEMPOTENT)
+    - name: Delete entire group (IDEMPOTENT)
       alliedtelesis.awplus.awplus_lag_interfaces: *d5
       register: result
 

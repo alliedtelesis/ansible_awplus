@@ -33,7 +33,7 @@
           - result.changed == True
           - "{{ rc1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Replace eisting controller (IDEMPOTENT)
+    - name: Replace new controller (IDEMPOTENT)
       alliedtelesis.awplus.awplus_openflow: *rc1
       register: result
 
@@ -62,7 +62,7 @@
           - result.changed == True
           - "{{ rc2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Replace eisting controller (IDEMPOTENT)
+    - name: Replace existing controller (IDEMPOTENT)
       alliedtelesis.awplus.awplus_openflow: *rc2
       register: result
 
