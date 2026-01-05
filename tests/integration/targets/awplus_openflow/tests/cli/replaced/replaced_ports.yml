@@ -8,11 +8,11 @@
       commands:
     rp1_expected:
       commands:
-        - interface port1.0.3
+        - interface port1.0.14
         - openflow
     rp2_expected:
       commands:
-        - interface port1.0.3
+        - interface port1.0.14
         - openflow
 
 
@@ -46,11 +46,11 @@
       alliedtelesis.awplus.awplus_openflow: &rp1
         config:
           ports:
-            - port1.0.3
+            - port1.0.14
         state: replaced
       register: result
 
-    - name: Assert controller config replaced
+    - name: Assert port added
       ansible.builtin.assert:
         that:
           - result.changed == True
@@ -72,13 +72,13 @@
       alliedtelesis.awplus.awplus_openflow: &rp2
         config:
           ports:
-            - port1.0.1
-            - port1.0.2
-            - port1.0.3
+            - port1.0.12
+            - port1.0.13
+            - port1.0.14
         state: replaced
       register: result
 
-    - name: Assert controller config replaced
+    - name: Assert ports added
       ansible.builtin.assert:
         that:
           - result.changed == True

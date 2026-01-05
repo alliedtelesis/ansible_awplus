@@ -108,7 +108,7 @@
           - result.changed == True
           - "{{ d4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Delete non-existing user by name (IDEMPOTENT)
+    - name: Delete multiple existing and non-existing users (IDEMPOTENT)
       alliedtelesis.awplus.awplus_user: *d4
       register: result
 

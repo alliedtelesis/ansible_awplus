@@ -6,15 +6,15 @@
 - ansible.builtin.set_fact:
     dp1_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.12
         - no openflow
     dp2_expected:
       commands:
     dp3_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.12
         - no openflow
-        - interface port1.0.2
+        - interface port1.0.13
         - no openflow
 
 - block:
@@ -25,7 +25,7 @@
       alliedtelesis.awplus.awplus_openflow: &dp1
         config:
           ports:
-            - "port1.0.1"
+            - port1.0.12
         state: deleted
       register: result
     
@@ -51,7 +51,7 @@
       alliedtelesis.awplus.awplus_openflow: &dp2
         config:
           ports:
-            - "port1.0.3"
+            - port1.0.14
         state: deleted
       register: result
     
@@ -68,8 +68,8 @@
       alliedtelesis.awplus.awplus_openflow: &dp3
         config:
           ports:
-            - "port1.0.1"
-            - "port1.0.2"
+            - port1.0.12
+            - port1.0.13
         state: deleted
       register: result
     

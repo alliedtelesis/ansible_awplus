@@ -3,15 +3,15 @@
   ansible.builtin.debug:
     msg: "START awplus_openflow overridden integration tests on connection={{ ansible_connection }}"
 
-- ansible.builtin.set_fact: # can alternatively set this in a vars file
+- ansible.builtin.set_fact:
     op1_expected:
       commands:
         - no openflow controller bob
         - no openflow controller fred
         - no openflow controller dave
-        - interface port1.0.1
+        - interface port1.0.12
         - no openflow
-        - interface port1.0.2
+        - interface port1.0.13
         - no openflow
         - no openflow inactivity
         - no openflow native vlan
@@ -19,7 +19,7 @@
         - no openflow failmode
         - no openflow ssl peer certificate
         - no openflow ssl trustpoint
-        - interface port1.0.3
+        - interface port1.0.14
         - openflow
 
 - block:
@@ -30,7 +30,7 @@
       alliedtelesis.awplus.awplus_openflow: &op1
         config:
           ports:
-            - port1.0.3
+            - port1.0.14
         state: overridden
       register: result
 

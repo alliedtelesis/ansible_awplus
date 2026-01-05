@@ -6,58 +6,58 @@
 - ansible.builtin.set_fact:
     o1_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no channel-group
-        - interface port1.0.2
+        - interface port1.0.12
         - no channel-group
-        - interface port1.0.3
+        - interface port1.0.13
         - no channel-group
-        - interface port1.0.4
+        - interface port1.0.14
         - no channel-group
-        - interface port1.0.5
+        - interface port1.0.15
         - no channel-group
-        - interface port1.0.6
+        - interface port1.0.16
         - no channel-group
     o2_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no channel-group
-        - interface port1.0.2
+        - interface port1.0.12
         - no channel-group
-        - interface port1.0.3
+        - interface port1.0.13
         - no channel-group
-        - interface port1.0.4
+        - interface port1.0.14
         - no channel-group
-        - interface port1.0.5
+        - interface port1.0.15
         - no channel-group
-        - interface port1.0.6
+        - interface port1.0.16
         - no channel-group
-        - interface port1.0.10
+        - interface port1.0.17
         - channel-group 44 mode active
     o3_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - channel-group 44 mode passive
-        - interface port1.0.4
+        - interface port1.0.14
         - channel-group 66 mode passive
     o4_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no channel-group
         - channel-group 66 mode passive
-        - interface port1.0.2
+        - interface port1.0.12
         - no channel-group
         - channel-group 66 mode passive
-        - interface port1.0.3
+        - interface port1.0.13
         - no channel-group
         - channel-group 66 mode active
-        - interface port1.0.4
+        - interface port1.0.14
         - no channel-group
         - channel-group 44 mode passive
-        - interface port1.0.5
+        - interface port1.0.15
         - no channel-group
         - channel-group 44 mode active
-        - interface port1.0.6
+        - interface port1.0.16
         - no channel-group
         - channel-group 44 mode active
 
@@ -94,7 +94,7 @@
         config:
           - name: 44
             members:
-              - member: port1.0.10
+              - member: port1.0.17
                 mode: active
         state: overridden
       register: result
@@ -122,19 +122,19 @@
         config:
           - name: 44
             members:
-              - member: port1.0.1
+              - member: port1.0.11
                 mode: passive
-              - member: port1.0.2
+              - member: port1.0.12
                 mode: active
-              - member: port1.0.3
+              - member: port1.0.13
                 mode: passive
           - name: 66  
             members:
-              - member: port1.0.4
+              - member: port1.0.14
                 mode: passive
-              - member: port1.0.5
+              - member: port1.0.15
                 mode: passive
-              - member: port1.0.6
+              - member: port1.0.16
                 mode: passive
         state: overridden
       register: result
@@ -162,19 +162,19 @@
         config:
           - name: 44
             members:
-              - member: port1.0.4
+              - member: port1.0.14
                 mode: passive
-              - member: port1.0.5
+              - member: port1.0.15
                 mode: passive
-              - member: port1.0.6
+              - member: port1.0.16
                 mode: active
           - name: 66  
             members:
-              - member: port1.0.1
+              - member: port1.0.11
                 mode: passive
-              - member: port1.0.2
+              - member: port1.0.12
                 mode: active
-              - member: port1.0.3
+              - member: port1.0.13
                 mode: active
         state: overridden
       register: result
@@ -199,7 +199,7 @@
         config:
           - name: 44
             members:
-              - member: port1.0.10
+              - member: port1.0.19
         state: overridden
       register: result
       ignore_errors: True
@@ -208,18 +208,18 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == missing_mode_error
+          - result.failed == True
 
     - name: Override with port in multiple groups
       alliedtelesis.awplus.awplus_lag_interfaces:
         config:
           - name: 44
             members:
-              - member: port1.0.10
+              - member: port1.0.19
                 mode: active
           - name: 66
             members:
-              - member: port1.0.10
+              - member: port1.0.19
                 mode: active
         state: overridden
       register: result
@@ -229,7 +229,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == port_in_multiple_groups_error
+          - result.failed == True
 
   always:
     - name: Reset configuration

@@ -1,9 +1,27 @@
 ---
-- name: Setup trustpoint
+- name: Check if trustpoint exists
+  alliedtelesis.awplus.awplus_command:
+    commands: "show running-config | include crypto pki trustpoint test"
+  register: trustpoint_output
+
+- name: Remove trustpoint if it exists
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - no crypto pki trustpoint test
+  when: "{{ 'crypto pki trustpoint test' in trustpoint_output.stdout[0] }}"
+
+- name: Make trustpoint
   alliedtelesis.awplus.awplus_config:
     lines:
       - crypto pki trustpoint test
+
+- name: Setup trustpoint
+  alliedtelesis.awplus.awplus_config:
+    lines:
       - enrollment selfsigned 
+    parents: "{{ item }}"
+  with_items:
+    - crypto pki trustpoint test
 
 - name: Authenticate and enroll trustpoint
   alliedtelesis.awplus.awplus_command:

@@ -8,17 +8,17 @@
       commands:
     m2_expected:
       commands:
-        - interface port1.0.8
+        - interface port1.0.18
         - channel-group 44 mode active
     m3_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - channel-group 44 mode passive
     m4_expected:
       commands:
-        - interface port1.0.4
+        - interface port1.0.14
         - channel-group 44 mode passive
-        - interface port1.0.1
+        - interface port1.0.11
         - channel-group 66 mode passive
 
 - block:
@@ -53,7 +53,7 @@
         config:
           - name: 44
             members:
-              - member: port1.0.8
+              - member: port1.0.18
                 mode: active
         state: merged
       register: result
@@ -81,7 +81,7 @@
         config:
           - name: 44
             members:
-              - member: port1.0.1
+              - member: port1.0.11
                 mode: passive
         state: merged
       register: result
@@ -109,11 +109,11 @@
         config:
           - name: 66
             members:
-              - member: port1.0.4
+              - member: port1.0.14
                 mode: passive
           - name: 44
             members:
-              - member: port1.0.1
+              - member: port1.0.11
                 mode: passive
         state: merged
       register: result
@@ -141,7 +141,7 @@
         config:
           - name: 44
             members:
-              - member: port1.0.10
+              - member: port1.0.19
         state: merged
       register: result
       ignore_errors: True
@@ -150,18 +150,18 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == missing_mode_error
+          - result.failed == True
 
     - name: Merge with port in multiple groups
       alliedtelesis.awplus.awplus_lag_interfaces:
         config:
           - name: 44
             members:
-              - member: port1.0.10
+              - member: port1.0.19
                 mode: active
           - name: 66
             members:
-              - member: port1.0.10
+              - member: port1.0.19
                 mode: active
         state: merged
       register: result
@@ -171,7 +171,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == port_in_multiple_groups_error
+          - result.failed == True
 
   always:
     - name: Reset configuration

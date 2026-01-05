@@ -24,7 +24,7 @@
         trustpoint: "test"
         peer_certificate: "bootstrap"
         ports:
-          - port1.0.1
+          - port1.0.11
     dc2_expected:
       commands:
     dc3_expected:
@@ -97,7 +97,7 @@
           - result.changed == True
           - "{{ dc3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Delete existing controller (IDEMPOTENT)
+    - name: Delete all controllers (IDEMPOTENT)
       alliedtelesis.awplus.awplus_openflow: *dc3
       register: result
 

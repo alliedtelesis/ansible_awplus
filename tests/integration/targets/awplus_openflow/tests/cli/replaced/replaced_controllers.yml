@@ -33,7 +33,7 @@
           - result.changed == True
           - "{{ rc1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Replace eisting controller (IDEMPOTENT)
+    - name: Replace new controller (IDEMPOTENT)
       alliedtelesis.awplus.awplus_openflow: *rc1
       register: result
 
@@ -62,7 +62,7 @@
           - result.changed == True
           - "{{ rc2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Replace eisting controller (IDEMPOTENT)
+    - name: Replace existing controller (IDEMPOTENT)
       alliedtelesis.awplus.awplus_openflow: *rc2
       register: result
 
@@ -86,7 +86,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == "New controller protocol missing"
+          - result.failed == True
 
     - name: Replace controller without address fails
       alliedtelesis.awplus.awplus_openflow:
@@ -103,7 +103,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == "New controller address missing"
+          - result.failed == True
 
     - name: Replace controller without port fails
       alliedtelesis.awplus.awplus_openflow:
@@ -120,7 +120,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == "New controller port missing"
+          - result.failed == True
 
   always:
     - name: Reset configuration

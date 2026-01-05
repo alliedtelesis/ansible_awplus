@@ -8,35 +8,33 @@
       commands:
     d2_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no static-channel-group
     d3_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no static-channel-group
-        - interface port1.0.3
+        - interface port1.0.13
         - no static-channel-group
     d4_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no static-channel-group
-        - interface port1.0.3
+        - interface port1.0.13
         - no static-channel-group
     d5_expected:
        commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no static-channel-group
-        - interface port1.0.2
+        - interface port1.0.12
         - no static-channel-group
-        - interface port1.0.3
+        - interface port1.0.13
         - no static-channel-group
-        - interface port1.0.4
+        - interface port1.0.14
         - no static-channel-group
-        - interface port1.0.5
+        - interface port1.0.15
         - no static-channel-group
-        - interface port1.0.6
-        - no static-channel-group
-        - interface port1.0.7
+        - interface port1.0.16
         - no static-channel-group
 
 - block:
@@ -71,7 +69,7 @@
         config:
           - name: 33
             members:
-              - port1.0.1
+              - port1.0.11
         state: deleted
       register: result
 
@@ -98,8 +96,8 @@
         config:
           - name: 33
             members:
-              - port1.0.1
-              - port1.0.3
+              - port1.0.11
+              - port1.0.13
         state: deleted
       register: result
 

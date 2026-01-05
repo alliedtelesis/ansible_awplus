@@ -8,19 +8,19 @@
     config:
       - name: 44
         members:
-          - member: port1.0.1
+          - member: port1.0.11
             mode: active
-          - member: port1.0.2
+          - member: port1.0.12
             mode: active
-          - member: port1.0.3
+          - member: port1.0.13
             mode: passive
       - name: 66  
         members:
-          - member: port1.0.4
+          - member: port1.0.14
             mode: active
-          - member: port1.0.5
+          - member: port1.0.15
             mode: passive
-          - member: port1.0.6
+          - member: port1.0.16
             mode: passive
     state: overridden
 

@@ -24,7 +24,7 @@
       datapath_id: 123
       fail_mode: "secure_nre"
       ports:
-        - port1.0.1
+        - port1.0.12
     state: overridden
 
 - name: Debug task

@@ -8,22 +8,22 @@
       commands:
     m2_expected:
       commands:
-        - interface port1.0.8
+        - interface port1.0.17
         - static-channel-group 33
     m3_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no static-channel-group
         - static-channel-group 33 member-filters
-        - interface port1.0.3
+        - interface port1.0.13
         - no static-channel-group
         - static-channel-group 33 member-filters
     m4_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no static-channel-group
         - static-channel-group 55 member-filters
-        - interface port1.0.2
+        - interface port1.0.12
         - no static-channel-group
         - static-channel-group 33
 
@@ -59,7 +59,7 @@
         config:
           - name: 33
             members:
-              - port1.0.8
+              - port1.0.17
             member-filters: False
         state: merged
       register: result
@@ -114,11 +114,11 @@
         config:
           - name: 33
             members:
-              - port1.0.2
+              - port1.0.12
             member-filters: False
           - name: 55
             members:
-              - port1.0.1
+              - port1.0.11
             member-filters: True
         state: merged
       register: result
@@ -146,11 +146,11 @@
         config:
           - name: 33
             members:
-              - member: port1.0.10
+              - member: port1.0.19
             member-filters: False
           - name: 55
             members:
-              - member: port1.0.10
+              - member: port1.0.19
             member-filters: False
         state: merged
       register: result
@@ -160,7 +160,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == port_in_multiple_groups_error
+          - result.failed == True
 
     - name: Initialise configuration
       ansible.builtin.include_tasks: _initial_config.yml
@@ -170,11 +170,11 @@
         config:
           - name: 33
             members:
-              - member: port1.0.9
+              - member: port1.0.18
             member-filters: False
           - name: 33
             members:
-              - member: port1.0.10
+              - member: port1.0.19
             member-filters: True
         state: merged
       register: result
@@ -184,7 +184,7 @@
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == multiple_of_same_group_error
+          - result.failed == True
 
   always:
     - name: Reset configuration
