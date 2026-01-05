@@ -6,7 +6,9 @@
 - name: Initialise configuration
   alliedtelesis.awplus.awplus_lacp:
     config:
-      - priority: 1
+      system:
+        priority: 1
+        global_passive_mode: False
     state: merged
 
 - name: Debug task

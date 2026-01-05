@@ -21,7 +21,8 @@
     - name: Merge existing priority
       alliedtelesis.awplus.awplus_lacp: &m1
         config:
-          - priority: 2
+          system:
+            priority: 2
         state: merged
       register: result
 
@@ -46,7 +47,8 @@
     - name: Merge default priority
       alliedtelesis.awplus.awplus_lacp: &m2
         config:
-          - priority: 32768
+          system:
+            priority: 32768
         state: merged
       register: result
 
@@ -71,7 +73,8 @@
     - name: Merge default priority
       alliedtelesis.awplus.awplus_lacp: &m3
         config:
-          - priority: 2
+          system:
+            priority: 2
         state: merged
       register: result
 
@@ -96,7 +99,8 @@
     - name: Merge invalid priority below bounds
       alliedtelesis.awplus.awplus_lacp:
         config:
-          - priority: 0
+          system:
+            priority: 0
         state: merged
       register: result
 
@@ -112,7 +116,8 @@
     - name: Merge invalid priority above bounds
       alliedtelesis.awplus.awplus_lacp:
         config:
-          - priority: 65536
+          system:
+            priority: 65536
         state: merged
       register: result
 
