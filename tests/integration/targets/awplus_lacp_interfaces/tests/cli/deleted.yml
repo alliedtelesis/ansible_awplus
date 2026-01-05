@@ -8,27 +8,27 @@
       commands:
     d2_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no lacp port-priority
         - lacp timeout long
     d3_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no lacp port-priority
         - lacp timeout long
-        - interface port1.0.5
+        - interface port1.0.15
         - no lacp port-priority
     d4_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no lacp port-priority
-        - interface port1.0.2
+        - interface port1.0.12
         - no lacp port-priority
     d5_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - lacp timeout long
-        - interface port1.0.2
+        - interface port1.0.12
         - lacp timeout long
 
 - block:
@@ -61,7 +61,7 @@
     - name: Delete interface by name
       alliedtelesis.awplus.awplus_lacp_interfaces: &d2
         config:
-          - name: port1.0.1
+          - name: port1.0.11
         state: deleted
       register: result
 
@@ -86,8 +86,8 @@
     - name: Delete interfaces by name
       alliedtelesis.awplus.awplus_lacp_interfaces: &d3
         config:
-          - name: port1.0.1
-          - name: port1.0.5
+          - name: port1.0.11
+          - name: port1.0.15
         state: deleted
       register: result
 
@@ -112,9 +112,9 @@
     - name: Delete port priorities only
       alliedtelesis.awplus.awplus_lacp_interfaces: &d4
         config:
-          - name: port1.0.1
+          - name: port1.0.11
             port_priority: 100
-          - name: port1.0.2
+          - name: port1.0.12
             port_priority: 123
         state: deleted
       register: result
@@ -140,9 +140,9 @@
     - name: Delete timeouts only
       alliedtelesis.awplus.awplus_lacp_interfaces: &d5
         config:
-          - name: port1.0.1
+          - name: port1.0.11
             timeout: short
-          - name: port1.0.2
+          - name: port1.0.12
             timeout: long
         state: deleted
       register: result

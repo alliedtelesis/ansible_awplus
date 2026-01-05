@@ -8,29 +8,29 @@
       commands:
     m2_expected:
       commands:
-        - interface port1.0.3
+        - interface port1.0.13
         - lacp port-priority 50
         - lacp timeout short
     m3_expected:
       commands:
-        - interface port1.0.3
+        - interface port1.0.13
         - lacp port-priority 50
         - lacp timeout short
-        - interface port1.0.4
+        - interface port1.0.14
         - lacp port-priority 50
         - lacp timeout short
     m4_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - lacp port-priority 50
-        - interface port1.0.2
+        - interface port1.0.12
         - lacp port-priority 50
         - lacp timeout long
     m5_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - lacp port-priority 50
-        - interface port1.0.2
+        - interface port1.0.12
         - lacp timeout long
 
 - block:
@@ -63,7 +63,7 @@
     - name: Merge add new interface
       alliedtelesis.awplus.awplus_lacp_interfaces: &m2
         config:
-          - name: port1.0.3
+          - name: port1.0.13
             port_priority: 50
             timeout: short
         state: merged
@@ -90,10 +90,10 @@
     - name: Merge add multiple new interfaces
       alliedtelesis.awplus.awplus_lacp_interfaces: &m3
         config:
-          - name: port1.0.3
+          - name: port1.0.13
             port_priority: 50
             timeout: short
-          - name: port1.0.4
+          - name: port1.0.14
             port_priority: 50
             timeout: short
         state: merged
@@ -120,10 +120,10 @@
     - name: Merge change existing interfaces full args
       alliedtelesis.awplus.awplus_lacp_interfaces: &m4
         config:
-          - name: port1.0.1
+          - name: port1.0.11
             port_priority: 50
             timeout: short
-          - name: port1.0.2
+          - name: port1.0.12
             port_priority: 50
             timeout: long
         state: merged
@@ -150,9 +150,9 @@
     - name: Merge change existing interfaces partial args
       alliedtelesis.awplus.awplus_lacp_interfaces: &m5
         config:
-          - name: port1.0.1
+          - name: port1.0.11
             port_priority: 50
-          - name: port1.0.2
+          - name: port1.0.12
             timeout: long
         state: merged
       register: result
@@ -178,7 +178,7 @@
     - name: Merge below range port priority
       alliedtelesis.awplus.awplus_lacp_interfaces:
         config:
-          - name: port1.0.1
+          - name: port1.0.11
             port_priority: 0
         state: merged
       register: result
@@ -193,7 +193,7 @@
     - name: Merge below range port priority
       alliedtelesis.awplus.awplus_lacp_interfaces:
         config:
-          - name: port1.0.1
+          - name: port1.0.11
             port_priority: 65536
         state: merged
       register: result
@@ -208,7 +208,7 @@
     - name: Merge invalid timeout value
       alliedtelesis.awplus.awplus_lacp_interfaces:
         config:
-          - name: port1.0.1
+          - name: port1.0.11
             timeout: medium
         state: merged
       register: result
@@ -223,7 +223,7 @@
     - name: Merge invalid args
       alliedtelesis.awplus.awplus_lacp_interfaces:
         config:
-          - name: port1.0.3
+          - name: port1.0.13
         state: merged
       register: result
       ignore_errors: True

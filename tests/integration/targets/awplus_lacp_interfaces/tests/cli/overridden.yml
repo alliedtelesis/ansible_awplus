@@ -6,15 +6,59 @@
 - ansible.builtin.set_fact:
     o1_expected:
       commands:
+        - interface port1.0.11
+        - no lacp port-priority
+        - lacp timeout long
+        - interface port1.0.12
+        - no lacp port-priority
+        - lacp timeout long
+        - interface port1.0.15
+        - no lacp port-priority
+    o2_expected:
+      commands:
+        - interface port1.0.11
+        - no lacp port-priority
+        - lacp timeout long
+        - interface port1.0.12
+        - no lacp port-priority
+        - lacp timeout long
+        - interface port1.0.15
+        - no lacp port-priority
+        - interface port1.0.14
+        - lacp port-priority 5000
 
 - block:
     - name: Initialise configuration
       ansible.builtin.include_tasks: _initial_config.yml
 
-    - name: Override existing interface
+    - name: Override with empty config
       alliedtelesis.awplus.awplus_lacp_interfaces: &o1
         config:
-          - name: port1.0.1
+        state: overridden
+      register: result
+
+    - name: Assert existing interface overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with empty config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *o1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with new config
+      alliedtelesis.awplus.awplus_lacp_interfaces: &o2
+        config:
+          - name: port1.0.14
             port_priority: 5000
             timeout: long
         state: overridden
@@ -24,9 +68,10 @@
       ansible.builtin.assert:
         that:
           - result.changed == True
+          - "{{ o2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Overridden existing interface (IDEMPOTENT)
-      alliedtelesis.awplus.awplus_lacp_interfaces: *o1
+    - name: Override with new config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *o2
       register: result
 
     - name: Assert idempotency

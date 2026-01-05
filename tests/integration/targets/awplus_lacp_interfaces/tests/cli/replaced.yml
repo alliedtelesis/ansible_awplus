@@ -8,30 +8,30 @@
       commands:
     r2_expected:
       commands:
-        - interface port1.0.3
+        - interface port1.0.13
         - lacp port-priority 50
         - lacp timeout short
     r3_expected:
       commands:
-        - interface port1.0.3
+        - interface port1.0.13
         - lacp port-priority 50
         - lacp timeout short
-        - interface port1.0.4
+        - interface port1.0.14
         - lacp port-priority 50
         - lacp timeout short
     r4_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - lacp port-priority 50
-        - interface port1.0.2
+        - interface port1.0.12
         - lacp port-priority 50
         - lacp timeout long
     r5_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - lacp timeout long
         - lacp port-priority 50
-        - interface port1.0.2
+        - interface port1.0.12
         - no lacp port-priority
         - lacp timeout long
 
@@ -65,7 +65,7 @@
     - name: Replace add new interface
       alliedtelesis.awplus.awplus_lacp_interfaces: &r2
         config:
-          - name: port1.0.3
+          - name: port1.0.13
             port_priority: 50
             timeout: short
         state: replaced
@@ -92,10 +92,10 @@
     - name: Replace add multiple new interfaces
       alliedtelesis.awplus.awplus_lacp_interfaces: &r3
         config:
-          - name: port1.0.3
+          - name: port1.0.13
             port_priority: 50
             timeout: short
-          - name: port1.0.4
+          - name: port1.0.14
             port_priority: 50
             timeout: short
         state: replaced
@@ -122,10 +122,10 @@
     - name: Replace change existing interfaces full args
       alliedtelesis.awplus.awplus_lacp_interfaces: &r4
         config:
-          - name: port1.0.1
+          - name: port1.0.11
             port_priority: 50
             timeout: short
-          - name: port1.0.2
+          - name: port1.0.12
             port_priority: 50
             timeout: long
         state: replaced
@@ -152,9 +152,9 @@
     - name: Replace change existing interfaces partial args
       alliedtelesis.awplus.awplus_lacp_interfaces: &r5
         config:
-          - name: port1.0.1
+          - name: port1.0.11
             port_priority: 50
-          - name: port1.0.2
+          - name: port1.0.12
             timeout: long
         state: replaced
       register: result
@@ -180,7 +180,7 @@
     - name: Replace below range port priority
       alliedtelesis.awplus.awplus_lacp_interfaces:
         config:
-          - name: port1.0.1
+          - name: port1.0.11
             port_priority: 0
         state: replaced
       register: result
@@ -195,7 +195,7 @@
     - name: Replace above range port priority
       alliedtelesis.awplus.awplus_lacp_interfaces:
         config:
-          - name: port1.0.1
+          - name: port1.0.11
             port_priority: 65536
         state: replaced
       register: result
@@ -210,7 +210,7 @@
     - name: Replace invalid timeout value
       alliedtelesis.awplus.awplus_lacp_interfaces:
         config:
-          - name: port1.0.1
+          - name: port1.0.11
             timeout: medium
         state: replaced
       register: result
@@ -225,7 +225,7 @@
     - name: Replace invalid args
       alliedtelesis.awplus.awplus_lacp_interfaces:
         config:
-          - name: port1.0.3
+          - name: port1.0.13
         state: replaced
       register: result
       ignore_errors: True
