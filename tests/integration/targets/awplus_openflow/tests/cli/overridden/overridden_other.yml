@@ -9,7 +9,7 @@
         - no openflow controller bob
         - no openflow controller fred
         - no openflow controller dave
-        - interface port1.0.2
+        - interface port1.0.12
         - no openflow
         - openflow inactivity 60
         - openflow native vlan 1111
