@@ -184,13 +184,12 @@
             port_priority: 0
         state: replaced
       register: result
-      ignore_errors: True
 
     - name: Assert failure
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == invalid_port_priority_error
+          - result.failed == True
 
     - name: Replace above range port priority
       alliedtelesis.awplus.awplus_lacp_interfaces:
@@ -199,13 +198,12 @@
             port_priority: 65536
         state: replaced
       register: result
-      ignore_errors: True
 
     - name: Assert failure
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == invalid_port_priority_error
+          - result.failed == True
 
     - name: Replace invalid timeout value
       alliedtelesis.awplus.awplus_lacp_interfaces:
@@ -214,13 +212,12 @@
             timeout: medium
         state: replaced
       register: result
-      ignore_errors: True
 
     - name: Assert failure
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == invalid_timeout_error
+          - result.failed == True
 
     - name: Replace invalid args
       alliedtelesis.awplus.awplus_lacp_interfaces:
@@ -228,13 +225,12 @@
           - name: port1.0.13
         state: replaced
       register: result
-      ignore_errors: True
 
     - name: Assert failure
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == invalid_args_error
+          - result.failed == True
 
   always:
     - name: Reset configuration

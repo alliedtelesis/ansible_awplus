@@ -182,28 +182,26 @@
             port_priority: 0
         state: merged
       register: result
-      ignore_errors: True
 
     - name: Assert failure
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == invalid_port_priority_error
+          - result.failed == True
 
-    - name: Merge below range port priority
+    - name: Merge above range port priority
       alliedtelesis.awplus.awplus_lacp_interfaces:
         config:
           - name: port1.0.11
             port_priority: 65536
         state: merged
       register: result
-      ignore_errors: True
 
     - name: Assert failure
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == invalid_port_priority_error
+          - result.failed == True
 
     - name: Merge invalid timeout value
       alliedtelesis.awplus.awplus_lacp_interfaces:
@@ -212,13 +210,12 @@
             timeout: medium
         state: merged
       register: result
-      ignore_errors: True
 
     - name: Assert failure
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == invalid_timeout_error
+          - result.failed == True
 
     - name: Merge invalid args
       alliedtelesis.awplus.awplus_lacp_interfaces:
@@ -226,13 +223,12 @@
           - name: port1.0.13
         state: merged
       register: result
-      ignore_errors: True
 
     - name: Assert failure
       ansible.builtin.assert:
         that:
           - result.changed == False
-          - result.msg == invalid_args_error
+          - result.failed == True
 
   always:
     - name: Reset configuration
