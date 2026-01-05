@@ -9,9 +9,9 @@
         - no openflow controller bob
         - no openflow controller fred
         - no openflow controller dave
-        - interface port1.0.2
+        - interface port1.0.12
         - no openflow
-        - interface port1.0.3
+        - interface port1.0.13
         - no openflow
         - no openflow inactivity
         - no openflow native vlan
@@ -25,9 +25,9 @@
         - no openflow controller fred
         - no openflow controller dave
         - openflow controller andy tcp 192.168.2.100 6654
-        - interface port1.0.2
+        - interface port1.0.12
         - no openflow
-        - interface port1.0.3
+        - interface port1.0.13
         - no openflow
         - no openflow inactivity
         - no openflow native vlan
@@ -47,9 +47,9 @@
         - no openflow controller fred
         - no openflow controller dave
         - openflow controller bob tcp 192.168.2.100 6654
-        - interface port1.0.2
+        - interface port1.0.12
         - no openflow
-        - interface port1.0.3
+        - interface port1.0.13
         - no openflow
         - no openflow inactivity
         - no openflow native vlan

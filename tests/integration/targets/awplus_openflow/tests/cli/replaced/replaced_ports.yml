@@ -8,11 +8,11 @@
       commands:
     rp1_expected:
       commands:
-        - interface port1.0.4
+        - interface port1.0.14
         - openflow
     rp2_expected:
       commands:
-        - interface port1.0.4
+        - interface port1.0.14
         - openflow
 
 
@@ -46,7 +46,7 @@
       alliedtelesis.awplus.awplus_openflow: &rp1
         config:
           ports:
-            - port1.0.4
+            - port1.0.14
         state: replaced
       register: result
 
@@ -72,9 +72,9 @@
       alliedtelesis.awplus.awplus_openflow: &rp2
         config:
           ports:
-            - port1.0.2
-            - port1.0.3
-            - port1.0.4
+            - port1.0.12
+            - port1.0.13
+            - port1.0.14
         state: replaced
       register: result
 

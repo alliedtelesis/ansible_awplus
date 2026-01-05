@@ -8,7 +8,7 @@
       commands: 
     mp1_expected:
       commands:
-        - interface port1.0.5
+        - interface port1.0.15
         - openflow
 
 - block:
@@ -44,7 +44,7 @@
       alliedtelesis.awplus.awplus_openflow: &mp1
         config:
           ports:
-            - port1.0.5
+            - port1.0.15
         state: merged
       register: result
 

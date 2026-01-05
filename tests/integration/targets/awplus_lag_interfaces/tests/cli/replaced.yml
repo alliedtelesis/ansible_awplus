@@ -8,39 +8,39 @@
       commands:
     r2_expected:
       commands:
-        - interface port1.0.8
+        - interface port1.0.18
         - channel-group 44 mode passive
-        - interface port1.0.1
+        - interface port1.0.11
         - no channel-group
-        - interface port1.0.2
+        - interface port1.0.12
         - no channel-group
-        - interface port1.0.3
+        - interface port1.0.13
         - no channel-group
     r3_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no channel-group
         - channel-group 66 mode passive
-        - interface port1.0.2
+        - interface port1.0.12
         - no channel-group
-        - interface port1.0.3
+        - interface port1.0.13
         - no channel-group
-        - interface port1.0.4
+        - interface port1.0.14
         - no channel-group
         - channel-group 44 mode passive
-        - interface port1.0.5
+        - interface port1.0.15
         - no channel-group
-        - interface port1.0.6
+        - interface port1.0.16
         - no channel-group
     r4_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no channel-group
-        - interface port1.0.2
+        - interface port1.0.12
         - no channel-group
-        - interface port1.0.3
+        - interface port1.0.13
         - no channel-group
-        - interface port1.0.4
+        - interface port1.0.14
         - no channel-group
         - channel-group 44 mode active
 
@@ -76,7 +76,7 @@
         config:
           - name: 44
             members:
-              - member: port1.0.8
+              - member: port1.0.18
                 mode: passive
         state: replaced
       register: result
@@ -104,11 +104,11 @@
         config:
           - name: 44
             members:
-              - member: port1.0.4
+              - member: port1.0.14
                 mode: passive
           - name: 66
             members:
-              - member: port1.0.1
+              - member: port1.0.11
                 mode: passive
         state: replaced
       register: result
@@ -136,7 +136,7 @@
         config:
           - name: 44
             members:
-              - member: port1.0.4
+              - member: port1.0.14
                 mode: active
         state: replaced
       register: result
@@ -164,7 +164,7 @@
         config:
           - name: 44
             members:
-              - member: port1.0.10
+              - member: port1.0.19
         state: replaced
       register: result
       ignore_errors: True
@@ -183,11 +183,11 @@
         config:
           - name: 44
             members:
-              - member: port1.0.10
+              - member: port1.0.19
                 mode: active
           - name: 66
             members:
-              - member: port1.0.10
+              - member: port1.0.19
                 mode: active
         state: replaced
       register: result

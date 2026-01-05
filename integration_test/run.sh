@@ -23,6 +23,7 @@ done
 HOST_ADDRESS="${POSITIONAL_ARGS[0]}"
 HOST_USER="${POSITIONAL_ARGS[1]}"
 HOST_PASSWORD="${POSITIONAL_ARGS[2]}"
+TB_DIRECTORY="${POSITIONAL_ARGS[3]}"
 
 # File paths
 ROOT_DIR="./"
@@ -33,7 +34,6 @@ VENV_DIR="${SETUP_ENV_DIR}/.venv"
 TESTS_FILE="${SETUP_ENV_DIR}/integration.list"
 
 # Paths to go to the testbox
-TB_DIRECTORY="../../../tb"
 ANSIBLE_OUTFILE="${TB_DIRECTORY}/ansible_logs.txt"
 JUNIT_OUTFILE="${TB_DIRECTORY}/junit.xml"
 

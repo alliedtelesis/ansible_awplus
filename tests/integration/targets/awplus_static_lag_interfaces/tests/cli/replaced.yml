@@ -8,39 +8,39 @@
       commands:
     r2_expected:
       commands:
-        - interface port1.0.7
+        - interface port1.0.17
         - static-channel-group 77 
     r3_expected:
       commands:
-        - interface port1.0.7
+        - interface port1.0.17
         - static-channel-group 33 member-filters
-        - interface port1.0.1
+        - interface port1.0.11
         - no static-channel-group
-        - interface port1.0.3
+        - interface port1.0.13
         - no static-channel-group
     r4_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no static-channel-group
         - static-channel-group 33 member-filters
-        - interface port1.0.3
+        - interface port1.0.13
         - no static-channel-group
         - static-channel-group 33 member-filters
     r5_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no static-channel-group
         - static-channel-group 55 member-filters
-        - interface port1.0.2
+        - interface port1.0.12
         - no static-channel-group
         - static-channel-group 33
-        - interface port1.0.3
+        - interface port1.0.13
         - no static-channel-group
-        - interface port1.0.4
+        - interface port1.0.14
         - no static-channel-group
-        - interface port1.0.5
+        - interface port1.0.15
         - no static-channel-group
-        - interface port1.0.6
+        - interface port1.0.16
         - no static-channel-group
 
 - block:
@@ -75,7 +75,7 @@
         config:
           - name: 77
             members:
-              - port1.0.7
+              - port1.0.17
             member-filters: False
         state: replaced
       register: result
@@ -103,7 +103,7 @@
         config:
           - name: 33
             members:
-              - port1.0.7
+              - port1.0.17
             member-filters: True
         state: replaced
       register: result
@@ -131,8 +131,8 @@
         config:
           - name: 33
             members:
-              - port1.0.1
-              - port1.0.3
+              - port1.0.11
+              - port1.0.13
             member-filters: True
         state: replaced
       register: result
@@ -160,11 +160,11 @@
         config:
           - name: 33
             members:
-              - port1.0.2
+              - port1.0.12
             member-filters: False
           - name: 55
             members:
-              - port1.0.1
+              - port1.0.11
             member-filters: True
         state: replaced
       register: result
@@ -192,11 +192,11 @@
         config:
           - name: 33
             members:
-              - member: port1.0.7
+              - member: port1.0.17
             member-filters: False
           - name: 55
             members:
-              - member: port1.0.7
+              - member: port1.0.17
             member-filters: False
         state: replaced
       register: result
@@ -216,11 +216,11 @@
         config:
           - name: 33
             members:
-              - member: port1.0.7
+              - member: port1.0.17
             member-filters: False
           - name: 33
             members:
-              - member: port1.0.8
+              - member: port1.0.18
             member-filters: True
         state: replaced
       register: result

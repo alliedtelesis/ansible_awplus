@@ -8,37 +8,37 @@
       commands:
     d2_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no channel-group
     d3_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no channel-group
-        - interface port1.0.2
+        - interface port1.0.12
         - no channel-group
-        - interface port1.0.3
+        - interface port1.0.13
         - no channel-group
     d4_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no channel-group
-        - interface port1.0.2
+        - interface port1.0.12
         - no channel-group
-        - interface port1.0.3
+        - interface port1.0.13
         - no channel-group
-        - interface port1.0.4
+        - interface port1.0.14
         - no channel-group
-        - interface port1.0.5
+        - interface port1.0.15
         - no channel-group
-        - interface port1.0.6
+        - interface port1.0.16
         - no channel-group
     d5_expected:
       commands:
-        - interface port1.0.1
+        - interface port1.0.11
         - no channel-group
-        - interface port1.0.2
+        - interface port1.0.12
         - no channel-group
-        - interface port1.0.3
+        - interface port1.0.13
         - no channel-group
 
 - block:
@@ -73,7 +73,7 @@
         config:
           - name: 44
             members:
-              - member: port1.0.1
+              - member: port1.0.11
         state: deleted
       register: result
 
@@ -100,9 +100,9 @@
         config:
           - name: 44
             members:
-              - member: port1.0.1
-              - member: port1.0.2
-              - member: port1.0.3
+              - member: port1.0.11
+              - member: port1.0.12
+              - member: port1.0.13
         state: deleted
       register: result
 
@@ -129,14 +129,14 @@
         config:
           - name: 44
             members:
-              - member: port1.0.1
-              - member: port1.0.2
-              - member: port1.0.3
+              - member: port1.0.11
+              - member: port1.0.12
+              - member: port1.0.13
           - name: 66
             members:
-              - member: port1.0.4
-              - member: port1.0.5
-              - member: port1.0.6
+              - member: port1.0.14
+              - member: port1.0.15
+              - member: port1.0.16
         state: deleted
       register: result
 

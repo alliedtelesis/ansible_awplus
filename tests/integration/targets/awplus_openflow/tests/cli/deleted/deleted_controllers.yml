@@ -24,7 +24,7 @@
         trustpoint: "test"
         peer_certificate: "bootstrap"
         ports:
-          - port1.0.1
+          - port1.0.11
     dc2_expected:
       commands:
     dc3_expected:
