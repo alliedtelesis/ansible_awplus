@@ -55,7 +55,6 @@ class Lacp(ConfigBase):
         :returns: The result from module execution
         """
         result = {'changed': False}
-        warnings = list()
         commands = list()
 
         existing_lacp_facts = self.get_lacp_facts()
@@ -72,7 +71,6 @@ class Lacp(ConfigBase):
         if result['changed']:
             result['after'] = changed_lacp_facts
 
-        result['warnings'] = warnings
         return result
 
     def set_config(self, existing_lacp_facts):
@@ -136,13 +134,22 @@ class Lacp(ConfigBase):
     def _set_config(self, want, have):
         # Set the interface config based on the want and have config
         commands = []
+        want, have = want.get("system"), have.get("system")
 
-        if want != have:
-            priority = want.get('system').get('priority')
+        priority = want.get('priority')
+        if priority and have.get('priority', 32768) != want.get('timeout'):
             if self.is_valid_priority(priority):
                 cmd = f"lacp system-priority {priority}"
             else:
                 self._module.fail_json(msg='Invalid system priority')
+            commands.append(cmd)
+
+        priority = want.get('global_passive_mode')
+        if priority and have.get('global_passive_mode', False) != want.get('global_passive_mode'):
+            if priority is True:
+                cmd = "lacp global-passive-mode enable"
+            else:
+                cmd = "no lacp global-passive-mode"
             commands.append(cmd)
 
         return commands
@@ -153,6 +160,10 @@ class Lacp(ConfigBase):
 
         if have.get('system').get('priority') and have.get('system').get('priority') != 32768:
             cmd = 'no lacp system-priority'
+            commands.append(cmd)
+
+        if have.get('system').get('global_passive_mode') and have.get('system').get('priority') is True:
+            cmd = "no lacp global-passive-mode"
             commands.append(cmd)
 
         return commands

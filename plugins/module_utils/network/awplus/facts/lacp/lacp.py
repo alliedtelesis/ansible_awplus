@@ -36,8 +36,11 @@ class LacpFacts(object):
 
         self.generated_spec = utils.generate_dict(facts_argument_spec)
 
-    def get_device_data(self, connection):
+    def get_lacp_config(self, connection):
         return connection.get('show lacp sys-id')
+    
+    def get_running_config(self, connection):
+        return connection.get('show running-config')
 
     def populate_facts(self, connection, ansible_facts, data=None):
         """ Populate the facts for lacp
@@ -48,25 +51,50 @@ class LacpFacts(object):
         :returns: facts
         """
         if not data:
-            # typically data is populated from the current device configuration
-            data = self.get_device_data(connection)
+            # Normal situation should be no data. Since we need data
+            # from multiple sources, it's probably best if we just ignore
+            # any data passed in.
+            pass
 
-        objs = {}
-        if data:
-            obj = self.render_config(self.generated_spec, data)
-            if obj:
-                objs = obj
+        # Get required information
+        glc = self.get_lacp_config(connection)
+        grc = self.get_running_config(connection)
+
+        # split the config into instances of the resource. don't do it the way
+        # the template suggests since we can't just conveniently split the data
+        # into sections.
+        config = deepcopy(self.generated_spec)
+
+        # get list of controllers and ports and add to config.
+        config = self.render_priority(config, glc)
+        config = self.render_global_passive_mode(grc)
+
+        config = utils.remove_empties(config)
 
         ansible_facts['ansible_network_resources'].pop('lacp', None)
-        facts = {}
-        if objs:
-            params = utils.validate_config(self.argument_spec, {'config': objs})
-            facts['lacp'] = utils.remove_empties(params['config'])
 
+        facts = {'lacp': config}
         ansible_facts['ansible_network_resources'].update(facts)
+
         return ansible_facts
 
-    def render_config(self, spec, conf):
+    def render_priority(self, have, conf):
+        """
+        Render config as dictionary structure and delete keys
+          from spec for null values
+
+        :param have: The new have config
+        :param conf: The text output config
+        :rtype: dictionary
+        :returns: The generated config
+        """
+        # System Priority: 0x8000 (32768)
+        match = re.search(r'System Priority: .+\((\d+)\)', conf)
+        have['system']['priority'] = int(match.group(1))
+
+        return have
+
+    def render_global_passive_mode(self, spec, conf):
         """
         Render config as dictionary structure and delete keys
           from spec for null values
@@ -76,10 +104,10 @@ class LacpFacts(object):
         :rtype: dictionary
         :returns: The generated config
         """
-
-        # System Priority: 0x8000 (32768)
         config = deepcopy(spec)
-        match = re.search(r'System Priority: .+\((\d+)\)', conf)
-        config['system']['priority'] = int(match.group(1))
+        if re.search(r'lacp global-passive-mode enable', conf):
+            config['system']['global_passive_mode'] = True
+        else:
+            config['system']['global_passive_mode'] = False
 
         return config
