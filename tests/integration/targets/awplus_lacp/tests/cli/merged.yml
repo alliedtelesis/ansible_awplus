@@ -12,7 +12,14 @@
         - lacp system-priority 32768
     m3_expected:
       commands:
+        - lacp global-passive-mode enabled
+    m4_expected:
+      commands:
+        - no lacp global-passive-mode enabled
+    m5_expected:
+      commands:
         - lacp system-priority 2
+        - no lacp global-passive-mode enabled
 
 - block:
     - name: Initialise configuration
@@ -32,13 +39,13 @@
           - result.changed == True
           - "{{ m1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Merge nothing (IDEMPOTENT)
+    - name: Merge existing priority (IDEMPOTENT)
       alliedtelesis.awplus.awplus_lacp: *m1
       register: result
 
     - name: Assert idempotency
       ansible.builtin.assert:
-        that: 
+        that:
           - result.changed == False
 
     - name: Initialise configuration
@@ -58,40 +65,108 @@
           - result.changed == True
           - "{{ m2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Merge nothing (IDEMPOTENT)
+    - name: Merge default priority (IDEMPOTENT)
       alliedtelesis.awplus.awplus_lacp: *m2
       register: result
 
     - name: Assert idempotency
       ansible.builtin.assert:
-        that: 
+        that:
           - result.changed == False
 
     - name: Initialise configuration (to default state)
       ansible.builtin.include_tasks: _reset_config.yml
 
-    - name: Merge default priority
+    - name: Merge global passive mode enabled
       alliedtelesis.awplus.awplus_lacp: &m3
         config:
           system:
-            priority: 2
+            global_passive_mode: True
         state: merged
       register: result
 
-    - name: Assert priority merged
+    - name: Assert global passive mode enabled
       ansible.builtin.assert:
         that:
           - result.changed == True
           - "{{ m3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Merge nothing (IDEMPOTENT)
+    - name: Merge global passive mode enabled (IDEMPOTENT)
       alliedtelesis.awplus.awplus_lacp: *m3
       register: result
 
     - name: Assert idempotency
       ansible.builtin.assert:
-        that: 
+        that:
           - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge global passive mode disabled
+      alliedtelesis.awplus.awplus_lacp: &m4
+        config:
+          system:
+            global_passive_mode: False
+        state: merged
+      register: result
+
+    - name: Assert global passive mode disabled
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge global passive mode disabled (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp: *m4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge all params
+      alliedtelesis.awplus.awplus_lacp: &m5
+        config:
+          system:
+            priority: 1
+            global_passive_mode: False
+        state: merged
+      register: result
+
+    - name: Assert all params merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m5_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge all params (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp: *m5
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge nothing fails
+      alliedtelesis.awplus.awplus_lacp:
+        config:
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
 
     - name: Initialise configuration
       ansible.builtin.include_tasks: _initial_config.yml

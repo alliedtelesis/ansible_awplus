@@ -7,6 +7,13 @@
     d1_expected:
       commands:
         - no lacp system-priority
+    d2_expected:
+      commands:
+        - no lacp global-passive-mode enable
+    d3_expected:
+      commands:
+        - no lacp system-priority
+        - no lacp global-passive-mode enable
 
 - block:
     - name: Initialise configuration
@@ -15,6 +22,8 @@
     - name: Delete LACP priority
       alliedtelesis.awplus.awplus_lacp: &d1
         config:
+          system:
+            priority: 1
         state: deleted
       register: result
 
@@ -24,14 +33,79 @@
           - result.changed == True
           - "{{ d1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Delete nothing (IDEMPOTENT)
+    - name: Delete LACP priority (IDEMPOTENT)
       alliedtelesis.awplus.awplus_lacp: *d1
       register: result
 
     - name: Assert idempotency
       ansible.builtin.assert:
-        that: 
+        that:
           - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete global passive mode
+      alliedtelesis.awplus.awplus_lacp: &d2
+        config:
+          system:
+            global_passive_mode: True
+        state: deleted
+      register: result
+
+    - name: Assert global passive mode deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete global passive mode (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp: *d2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete all params
+      alliedtelesis.awplus.awplus_lacp: &d3
+        config:
+          system:
+            priority: 1
+            global_passive_mode: True
+        state: deleted
+      register: result
+
+    - name: Assert all params deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete all params (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp: *d3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Delete nothing fails
+      alliedtelesis.awplus.awplus_lacp:
+        config:
+        state: deleted
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
 
   always:
     - name: Reset configuration

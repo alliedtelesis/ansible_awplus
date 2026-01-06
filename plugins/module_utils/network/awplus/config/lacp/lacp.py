@@ -95,6 +95,10 @@ class Lacp(ConfigBase):
         :returns: the commands necessary to migrate the current configuration
                   to the desired configuration
         """
+        if want is None or want.get("system").get("priority") is None and want.get("system").get("global_passive_mode") is None:
+            self._module.fail_json(
+                msg=f"one of 'priority' or 'global_passive_mode' is required.")
+
         state = self._module.params['state']
         if state in ('merged') and not want:
             self._module.fail_json(msg=f"value of config parameter must not be empty for state {state}")
@@ -128,7 +132,7 @@ class Lacp(ConfigBase):
                   of the provided objects
         """
         commands = []
-        commands.extend(self._clear_config(have))
+        commands.extend(self._clear_config(want, have))
         return commands
 
     def _set_config(self, want, have):
@@ -144,26 +148,26 @@ class Lacp(ConfigBase):
                 self._module.fail_json(msg='Invalid system priority')
             commands.append(cmd)
 
-        priority = want.get('global_passive_mode')
-        if priority and have.get('global_passive_mode', False) != want.get('global_passive_mode'):
-            if priority is True:
+        gpm = want.get('global_passive_mode')
+        if gpm is not None and have.get('global_passive_mode', False) != want.get('global_passive_mode'):
+            if gpm is True:
                 cmd = "lacp global-passive-mode enable"
             else:
-                cmd = "no lacp global-passive-mode"
+                cmd = "no lacp global-passive-mode enable"
             commands.append(cmd)
 
         return commands
 
-    def _clear_config(self, have):
+    def _clear_config(self, want, have):
         # Delete the interface config based on the want and have config
         commands = []
 
-        if have.get('system').get('priority') and have.get('system').get('priority') != 32768:
+        if want.get('system').get('priority') and have.get('system').get('priority') != 32768:
             cmd = 'no lacp system-priority'
             commands.append(cmd)
 
-        if have.get('system').get('global_passive_mode') and have.get('system').get('priority') is True:
-            cmd = "no lacp global-passive-mode"
+        if want.get('system').get('global_passive_mode') and have.get('system').get('global_passive_mode') is True:
+            cmd = "no lacp global-passive-mode enable"
             commands.append(cmd)
 
         return commands

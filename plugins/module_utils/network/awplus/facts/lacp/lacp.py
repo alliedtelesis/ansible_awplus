@@ -67,7 +67,7 @@ class LacpFacts(object):
 
         # get list of controllers and ports and add to config.
         config = self.render_priority(config, glc)
-        config = self.render_global_passive_mode(grc)
+        config = self.render_global_passive_mode(config, grc)
 
         config = utils.remove_empties(config)
 
@@ -94,20 +94,19 @@ class LacpFacts(object):
 
         return have
 
-    def render_global_passive_mode(self, spec, conf):
+    def render_global_passive_mode(self, have, conf):
         """
         Render config as dictionary structure and delete keys
           from spec for null values
 
-        :param spec: The facts tree, generated from the argspec
-        :param conf: The configuration
+        :param have: The new have config
+        :param conf: The text output config
         :rtype: dictionary
         :returns: The generated config
         """
-        config = deepcopy(spec)
-        if re.search(r'lacp global-passive-mode enable', conf):
-            config['system']['global_passive_mode'] = True
+        if re.search(r'no lacp global-passive-mode enable', conf):
+            have['system']['global_passive_mode'] = False
         else:
-            config['system']['global_passive_mode'] = False
+            have['system']['global_passive_mode'] = True
 
-        return config
+        return have

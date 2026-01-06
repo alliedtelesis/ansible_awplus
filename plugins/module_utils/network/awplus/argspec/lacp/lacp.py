@@ -37,7 +37,7 @@ class LacpArgs(object):  # pylint: disable=R0903
     argument_spec = {
         'config': {'options': {
             'system': {'options': {
-                'priority': {'required': True, 'type': 'int'},
+                'priority': {'type': 'int'},
                 'global_passive_mode': {'type': 'bool'}},
                 'type': 'dict'}},
             'type': 'dict'},

@@ -8,7 +8,7 @@
     config:
       system:
         priority: 1
-        global_passive_mode: False
+        global_passive_mode: True
     state: merged
 
 - name: Debug task
