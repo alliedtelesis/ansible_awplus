@@ -117,7 +117,7 @@
           - result.changed == True
           - "{{ o3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Override with new config (IDEMPOTENT)
+    - name: Override existing config (IDEMPOTENT)
       alliedtelesis.awplus.awplus_lacp_interfaces: *o3
       register: result
 
