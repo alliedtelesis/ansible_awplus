@@ -165,7 +165,7 @@
           - result.changed == True
           - "{{ r5_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Replace add multiple new interface (IDEMPOTENT)
+    - name: Replace change existing interfaces partial args (IDEMPOTENT)
       alliedtelesis.awplus.awplus_lacp_interfaces: *r5
       register: result
 
