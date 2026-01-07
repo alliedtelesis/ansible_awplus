@@ -38,7 +38,7 @@ class LacpFacts(object):
 
     def get_lacp_config(self, connection):
         return connection.get('show lacp sys-id')
-    
+
     def get_running_config(self, connection):
         return connection.get('show running-config')
 
