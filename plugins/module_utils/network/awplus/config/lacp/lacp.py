@@ -162,11 +162,13 @@ class Lacp(ConfigBase):
         # Delete the interface config based on the want and have config
         commands = []
 
-        if want.get('system').get('priority') and have.get('system').get('priority') != 32768:
+        have_system_priority = have.get('system').get('priority')
+        if want.get('system').get('priority') and have_system_priority and have_system_priority != 32768:
             cmd = 'no lacp system-priority'
             commands.append(cmd)
 
-        if want.get('system').get('global_passive_mode') and have.get('system').get('global_passive_mode') is True:
+        have_gpm = have.get('system').get('global_passive_mode')
+        if want.get('system').get('global_passive_mode') and have_gpm is True:
             cmd = "no lacp global-passive-mode enable"
             commands.append(cmd)
 
