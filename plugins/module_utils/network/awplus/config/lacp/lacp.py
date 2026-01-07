@@ -141,7 +141,7 @@ class Lacp(ConfigBase):
         want, have = want.get("system"), have.get("system")
 
         priority = want.get('priority')
-        if priority and have.get('priority', 32768) != want.get('timeout'):
+        if priority and have.get('priority', 32768) != want.get('priority'):
             if self.is_valid_priority(priority):
                 cmd = f"lacp system-priority {priority}"
             else:
