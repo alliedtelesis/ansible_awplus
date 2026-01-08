@@ -1,0 +1,222 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lacp_interfaces overridden integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    o1_expected:
+      commands:
+        - interface port1.0.11
+        - no lacp port-priority
+        - lacp timeout long
+        - interface port1.0.12
+        - no lacp port-priority
+        - lacp timeout long
+        - interface port1.0.15
+        - no lacp port-priority
+    o2_expected:
+      commands:
+        - interface port1.0.11
+        - no lacp port-priority
+        - lacp timeout long
+        - interface port1.0.12
+        - no lacp port-priority
+        - lacp timeout long
+        - interface port1.0.15
+        - no lacp port-priority
+        - interface port1.0.14
+        - lacp port-priority 5000
+    o3_expected:
+      commands:
+        - interface port1.0.11
+        - lacp port-priority 5000
+        - lacp timeout long
+        - interface port1.0.12
+        - no lacp port-priority
+        - lacp timeout long
+        - interface port1.0.15
+        - no lacp port-priority
+    o4_expected:
+      commands:
+        - interface port1.0.11
+        - lacp port-priority 200
+        - interface port1.0.12
+        - lacp port-priority 200
+        - lacp timeout long
+        - interface port1.0.15
+        - no lacp port-priority
+        - lacp timeout long
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with empty config
+      alliedtelesis.awplus.awplus_lacp_interfaces: &o1
+        config:
+        state: overridden
+      register: result
+
+    - name: Assert existing interface overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with empty config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *o1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with new config
+      alliedtelesis.awplus.awplus_lacp_interfaces: &o2
+        config:
+          - name: port1.0.14
+            port_priority: 5000
+            timeout: long
+        state: overridden
+      register: result
+
+    - name: Assert existing interface overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with new config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *o2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override existing config
+      alliedtelesis.awplus.awplus_lacp_interfaces: &o3
+        config:
+          - name: port1.0.11
+            port_priority: 5000
+            timeout: long
+        state: overridden
+      register: result
+
+    - name: Assert existing interface overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override existing config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *o3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override multiple configs
+      alliedtelesis.awplus.awplus_lacp_interfaces: &o4
+        config:
+          - name: port1.0.11
+            port_priority: 200
+            timeout: short
+          - name: port1.0.12
+            port_priority: 200
+        state: overridden
+      register: result
+
+    - name: Assert existing interface overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override multiple configs (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_lacp_interfaces: *o4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that: 
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override below range port priority
+      alliedtelesis.awplus.awplus_lacp_interfaces:
+        config:
+          - name: port1.0.11
+            port_priority: 0
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Override above range port priority
+      alliedtelesis.awplus.awplus_lacp_interfaces:
+        config:
+          - name: port1.0.11
+            port_priority: 65536
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Override invalid timeout value
+      alliedtelesis.awplus.awplus_lacp_interfaces:
+        config:
+          - name: port1.0.11
+            timeout: medium
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Override invalid args
+      alliedtelesis.awplus.awplus_lacp_interfaces:
+        config:
+          - name: port1.0.13
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lacp_interfaces overridden integration tests on connection={{ ansible_connection }}"

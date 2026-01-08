@@ -1,0 +1,39 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lacp_interfaces initialise config on connection={{ ansible_connection }}"
+
+- name: Create required channel groups
+  alliedtelesis.awplus.awplus_lag_interfaces:
+    config:
+      - name: 2
+        members:
+          - member: port1.0.11
+            mode: active
+          - member: port1.0.12
+            mode: active
+          - member: port1.0.13
+            mode: active
+          - member: port1.0.14
+            mode: active
+          - member: port1.0.15
+            mode: active
+    state: overridden
+
+- name: Initialise configuration
+  alliedtelesis.awplus.awplus_lacp_interfaces:
+    config:
+      - name: port1.0.11
+        port_priority: 100
+        timeout: short
+      - name: port1.0.12
+        port_priority: 500
+        timeout: short
+      - name: port1.0.15
+        port_priority: 1
+        timeout: long
+    state: overridden
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lacp_interfaces initialise config on connection={{ ansible_connection }}"

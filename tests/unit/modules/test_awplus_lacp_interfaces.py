@@ -149,7 +149,6 @@ class TestAwplusLacpInterfacesModule(TestAwplusModule):
         commands = ["interface port1.0.2", "no lacp port-priority"]
         self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_lacp_interfaces_deleted_all(self):
+    def test_awplus_lacp_interfaces_deleted_empty(self):
         set_module_args(dict(state="deleted"))
-        commands = ["interface port1.0.2", "no lacp port-priority"]
-        self.execute_module(changed=True, commands=commands)
+        self.execute_module(changed=False, commands=[])

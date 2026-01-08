@@ -62,7 +62,6 @@ class Lacp_interfaces(ConfigBase):
         :returns: The result from module execution
         """
         result = {'changed': False}
-        warnings = list()
         commands = list()
 
         existing_lacp_interfaces_facts = self.get_lacp_interfaces_facts()
@@ -79,7 +78,6 @@ class Lacp_interfaces(ConfigBase):
         if result['changed']:
             result['after'] = changed_lacp_interfaces_facts
 
-        result['warnings'] = warnings
         return result
 
     def set_config(self, existing_lacp_interfaces_facts):
@@ -107,6 +105,15 @@ class Lacp_interfaces(ConfigBase):
         state = self._module.params['state']
         want = param_list_to_dict(want) if want else dict()
         have = param_list_to_dict(have) if have else dict()
+
+        if state in ('replaced', 'overridden', 'merged'):
+            for name, want_dict in iteritems(want):
+                port_priority = want_dict.get('port_priority')
+                timeout = want_dict.get('timeout')
+                if port_priority is None and timeout is None:
+                    self._module.fail_json(msg="one of 'port_priority' or 'timeout' is required")
+                if port_priority is not None and not (1 <= port_priority <= 65535):
+                    self._module.fail_json(msg="argument 'port_priority' must be between 1 and 65535 inclusively")
 
         kwargs = {'self': self, 'want': want, 'have': have}
 
@@ -155,7 +162,7 @@ class Lacp_interfaces(ConfigBase):
                 p_want = {name: want[name]}
                 commands.extend(self._state_replaced(self, p_want, p_have))
             else:
-                commands.extend(self._state_deleted(self, dict(), p_have))
+                commands.extend(_clear_config(name, dict(), have_dict))
 
         return commands
 
@@ -186,14 +193,23 @@ class Lacp_interfaces(ConfigBase):
         """
         commands = []
 
-        if not want:
-            for name, have_dict in iteritems(have):
+        for name, want_dict in iteritems(want):
+            have_dict = have[name]
+
+            # determine if we want to delete everything for a
+            # specified port, or just a subset of the params
+            partial_delete = False
+            config_diff = False
+            for argument, value in iteritems(want_dict):
+                if value is not None:
+                    partial_delete = True
+                    if have_dict.get(argument) is not None:
+                        config_diff = True
+
+            if partial_delete and config_diff:
+                commands.extend(_clear_config(name, dict(), want_dict))
+            elif not partial_delete:
                 commands.extend(_clear_config(name, dict(), have_dict))
-        else:
-            for name, want_dict in iteritems(want):
-                if name in have:
-                    have_dict = have[name]
-                    commands.extend(_clear_config(name, dict(), have_dict))
 
         return commands
 
@@ -204,7 +220,7 @@ def _set_config(name, want, have):
     if want.get('timeout') and have.get('timeout', 'long') != want.get('timeout'):
         commands.append(f"lacp timeout {want['timeout']}")
 
-    if want.get('port_priority') and have.get('port_priority', 32768) != want.get('port_priority'):
+    if want.get('port_priority') is not None and have.get('port_priority', 32768) != want.get('port_priority'):
         commands.append(f"lacp port-priority {want['port_priority']}")
 
     if commands:
