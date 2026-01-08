@@ -38,8 +38,8 @@ class MlagFacts(object):
 
     # Needs to be mockable for unit tests.
     @staticmethod
-    def get_openflow_stat(connection):
-        return connection.get("show running-config").splitlines()
+    def get_run_mlag(connection):
+        return connection.get("show running-config")
 
     def populate_facts(self, connection, ansible_facts, data=None):
         """ Populate the facts for mlag
@@ -53,29 +53,20 @@ class MlagFacts(object):
             # Normal situation should be no data. Since we need data
             # from multiple sources, it's probably best if we just ignore
             # any data passed in.
-            pass
-        
-        grm = self.get_run_mlag(connection)
+            data = self.get_run_mlag(connection)
 
-        # split the config into instances of the resource
-        resource_delim = 'resource'
-        find_pattern = r'(?:^|\n)%s.*?(?=(?:^|\n)%s|$)' % (resource_delim,
-                                                           resource_delim)
-        resources = [p.strip() for p in re.findall(find_pattern,
-                                                   data,
-                                                   re.DOTALL)]
+        resources = data.split('!')
 
-        objs = []
+        obj = {}
         for resource in resources:
-            if resource:
+            resource = [t for t in resource.splitlines() if t]
+            if len(resource) > 0 and "mlag domain" in resource[0]:
                 obj = self.render_config(self.generated_spec, resource)
-                if obj:
-                    objs.append(obj)
 
         ansible_facts['ansible_network_resources'].pop('mlag', None)
         facts = {}
-        if objs:
-            params = utils.validate_config(self.argument_spec, {'config': objs})
+        if obj:
+            params = utils.validate_config(self.argument_spec, {'config': obj})
             facts['mlag'] = params['config']
 
         ansible_facts['ansible_network_resources'].update(facts)
@@ -92,24 +83,33 @@ class MlagFacts(object):
         :returns: The generated config
         """
         config = deepcopy(spec)
-        config['name'] = utils.parse_conf_arg(conf, 'resource')
-        config['some_string'] = utils.parse_conf_arg(conf, 'a_string')
+        domain = re.search(r'mlag domain (\d+)', conf[0]).group(1)
+        config["domain"] = domain
 
-        match = re.match(r'.*key is property01 (\S+)',
-                         conf, re.MULTILINE | re.DOTALL)
-        if match:
-            config['some_dict']['property_01'] = match.groups()[0]
+        for line in conf[1:]:
+            match = re.search(r'source-address (\S+)', line)
+            if match:
+                config["source_address"] = match.group(1)
+                continue
 
-        a_bool = utils.parse_conf_arg(conf, 'a_bool')
-        if a_bool == 'true':
-            config['some_bool'] = True
-        elif a_bool == 'false':
-            config['some_bool'] = False
-        else:
-            config['some_bool'] = None
+            match = re.search(r'peer-address (\S+)', line)
+            if match:
+                config["peer_address"] = match.group(1)
+                continue
 
-        try:
-            config['some_int'] = int(utils.parse_conf_arg(conf, 'an_int'))
-        except TypeError:
-            config['some_int'] = None
+            match = re.search(r'peer-link (\S+)', line)
+            if match:
+                config["peer_link"] = match.group(1)
+                continue
+
+            match = re.search(r'keepalive-interval (\S+)', line)
+            if match:
+                config["keepalive_interval"] = match.group(1)
+                continue
+        
+            match = re.search(r'session-timeout (\S+)', line)
+            if match:
+                config["session_timeout"] = match.group(1)
+                continue
         return utils.remove_empties(config)
+

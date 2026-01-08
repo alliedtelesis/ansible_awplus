@@ -233,7 +233,6 @@ def main():
     """
     module = AnsibleModule(argument_spec=MlagArgs.argument_spec,
                            supports_check_mode=True)
-
     result = Mlag(module).execute_module()
     module.exit_json(**result)
 
