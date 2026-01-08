@@ -54,34 +54,41 @@ options:
     description: Configuration of the MLAG module.
     type: dict
     suboptions:
-      domain:
+      domains:
         description: 
-          - The MLAG domain to configure.
-        type: int
+          - The MLAG domains to configure.
+        type: list
+        elements: dict
         required: True
-      peer_link:
-        description:
-          - The peer-link interface for this MLAG domain.
-        type: str
-      source_address:
-        description:
-          - The MLAG domain source ip address.
-        type: str
-      peer_address:
-        description:
-          - The MLAG domain peer ip address.
-        type: str
-      keepalive_interval:
-        description:
-          - Interval at which keepalive messages are exchanged between peers.
-        default: 1
-        type: int
-      session_timeout:
-        description:
-          - Seconds waited without recieving keep alive messages from a peer
-            before assuming the peer is down.
-        default: 30
-        type: int
+        suboptions:
+          domain_id: 
+            description:
+              - The id of the domain.
+            type: int
+            required: True
+          peer_link:
+            description:
+              - The peer-link interface for this MLAG domain.
+            type: str
+          source_address:
+            description:
+              - The MLAG domain source ip address.
+            type: str
+          peer_address:
+            description:
+              - The MLAG domain peer ip address.
+            type: str
+          keepalive_interval:
+            description:
+              - Interval at which keepalive messages are exchanged between peers.
+            default: 1
+            type: int
+          session_timeout:
+            description:
+              - Seconds waited without recieving keep alive messages from a peer
+                before assuming the peer is down.
+            default: 30
+            type: int
   state:
     description:
       - The state the configuration should be left in, defaults to merged
@@ -107,9 +114,10 @@ EXAMPLES = """
 - name: Merge config
   alliedtelesis.awplus.awplus_mlag:
     config:
-      domain: 10
-      source_address: 2.2.2.2
-      peer_link: port1.0.1
+      domains:
+        - domain_id: 10
+          source_address: 2.2.2.2
+          peer_link: port1.0.1
     state: merged
 
 # After state:
@@ -135,9 +143,10 @@ EXAMPLES = """
 - name: Replace config
   alliedtelesis.awplus.awplus_mlag:
     config:
-      domain: 10
-      source_address: 2.2.2.2
-      peer_link: port1.0.1
+      domains:
+        - domain_id: 10
+          source_address: 2.2.2.2
+          peer_link: port1.0.1
     state: replaced
 
 # After state:
@@ -161,9 +170,10 @@ EXAMPLES = """
 - name: Replace config
   alliedtelesis.awplus.awplus_mlag:
     config:
-      domain: 10
-      source_address: 2.2.2.2
-      peer_link: port1.0.1
+      domains:
+        - domain_id: 10
+          source_address: 2.2.2.2
+          peer_link: port1.0.1
     state: replaced
 
 # After state:
@@ -187,7 +197,8 @@ EXAMPLES = """
 - name: Delete config
   alliedtelesis.awplus.awplus_mlag:
     config:
-      domain: 10
+      domains:
+        - domain_id: 10
     state: deleted
 
 # After state:
@@ -233,6 +244,7 @@ def main():
     """
     module = AnsibleModule(argument_spec=MlagArgs.argument_spec,
                            supports_check_mode=True)
+
     result = Mlag(module).execute_module()
     module.exit_json(**result)
 

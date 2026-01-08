@@ -62,6 +62,8 @@ class MlagFacts(object):
             resource = [t for t in resource.splitlines() if t]
             if len(resource) > 0 and "mlag domain" in resource[0]:
                 obj = self.render_config(self.generated_spec, resource)
+        if not obj:
+            obj = dict(domains=[])
 
         ansible_facts['ansible_network_resources'].pop('mlag', None)
         facts = {}
@@ -83,33 +85,39 @@ class MlagFacts(object):
         :returns: The generated config
         """
         config = deepcopy(spec)
-        domain = re.search(r'mlag domain (\d+)', conf[0]).group(1)
-        config["domain"] = domain
+
+        domains = []
+        domain = {}
+        domain_id = re.search(r'mlag domain (\d+)', conf[0]).group(1)
+        domain["domain_id"] = domain_id
 
         for line in conf[1:]:
             match = re.search(r'source-address (\S+)', line)
             if match:
-                config["source_address"] = match.group(1)
+                domain["source_address"] = match.group(1)
                 continue
 
             match = re.search(r'peer-address (\S+)', line)
             if match:
-                config["peer_address"] = match.group(1)
+                domain["peer_address"] = match.group(1)
                 continue
 
             match = re.search(r'peer-link (\S+)', line)
             if match:
-                config["peer_link"] = match.group(1)
+                domain["peer_link"] = match.group(1)
                 continue
 
             match = re.search(r'keepalive-interval (\S+)', line)
             if match:
-                config["keepalive_interval"] = match.group(1)
+                domain["keepalive_interval"] = match.group(1)
                 continue
         
             match = re.search(r'session-timeout (\S+)', line)
             if match:
-                config["session_timeout"] = match.group(1)
+                domain["session_timeout"] = match.group(1)
                 continue
+
+        domains.append(domain)
+        config["domains"] = domains
         return utils.remove_empties(config)
 
