@@ -58,6 +58,10 @@ options:
             - LACP system priority. Lower numerical values have higher priorities. Integer range 1-65535.
             type: int
             required: true
+          global_passive_mode:
+            description:
+            - LACP global passive mode. True means this is enabled on all ports
+            type: bool
   state:
     description:
     - The state the configuration should be left in

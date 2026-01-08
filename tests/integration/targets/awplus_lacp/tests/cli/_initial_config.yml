@@ -1,0 +1,16 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lacp initialise config on connection={{ ansible_connection }}"
+
+- name: Initialise configuration
+  alliedtelesis.awplus.awplus_lacp:
+    config:
+      system:
+        priority: 1
+        global_passive_mode: True
+    state: merged
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lacp initialise config on connection={{ ansible_connection }}"
