@@ -1,7 +1,7 @@
 ---
 - name: Debug task
   ansible.builtin.debug:
-    msg: "START <module_name> deleted integration tests on connection={{ ansible_connection }}"
+    msg: "START awplus_mlag deleted integration tests on connection={{ ansible_connection }}"
 
 - ansible.builtin.set_fact:
     d1_expected:
@@ -13,7 +13,7 @@
       ansible.builtin.include_tasks: _initial_config.yml
 
     - name: Delete <task>
-      alliedtelesis.awplus.<module_name>: &d1
+      alliedtelesis.awplus.awplus_mlag: &d1
         config:
         state: deleted
       register: result
@@ -25,7 +25,7 @@
           - "{{ d1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
     - name: Delete <task> (IDEMPOTENT)
-      alliedtelesis.awplus.<module_name>: *d1
+      alliedtelesis.awplus.awplus_mlag: *d1
       register: result
 
     - name: Assert idempotency
@@ -39,4 +39,4 @@
 
 - name: Debug task
   ansible.builtin.debug:
-    msg: "END <module_name> deleted integration tests on connection={{ ansible_connection }}"
+    msg: "END awplus_mlag deleted integration tests on connection={{ ansible_connection }}"

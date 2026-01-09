@@ -1,0 +1,20 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_mlag initialise config on connection={{ ansible_connection }}"
+
+- name: Initialise configuration
+  alliedtelesis.awplus.awplus_mlag:
+    config:
+      domains:
+        - domain_id: 10
+          peer_link: port1.0.10
+          peer_address: 255.255.255.255
+          source_address: 1.1.1.1
+          keepalive_interval: 50
+          session_timeout: 120
+    state: overridden
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_mlag initialise config on connection={{ ansible_connection }}"
