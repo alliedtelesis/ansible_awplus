@@ -6,26 +6,216 @@
 - ansible.builtin.set_fact:
     r1_expected:
       commands:
-        - placeholder
+        - mlag domain 10
+        - peer-link port1.0.19
+        - peer-address 255.255.255.254
+        - source-address 1.1.1.2
+        - keepalive-interval 2
+        - session-timeout 60
+    r2_expected:
+      commands:
+        - mlag domain 10
+        - peer-link port1.0.19
+        - peer-address 255.255.255.254
+        - no source-address
+        - no keepalive-interval
+        - no session-timeout
+    r3_expected:
+      commands:
+        - no mlag domain 10
+        - mlag domain 11
+        - peer-link port1.0.19
+        - peer-address 255.255.255.254
+        - source-address 1.1.1.2
+        - keepalive-interval 2
+        - session-timeout 60
+    r4_expected:
+      commands:
+        - no mlag domain 10
+        - mlag domain 11
+        - peer-link port1.0.19
+        - peer-address 255.255.255.254
+    r5_expected:
+      commands:
+        - mlag domain 10
+        - no peer-link
+        - no peer-address
+        - no source-address
+        - no keepalive-interval
+        - no session-timeout
+    r6_expected:
+      commands:
+        - no mlag domain 10
+        - mlag domain 11
 
 - block:
     - name: Initialise configuration
       ansible.builtin.include_tasks: _initial_config.yml
 
-    - name: Replaced <task>
+    - name: Replace all params of existing domain
       alliedtelesis.awplus.awplus_mlag: &r1
         config:
+          domains:
+            - domain_id: 10
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+              source_address: 1.1.1.2
+              keepalive_interval: 2
+              session_timeout: 60
         state: replaced
       register: result
 
-    - name: Assert <task>
+    - name: Assert all params replaced
       ansible.builtin.assert:
         that:
           - result.changed == True
           - "{{ r1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Replaced <task> (IDEMPOTENT)
+    - name: Replace all params of existing domain (IDEMPOTENT)
       alliedtelesis.awplus.awplus_mlag: *r1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace some params of existing domain
+      alliedtelesis.awplus.awplus_mlag: &r2
+        config:
+          domains:
+            - domain_id: 10
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+        state: replaced
+      register: result
+
+    - name: Assert some params replaced
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace some params of existing domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *r2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace all params of new domain
+      alliedtelesis.awplus.awplus_mlag: &r3
+        config:
+          domains:
+            - domain_id: 11
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+              source_address: 1.1.1.2
+              keepalive_interval: 2
+              session_timeout: 60
+        state: replaced
+      register: result
+
+    - name: Assert all params replaced
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace all params of new domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *r3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace some params of new domain
+      alliedtelesis.awplus.awplus_mlag: &r4
+        config:
+          domains:
+            - domain_id: 11
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+        state: replaced
+      register: result
+
+    - name: Assert some params replaced
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace some params of new domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *r4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace with defaults for existing domain
+      alliedtelesis.awplus.awplus_mlag: &r5
+        config:
+          domains:
+            - domain_id: 10
+              keepalive_interval: 1
+              session_timeout: 30
+        state: replaced
+      register: result
+
+    - name: Assert default params removed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r5_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace with defaults for existing domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *r5
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replace with defaults for new domain
+      alliedtelesis.awplus.awplus_mlag: &r6
+        config:
+          domains:
+            - domain_id: 11
+              keepalive_interval: 1
+              session_timeout: 30
+        state: replaced
+      register: result
+
+    - name: Assert default params removed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r6_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replace with defaults for new domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *r6
       register: result
 
     - name: Assert idempotency

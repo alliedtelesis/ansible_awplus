@@ -49,6 +49,7 @@ class Mlag(ConfigBase):
 
     def __init__(self, module):
         super(Mlag, self).__init__(module)
+        self.domain_deleted = False
 
     def get_mlag_facts(self):
         """ Get the 'facts' (the current configuration)
@@ -113,12 +114,14 @@ class Mlag(ConfigBase):
         want = want if want else dict()
         have = have if have else dict()
 
+        # Disallow empty config for non-override states as this would do nothing
+        if want.get("domains") and len(want.get("domains")) < 1 and state in ('merged', 'replaced', 'deleted'):
+            self._module.fail_json("At least one domain must be supplied.")
+
         # Temporarily enforce that only one domain is allowed at a time.
         if state in ('merged', 'replaced', 'overridden'):
-            if len(want.get("domains")) > 1:
+            if want.get("domains") and len(want.get("domains")) > 1:
                 self._module.fail_json("Currently only one domain is allowed at a time.")
-        if len(want.get("domains")) < 1 and state in ('merged', 'replaced', 'deleted'):
-            self._module.fail_json("At least one domain must be supplied.")
 
         # Handle case with empty config when state is overridden early
         if not want.get("domains") and state == "overridden":
@@ -136,6 +139,7 @@ class Mlag(ConfigBase):
                         keep = True
                 if not keep:
                     commands.append(f"no mlag domain {h_domain.get("domain_id")}")
+                    self.domain_deleted = True
 
         # Iterate through each wanted domain and update their configs seperately
         for w_domain in want.get("domains"):
@@ -240,19 +244,21 @@ class Mlag(ConfigBase):
                   of the provided objects
         """
         commands = []
-
         remove_dict = {}
+        remove_domain = True
         for key, val in iteritems(want):
             if key == "domain_id":
                 continue
-            if val is not None and val != parm_to_default[key]:
-                remove_dict[key] = val
+            if val != parm_to_default[key]:
+                remove_domain = False
+                if val is not None and have.get(key) != parm_to_default[key]:
+                    remove_dict[key] = val
 
         domain_id = want.get("domain_id")
-        if not remove_dict:
+        if remove_domain:
             if domain_id == have.get("domain_id"):
                 commands.append(f"no mlag domain {domain_id}")
-        else:
+        elif domain_id == have.get("domain_id"):
             commands.extend(self._update_partial(domain_id, {}, remove_dict))
         
         return commands
@@ -277,7 +283,6 @@ class Mlag(ConfigBase):
             command = parm_to_keyword[key]
             commands.append(f"{command} {value}")
 
-        if commands:
+        if commands or self.domain_deleted:
             commands.insert(0, f"mlag domain {domain_id}")
-
         return commands
