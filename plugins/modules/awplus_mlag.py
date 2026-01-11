@@ -55,13 +55,13 @@ options:
     type: dict
     suboptions:
       domains:
-        description: 
+        description:
           - The MLAG domains to configure.
         type: list
         elements: dict
         required: True
         suboptions:
-          domain_id: 
+          domain_id:
             description:
               - The id of the domain.
             type: int

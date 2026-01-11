@@ -82,7 +82,7 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_merge_all_existing(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=10, 
+                domain_id=10,
                 peer_link="port1.0.10",
                 peer_address="1.1.1.1",
                 source_address="1.1.1.2",
@@ -90,7 +90,7 @@ class TestAwplusMlagModule(TestAwplusModule):
                 keepalive_interval="2"
             )]), state="merged"))
         commands = [
-            "mlag domain 10", 
+            "mlag domain 10",
             "peer-link port1.0.10",
             "peer-address 1.1.1.1",
             "source-address 1.1.1.2",
@@ -102,7 +102,7 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_merge_all_new(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=11, 
+                domain_id=11,
                 peer_link="port1.0.10",
                 peer_address="1.1.1.1",
                 source_address="1.1.1.2",
@@ -111,7 +111,7 @@ class TestAwplusMlagModule(TestAwplusModule):
             )]), state="merged"))
         commands = [
             "no mlag domain 10",
-            "mlag domain 11", 
+            "mlag domain 11",
             "peer-link port1.0.10",
             "peer-address 1.1.1.1",
             "source-address 1.1.1.2",
@@ -123,12 +123,12 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_merge_partial_existing(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=10, 
+                domain_id=10,
                 peer_link="port1.0.10",
                 peer_address="1.1.1.1",
             )]), state="merged"))
         commands = [
-            "mlag domain 10", 
+            "mlag domain 10",
             "peer-link port1.0.10",
             "peer-address 1.1.1.1",
         ]
@@ -143,7 +143,7 @@ class TestAwplusMlagModule(TestAwplusModule):
             )]), state="merged"))
         commands = [
             "no mlag domain 10",
-            "mlag domain 11", 
+            "mlag domain 11",
             "peer-link port1.0.10",
             "peer-address 1.1.1.1",
         ]
@@ -152,7 +152,7 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_merge_defaults(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=10, 
+                domain_id=10,
                 session_timeout="30",
                 keepalive_interval="1"
             )]), state="merged"))
@@ -162,7 +162,7 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_replace_all_existing(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=10, 
+                domain_id=10,
                 peer_link="port1.0.10",
                 peer_address="1.1.1.1",
                 source_address="1.1.1.2",
@@ -170,7 +170,7 @@ class TestAwplusMlagModule(TestAwplusModule):
                 keepalive_interval="2"
             )]), state="replaced"))
         commands = [
-            "mlag domain 10", 
+            "mlag domain 10",
             "peer-link port1.0.10",
             "peer-address 1.1.1.1",
             "source-address 1.1.1.2",
@@ -182,7 +182,7 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_replace_all_new(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=11, 
+                domain_id=11,
                 peer_link="port1.0.10",
                 peer_address="1.1.1.1",
                 source_address="1.1.1.2",
@@ -191,7 +191,7 @@ class TestAwplusMlagModule(TestAwplusModule):
             )]), state="replaced"))
         commands = [
             "no mlag domain 10",
-            "mlag domain 11", 
+            "mlag domain 11",
             "peer-link port1.0.10",
             "peer-address 1.1.1.1",
             "source-address 1.1.1.2",
@@ -203,11 +203,11 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_replace_partial_existing(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=10, 
+                domain_id=10,
                 peer_link="port1.0.10",
             )]), state="replaced"))
         commands = [
-            "mlag domain 10", 
+            "mlag domain 10",
             "peer-link port1.0.10",
             "no source-address",
             "no peer-address",
@@ -219,12 +219,12 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_replace_partial_new(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=11, 
+                domain_id=11,
                 peer_link="port1.0.10",
             )]), state="replaced"))
         commands = [
             "no mlag domain 10",
-            "mlag domain 11", 
+            "mlag domain 11",
             "peer-link port1.0.10"
         ]
         self.execute_module(changed=True, commands=commands)
@@ -232,7 +232,7 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_replace_defaults(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=10, 
+                domain_id=10,
                 session_timeout="30",
                 keepalive_interval="1"
             )]), state="replaced"))
@@ -254,7 +254,7 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_override_all_existing(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=10, 
+                domain_id=10,
                 peer_link="port1.0.10",
                 peer_address="1.1.1.1",
                 source_address="1.1.1.2",
@@ -262,7 +262,7 @@ class TestAwplusMlagModule(TestAwplusModule):
                 keepalive_interval="2"
             )]), state="overridden"))
         commands = [
-            "mlag domain 10", 
+            "mlag domain 10",
             "peer-link port1.0.10",
             "peer-address 1.1.1.1",
             "source-address 1.1.1.2",
@@ -274,7 +274,7 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_override_all_new(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=11, 
+                domain_id=11,
                 peer_link="port1.0.10",
                 peer_address="1.1.1.1",
                 source_address="1.1.1.2",
@@ -283,7 +283,7 @@ class TestAwplusMlagModule(TestAwplusModule):
             )]), state="overridden"))
         commands = [
             "no mlag domain 10",
-            "mlag domain 11", 
+            "mlag domain 11",
             "peer-link port1.0.10",
             "peer-address 1.1.1.1",
             "source-address 1.1.1.2",
@@ -295,11 +295,11 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_override_partial_existing(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=10, 
+                domain_id=10,
                 peer_link="port1.0.10",
             )]), state="overridden"))
         commands = [
-            "mlag domain 10", 
+            "mlag domain 10",
             "peer-link port1.0.10",
             "no peer-address",
             "no source-address",
@@ -311,12 +311,12 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_override_partial_new(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=11, 
+                domain_id=11,
                 peer_link="port1.0.10",
             )]), state="overridden"))
         commands = [
             "no mlag domain 10",
-            "mlag domain 11", 
+            "mlag domain 11",
             "peer-link port1.0.10"
         ]
         self.execute_module(changed=True, commands=commands)
@@ -324,7 +324,7 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_override_defaults(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=10, 
+                domain_id=10,
                 session_timeout="30",
                 keepalive_interval="1"
             )]), state="overridden"))
@@ -341,7 +341,7 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_delete_all(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=10, 
+                domain_id=10,
                 peer_link="port1.0.10",
                 peer_address="1.1.1.1",
                 source_address="1.1.1.2",
@@ -349,7 +349,7 @@ class TestAwplusMlagModule(TestAwplusModule):
                 keepalive_interval="2"
             )]), state="deleted"))
         commands = [
-            "mlag domain 10", 
+            "mlag domain 10",
             "no peer-link",
             "no peer-address",
             "no source-address",
@@ -361,12 +361,12 @@ class TestAwplusMlagModule(TestAwplusModule):
     def test_awplus_mlag_delete_partial(self):
         set_module_args(dict(config=dict(
             domains=[dict(
-                domain_id=10, 
+                domain_id=10,
                 peer_link="port1.0.10",
                 peer_address="1.1.1.1",
             )]), state="deleted"))
         commands = [
-            "mlag domain 10", 
+            "mlag domain 10",
             "no peer-link",
             "no peer-address"
         ]

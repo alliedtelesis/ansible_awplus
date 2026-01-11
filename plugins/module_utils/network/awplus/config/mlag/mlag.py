@@ -33,6 +33,7 @@ parm_to_default = {'source_address': None,
                    'keepalive_interval': 1,
                    'session_timeout': 30}
 
+
 class Mlag(ConfigBase):
     """
     The awplus_mlag class
@@ -164,14 +165,14 @@ class Mlag(ConfigBase):
                     commands.extend(self._state_replaced(w_domain, h_match))
 
         return commands
-    
+
     def _generate_add_remove_dicts(self, want, have):
         """
-        Generate an add and remove dict which tell us which parts of 
+        Generate an add and remove dict which tell us which parts of
         the config need to be added and removed to go from our current
-        state to the desired state, while achieving idempotence/minimal 
-        commands run. 
-        
+        state to the desired state, while achieving idempotence/minimal
+        commands run.
+
         :param want: wanted config as dict
         :param have: current config as dict
         :rtype: A tuple
@@ -179,7 +180,7 @@ class Mlag(ConfigBase):
         """
         add_dict = {}
         remove_dict = {}
-        
+
         for key, val in iteritems(want):
             if key == "domain_id":
                 continue
@@ -188,13 +189,13 @@ class Mlag(ConfigBase):
                     add_dict[key] = val
                 else:
                     remove_dict[key] = val
-        
+
         for key, val in iteritems(have):
             if key == "domain_id":
                 continue
             if val != parm_to_default[key] and want.get(key) == parm_to_default[key]:
                 remove_dict[key] = val
-        
+
         return add_dict, remove_dict
 
     def _state_replaced(self, want, have):
@@ -260,15 +261,15 @@ class Mlag(ConfigBase):
                 commands.append(f"no mlag domain {domain_id}")
         elif domain_id == have.get("domain_id"):
             commands.extend(self._update_partial(domain_id, {}, remove_dict))
-        
+
         return commands
 
     def _update_partial(self, domain_id, add_dict, remove_dict):
         """
         Function for generating commands to partially update
-        configuration from an existing domain based on dictionaries 
+        configuration from an existing domain based on dictionaries
         which specify configuration to add and remove.
-        
+
         :param domain_id: id of the domain to update
         :param add_dict: dictionary of config to add
         :param remove_dict: dictionary of config to remove

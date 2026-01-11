@@ -111,7 +111,7 @@ class MlagFacts(object):
             if match:
                 domain["keepalive_interval"] = match.group(1)
                 continue
-        
+
             match = re.search(r'session-timeout (\S+)', line)
             if match:
                 domain["session_timeout"] = match.group(1)
@@ -120,4 +120,3 @@ class MlagFacts(object):
         domains.append(domain)
         config["domains"] = domains
         return utils.remove_empties(config)
-
