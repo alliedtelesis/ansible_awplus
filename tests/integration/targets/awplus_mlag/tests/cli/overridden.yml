@@ -47,6 +47,9 @@
       commands:
         - no mlag domain 10
         - mlag domain 11
+    o7_expected:
+      commands:
+        - no mlag domain 10
 
 - block:
     - name: Initialise configuration
@@ -216,6 +219,30 @@
 
     - name: Override with defaults for new domain (IDEMPOTENT)
       alliedtelesis.awplus.awplus_mlag: *o6
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with empty config
+      alliedtelesis.awplus.awplus_mlag: &o7
+        config:
+        state: overridden
+      register: result
+
+    - name: Assert everything removed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o7_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with empty config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *o7
       register: result
 
     - name: Assert idempotency

@@ -44,7 +44,6 @@ class MlagArgs(object):  # pylint: disable=R0903
                                                 'session_timeout': {'default': 30,
                                                                     'type': 'int'},
                                                 'source_address': {'type': 'str'}},
-                                    'required': True,
                                     'type': 'list'}},
             'type': 'dict'},
  'state': {'choices': ['merged', 'replaced', 'overridden', 'deleted'],

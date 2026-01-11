@@ -113,28 +113,32 @@ class Mlag(ConfigBase):
         state = self._module.params['state']
         want = want if want else dict()
         have = have if have else dict()
+        w_domains = want.get("domains")
+        h_domains = have.get("domains")
 
         # Disallow empty config for non-override states as this would do nothing
-        if want.get("domains") and len(want.get("domains")) < 1 and state in ('merged', 'replaced', 'deleted'):
+        if w_domains and len(w_domains) < 1 and state in ('merged', 'replaced', 'deleted'):
             self._module.fail_json("At least one domain must be supplied.")
 
+        # REFACTOR ONCE MULTIPLE DOMAINS ALLOWED.
         # Temporarily enforce that only one domain is allowed at a time.
         if state in ('merged', 'replaced', 'overridden'):
-            if want.get("domains") and len(want.get("domains")) > 1:
+            if w_domains and len(w_domains) > 1:
                 self._module.fail_json("Currently only one domain is allowed at a time.")
 
         # Handle case with empty config when state is overridden early
-        if not want.get("domains") and state == "overridden":
-            for h_domain in have.get("domains"):
+        if not w_domains and state == "overridden" and h_domains:
+            for h_domain in h_domains:
                 commands.append(f"no mlag domain {h_domain.get("domain_id")}")
                 return commands
 
-        # Iterate through domains and delete domains that will need to be replaced
+        # REFACTOR ONCE MULTIPLE DOMAINS ALLOWED.
+        # Iterate through and delete domains that will need to be replaced
         # Eventually, once multiple domains are allowed, this will only apply to the overridden state.
-        if state in ('merged', 'replaced', 'overridden'):
-            for h_domain in have.get("domains"):
+        if state in ('merged', 'replaced', 'overridden') and h_domains:
+            for h_domain in h_domains:
                 keep = False
-                for w_domain in want.get("domains"):
+                for w_domain in w_domains:
                     if h_domain.get("domain_id") == w_domain.get("domain_id"):
                         keep = True
                 if not keep:
@@ -142,22 +146,56 @@ class Mlag(ConfigBase):
                     self.domain_deleted = True
 
         # Iterate through each wanted domain and update their configs seperately
-        for w_domain in want.get("domains"):
-            h_match = {}
-            for h_domain in have.get("domains"):
-                if h_domain.get("domain_id") == w_domain.get("domain_id"):
-                    h_match = h_domain
+        if w_domains:
+            for w_domain in w_domains:
+                h_match = {}
+                if h_domains:
+                    for h_domain in h_domains:
+                        if h_domain.get("domain_id") == w_domain.get("domain_id"):
+                            h_match = h_domain
 
-            if state == 'overridden':
-                commands.extend(self._state_overridden(w_domain, h_match))
-            elif state == 'deleted':
-                commands.extend(self._state_deleted(w_domain, h_match))
-            elif state == 'merged':
-                commands.extend(self._state_merged(w_domain, h_match))
-            elif state == 'replaced':
-                commands.extend(self._state_replaced(w_domain, h_match))
+                if state == 'overridden':
+                    commands.extend(self._state_overridden(w_domain, h_match))
+                elif state == 'deleted':
+                    commands.extend(self._state_deleted(w_domain, h_match))
+                elif state == 'merged':
+                    commands.extend(self._state_merged(w_domain, h_match))
+                elif state == 'replaced':
+                    commands.extend(self._state_replaced(w_domain, h_match))
 
         return commands
+    
+    def _generate_add_remove_dicts(self, want, have):
+        """
+        Generate an add and remove dict which tell us which parts of 
+        the config need to be added and removed to go from our current
+        state to the desired state, while achieving idempotence/minimal 
+        commands run. 
+        
+        :param want: wanted config as dict
+        :param have: current config as dict
+        :rtype: A tuple
+        :returns: Both an add and remove dict.
+        """
+        add_dict = {}
+        remove_dict = {}
+        
+        for key, val in iteritems(want):
+            if key == "domain_id":
+                continue
+            if val is not None and val != have.get(key, parm_to_default[key]):
+                if val != parm_to_default[key]:
+                    add_dict[key] = val
+                else:
+                    remove_dict[key] = val
+        
+        for key, val in iteritems(have):
+            if key == "domain_id":
+                continue
+            if val != parm_to_default[key] and want.get(key) == parm_to_default[key]:
+                remove_dict[key] = val
+        
+        return add_dict, remove_dict
 
     def _state_replaced(self, want, have):
         """ The command generator when state is replaced
@@ -167,23 +205,8 @@ class Mlag(ConfigBase):
                   to the desired configuration
         """
         commands = []
-        remove_dict = {}
-        add_dict = {}
         domain_id = want.get("domain_id")
-        for key, val in iteritems(want):
-            if key == "domain_id":
-                continue
-            if val is not None and val != have.get(key, parm_to_default[key]):
-                if val != parm_to_default[key]:
-                    add_dict[key] = val
-                else:
-                    remove_dict[key] = val
-        for key, val in iteritems(have):
-            if key == "domain_id":
-                continue
-            if val != parm_to_default[key] and want.get(key) == parm_to_default[key]:
-                remove_dict[key] = val
-
+        add_dict, remove_dict = self._generate_add_remove_dicts(want, have)
         commands.extend(self._update_partial(domain_id, add_dict, remove_dict))
         return commands
 
@@ -195,23 +218,8 @@ class Mlag(ConfigBase):
                   to the desired configuration
         """
         commands = []
-        remove_dict = {}
-        add_dict = {}
         domain_id = want.get("domain_id")
-        for key, val in iteritems(have):
-            if key == "domain_id":
-                continue
-            if val is not None and val != parm_to_default[key] and want.get(key) is None:
-                remove_dict[key] = val
-        for key, val in iteritems(want):
-            if key == "domain_id":
-                continue
-            if val is not None and val != have.get(key, parm_to_default[key]):
-                if val != parm_to_default[key]:
-                    add_dict[key] = val
-                else:
-                    remove_dict[key] = val
-
+        add_dict, remove_dict = self._generate_add_remove_dicts(want, have)
         commands.extend(self._update_partial(domain_id, add_dict, remove_dict))
         return commands
 
@@ -223,17 +231,9 @@ class Mlag(ConfigBase):
                   the current configuration
         """
         commands = []
-        remove_dict = {}
-        add_dict = {}
         domain_id = want.get("domain_id")
-        for key, val in iteritems(want):
-            if key == "domain_id":
-                continue
-            if val is not None and val != have.get(key, parm_to_default[key]):
-                if val != parm_to_default[key]:
-                    add_dict[key] = val
-
-        commands.extend(self._update_partial(domain_id, add_dict, remove_dict))
+        add_dict, _ = self._generate_add_remove_dicts(want, have)
+        commands.extend(self._update_partial(domain_id, add_dict, {}))
         return commands
 
     def _state_deleted(self, want, have):
@@ -276,12 +276,14 @@ class Mlag(ConfigBase):
         :returns: A list of commands to update the domain
         """
         commands = []
-        for key, _ in iteritems(remove_dict):
-            command = parm_to_keyword[key]
-            commands.append(f"no {command}")
-        for key, value in iteritems(add_dict):
-            command = parm_to_keyword[key]
-            commands.append(f"{command} {value}")
+        if remove_dict:
+            for key, _ in iteritems(remove_dict):
+                command = parm_to_keyword[key]
+                commands.append(f"no {command}")
+        if add_dict:
+            for key, value in iteritems(add_dict):
+                command = parm_to_keyword[key]
+                commands.append(f"{command} {value}")
 
         if commands or self.domain_deleted:
             commands.insert(0, f"mlag domain {domain_id}")
