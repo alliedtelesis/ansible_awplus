@@ -101,7 +101,7 @@ run_integration_tests() {
 
     while IFS= read -r module_name
     do
-        ansible-test network-integration "awplus_${module_name}" -vvvv >> ${ANSIBLE_OUTFILE} \
+        ansible-test network-integration "awplus_${module_name}" >> ${ANSIBLE_OUTFILE} \
             || log_error "Failed to run ansible network integration tests."
     done < "${TESTS_FILE}"
 
