@@ -153,7 +153,7 @@ class Vxlan(ConfigBase):
         :returns: the commands necessary to migrate the current configuration
                   to the desired configuration
         """
-        commands = []    
+        commands = []
 
         if not want or not want.get("l2_vnis"):
             commands.extend(self._clear_config("deleted", have.get("l2_vnis"), have.get("l2_vnis")))
@@ -188,7 +188,7 @@ class Vxlan(ConfigBase):
         """
         Generates commands based on the current configuration only
         so that dynamic (bgp-evpn mode) vxlan commands can bthe current configuration as a dictionarye run
-        
+
         :param have: the current configuration as a dictionary
         :rtype: A list
         :returns: the commands necessary to migrate the current configuration
@@ -228,16 +228,16 @@ class Vxlan(ConfigBase):
             for h_map in have:
                 if w_map.get("vlan") == h_map.get("vlan") and w_map.get("vni") == h_map.get("vni"):
                     add = False
-            if add == True:
+            if add is True:
                 commands.append(f"map-access vlan {w_map.get("vlan")} vni {w_map.get("vni")}")
-                self._update_change_counts(w_map.get("vlan"), w_map.get("vni"), 1)   
+                self._update_change_counts(w_map.get("vlan"), w_map.get("vni"), 1)
 
         return commands
 
     def _clear_config(self, state, want, have):
         """
         Generate commands to clear config that must be cleared.
-        
+
         :param want: the desired configuration as a dictionary
         :param have: the current configuration as a dictionary
         :rtype: A list
@@ -267,18 +267,18 @@ class Vxlan(ConfigBase):
 
             if removed:
                 commands.append(f"no map-access vlan {h_map.get("vlan")}")
-                self._update_change_counts(h_map.get("vlan"), h_map.get("vni"), -1)   
-        
+                self._update_change_counts(h_map.get("vlan"), h_map.get("vni"), -1)
+
         return commands
 
     def _update_change_counts(self, vlan, vni, amount):
         """
         Updates the change counts dict to count how many of each
-        specific VLAN and VNI ID you will gain/lose through the 
+        specific VLAN and VNI ID you will gain/lose through the
         changes actually made.the current configuration as a dictionary
 
         :param vlan: The VLAN id
-        :param vni: The VNI id 
+        :param vni: The VNI id
         :param amount: The amount to change by (+1/-1)
         """
         current_vlan_count = self.change_counts['vlans'].get(vlan, 0)
@@ -288,9 +288,9 @@ class Vxlan(ConfigBase):
 
     def _validate_duplicates(self, have):
         """
-        Checks for duplicate vlans/vnis and raises an error if there will be one 
+        Checks for duplicate vlans/vnis and raises an error if there will be one
         based off of the given have and want
-        
+
         :param have: the current configuration as a dictionary
         """
         # Count the number of uses of each vlan and vni in the current config

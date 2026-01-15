@@ -81,9 +81,9 @@ class TestAwplusVxlanModule(TestAwplusModule):
     def test_awplus_vxlan_merge_single(self):
         set_module_args(dict(config=dict(l2_vnis=[dict(vlan=10, vni=1000)]), state="merged"))
         commands = [
-            "source-interface lo", 
-            "host-reachability-protocol evpn-bgp", 
-            "nvo vxlan", 
+            "source-interface lo",
+            "host-reachability-protocol evpn-bgp",
+            "nvo vxlan",
             "map-access vlan 10 vni 1000"
         ]
         self.execute_module(changed=True, commands=commands)
@@ -91,29 +91,29 @@ class TestAwplusVxlanModule(TestAwplusModule):
     def test_awplus_vxlan_merge_mutliple(self):
         set_module_args(dict(config=dict(l2_vnis=[dict(vlan=10, vni=1000), dict(vlan=11, vni=2000)]), state="merged"))
         commands = [
-            "source-interface lo", 
-            "host-reachability-protocol evpn-bgp", 
-            "nvo vxlan", 
+            "source-interface lo",
+            "host-reachability-protocol evpn-bgp",
+            "nvo vxlan",
             "map-access vlan 10 vni 1000",
             "map-access vlan 11 vni 2000"
         ]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_vxlan_merge_with_existing(self):
-        set_module_args(dict(config=dict(l2_vnis=[dict(vlan=11, vni=2000)]), state="merged"))
+        set_module_args(dict(config=dict(l2_vnis=[dict(vlan=11, vni=4000)]), state="merged"))
         commands = [
-            "nvo vxlan", 
+            "nvo vxlan",
             "no map-access vlan 11",
-            "map-access vlan 11 vni 2000"
+            "map-access vlan 11 vni 4000"
         ]
         self.execute_module(changed=True, commands=commands, fixture="awplus_config_complete.cfg")
 
     def test_awplus_vxlan_replace_single(self):
         set_module_args(dict(config=dict(l2_vnis=[dict(vlan=10, vni=1000)]), state="replaced"))
         commands = [
-            "source-interface lo", 
-            "host-reachability-protocol evpn-bgp", 
-            "nvo vxlan", 
+            "source-interface lo",
+            "host-reachability-protocol evpn-bgp",
+            "nvo vxlan",
             "map-access vlan 10 vni 1000"
         ]
         self.execute_module(changed=True, commands=commands)
@@ -121,29 +121,29 @@ class TestAwplusVxlanModule(TestAwplusModule):
     def test_awplus_vxlan_replace_mutliple(self):
         set_module_args(dict(config=dict(l2_vnis=[dict(vlan=10, vni=1000), dict(vlan=11, vni=2000)]), state="replaced"))
         commands = [
-            "source-interface lo", 
-            "host-reachability-protocol evpn-bgp", 
-            "nvo vxlan", 
+            "source-interface lo",
+            "host-reachability-protocol evpn-bgp",
+            "nvo vxlan",
             "map-access vlan 10 vni 1000",
             "map-access vlan 11 vni 2000"
         ]
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_vxlan_replace_with_existing(self):
-        set_module_args(dict(config=dict(l2_vnis=[dict(vlan=11, vni=2000)]), state="replaced"))
+        set_module_args(dict(config=dict(l2_vnis=[dict(vlan=11, vni=4000)]), state="merged"))
         commands = [
-            "nvo vxlan", 
+            "nvo vxlan",
             "no map-access vlan 11",
-            "map-access vlan 11 vni 2000"
+            "map-access vlan 11 vni 4000"
         ]
         self.execute_module(changed=True, commands=commands, fixture="awplus_config_complete.cfg")
 
     def test_awplus_vxlan_override_single(self):
         set_module_args(dict(config=dict(l2_vnis=[dict(vlan=10, vni=1000)]), state="overridden"))
         commands = [
-            "source-interface lo", 
-            "host-reachability-protocol evpn-bgp", 
-            "nvo vxlan", 
+            "source-interface lo",
+            "host-reachability-protocol evpn-bgp",
+            "nvo vxlan",
             "map-access vlan 10 vni 1000"
         ]
         self.execute_module(changed=True, commands=commands)
@@ -151,9 +151,9 @@ class TestAwplusVxlanModule(TestAwplusModule):
     def test_awplus_vxlan_override_mutliple(self):
         set_module_args(dict(config=dict(l2_vnis=[dict(vlan=10, vni=1000), dict(vlan=11, vni=2000)]), state="overridden"))
         commands = [
-            "source-interface lo", 
-            "host-reachability-protocol evpn-bgp", 
-            "nvo vxlan", 
+            "source-interface lo",
+            "host-reachability-protocol evpn-bgp",
+            "nvo vxlan",
             "map-access vlan 10 vni 1000",
             "map-access vlan 11 vni 2000"
         ]
@@ -162,7 +162,7 @@ class TestAwplusVxlanModule(TestAwplusModule):
     def test_awplus_vxlan_override_existing_with_empty(self):
         set_module_args(dict(config=dict(), state="overridden"))
         commands = [
-            "nvo vxlan", 
+            "nvo vxlan",
             "no map-access vlan 10",
             "no map-access vlan 11"
         ]
@@ -171,7 +171,7 @@ class TestAwplusVxlanModule(TestAwplusModule):
     def test_awplus_vxlan_override_existing(self):
         set_module_args(dict(config=dict(l2_vnis=[dict(vlan=12, vni=2000)]), state="overridden"))
         commands = [
-            "nvo vxlan", 
+            "nvo vxlan",
             "no map-access vlan 10",
             "no map-access vlan 11",
             "map-access vlan 12 vni 2000"
@@ -181,7 +181,7 @@ class TestAwplusVxlanModule(TestAwplusModule):
     def test_awplus_vxlan_delete_single(self):
         set_module_args(dict(config=dict(l2_vnis=[dict(vlan=10)]), state="deleted"))
         commands = [
-            "nvo vxlan", 
+            "nvo vxlan",
             "no map-access vlan 10"
         ]
         self.execute_module(changed=True, commands=commands, fixture="awplus_config_complete.cfg")
@@ -189,7 +189,7 @@ class TestAwplusVxlanModule(TestAwplusModule):
     def test_awplus_vxlan_delete_mutliple(self):
         set_module_args(dict(config=dict(l2_vnis=[dict(vlan=10), dict(vlan=11)]), state="deleted"))
         commands = [
-            "nvo vxlan", 
+            "nvo vxlan",
             "no map-access vlan 10",
             "no map-access vlan 11"
         ]

@@ -41,10 +41,10 @@ module: awplus_vxlan
 version_added: 2.19
 short_description: Manage the vxlan attributes on AlliedWare Plus devices
 description:
-    - This module provides declarative management of dynamic vxlan 
-      attributes on awplus devices. It provides options to configure 
-      host system parameters or remove those parameters from the 
-      device's active configuration. This is mostly targetted towards 
+    - This module provides declarative management of dynamic vxlan
+      attributes on awplus devices. It provides options to configure
+      host system parameters or remove those parameters from the
+      device's active configuration. This is mostly targetted towards
       the setting up and tearing down of VXLAN tunnels.
 author:
   - Ryan Scofield
