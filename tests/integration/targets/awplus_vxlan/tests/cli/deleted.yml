@@ -1,0 +1,119 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_vxlan deleted integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    d1_expected:
+      commands:
+        - nvo vxlan
+        - no map-access vlan 2
+    d2_expected:
+      commands:
+        - nvo vxlan
+        - no map-access vlan 2
+        - no map-access vlan 3
+    d3_expected:
+      commands:
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete a single mapping
+      alliedtelesis.awplus.awplus_vxlan: &d1
+        config:
+          l2_vnis:
+            - vlan: 2
+        state: deleted
+      register: result
+
+    - name: Assert mapping is deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete a single mapping (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_vxlan: *d1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete multiple mappings
+      alliedtelesis.awplus.awplus_vxlan: &d2
+        config:
+          l2_vnis:
+            - vlan: 2
+            - vlan: 3
+        state: deleted
+      register: result
+
+    - name: Assert mappings are deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete multiple mappings (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_vxlan: *d2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete non-existing mapping
+      alliedtelesis.awplus.awplus_vxlan: &d3
+        config:
+          l2_vnis:
+            - vlan: 4
+        state: deleted
+      register: result
+
+    - name: Assert nothing happens
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Delete non-existing mapping (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_vxlan: *d3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete with empty config fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+        state: deleted
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_vxlan deleted integration tests on connection={{ ansible_connection }}"

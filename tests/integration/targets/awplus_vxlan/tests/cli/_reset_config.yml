@@ -1,0 +1,19 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_vxlan reset config on connection={{ ansible_connection }}"
+
+- name: Remove vxlan configuration
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - no nvo vxlan
+
+- name: Remove loopback address
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - no ip address
+    parents: interface lo
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_vxlan reset config on connection={{ ansible_connection }}"

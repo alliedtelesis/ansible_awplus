@@ -53,10 +53,18 @@ def load_fixture(name):
 
 class TestAwplusModule(ModuleTestCase):
     def execute_module(
-        self, failed=False, changed=False, commands=None, sort=True, defaults=False
+        self, failed=False, changed=False, commands=None, sort=True, defaults=False, fixture=None
     ):
-        self.load_fixtures(commands)
+        # work around to specify a fixture to load (e.g., if we sometimes want to load
+        # an empty config and sometimes want to load a semi-complete/complete config)
+        if fixture:
+            def load_from_file(*args, **kwargs):
+                return load_fixture(fixture)
+            self.execute_show_command.side_effect = load_from_file
+        else:
+            self.load_fixtures(commands)
         self.load_encryptions()
+
         if failed:
             result = self.failed()
             self.assertTrue(result["failed"], result)
