@@ -95,7 +95,8 @@ class Lacp(ConfigBase):
         :returns: the commands necessary to migrate the current configuration
                   to the desired configuration
         """
-        if want is None or (want.get("system").get("priority") is None and want.get("system").get("global_passive_mode") is None):
+        if want is None or (want.get("system").get("priority") is None and
+                            want.get("system").get("global_passive_mode") is None):
             self._module.fail_json(
                 msg=f"one of 'priority' or 'global_passive_mode' is required.")
 

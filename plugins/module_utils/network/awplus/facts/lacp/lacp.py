@@ -65,7 +65,7 @@ class LacpFacts(object):
         # into sections.
         config = deepcopy(self.generated_spec)
 
-        # get list of controllers and ports and add to config.
+        # get current priority and global passive mode
         config = self.render_priority(config, glc)
         config = self.render_global_passive_mode(config, grc)
 
