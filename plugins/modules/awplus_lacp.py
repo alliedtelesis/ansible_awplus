@@ -60,7 +60,8 @@ options:
             required: true
           global_passive_mode:
             description:
-            - LACP global passive mode. True means this is enabled on all ports
+            - LACP global passive mode. True means that all ports will operate LACP in passive mode, 
+              regardless of individual port mode settings.
             type: bool
   state:
     description:
