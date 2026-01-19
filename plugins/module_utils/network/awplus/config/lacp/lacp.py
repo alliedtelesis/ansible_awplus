@@ -121,7 +121,7 @@ class Lacp(ConfigBase):
                   the current configuration
         """
         commands = []
-        commands.extend(self._set_config(want.get("system"), have.get("system")))
+        commands.extend(self._set_config(want, have))
         return commands
 
     @staticmethod
@@ -139,8 +139,9 @@ class Lacp(ConfigBase):
     def _set_config(self, want, have):
         # Set the interface config based on the want and have config
         commands = []
-        priority = want.get('priority')
-        if priority and have.get('priority', 32768) != want.get('priority'):
+        w_sys, h_sys = want.get("system"), have.get("system")
+        priority = w_sys.get('priority')
+        if priority and h_sys.get('priority', 32768) != w_sys.get('priority'):
             if self.is_valid_priority(priority):
                 cmd = f"lacp system-priority {priority}"
             else:
@@ -148,7 +149,7 @@ class Lacp(ConfigBase):
             commands.append(cmd)
 
         gpm = want.get('global_passive_mode')
-        if gpm is not None and have.get('global_passive_mode', False) != want.get('global_passive_mode'):
+        if gpm is not None and h_sys.get('global_passive_mode', False) != w_sys.get('global_passive_mode'):
             if gpm is True:
                 cmd = "lacp global-passive-mode enable"
             else:
@@ -160,14 +161,15 @@ class Lacp(ConfigBase):
     def _clear_config(self, want, have):
         # Delete the interface config based on the want and have config
         commands = []
+        w_sys, h_sys = want.get("system"), have.get("system")
 
-        have_system_priority = have.get('system').get('priority')
-        if want.get('system').get('priority') and have_system_priority and have_system_priority != 32768:
+        have_system_priority = h_sys.get('priority')
+        if w_sys.get('priority') and have_system_priority and have_system_priority != 32768:
             cmd = 'no lacp system-priority'
             commands.append(cmd)
 
-        have_gpm = have.get('system').get('global_passive_mode')
-        if want.get('system').get('global_passive_mode') and have_gpm is True:
+        have_gpm = h_sys.get('global_passive_mode')
+        if w_sys.get('global_passive_mode') and have_gpm is True:
             cmd = "no lacp global-passive-mode enable"
             commands.append(cmd)
 
