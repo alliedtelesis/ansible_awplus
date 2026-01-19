@@ -66,7 +66,6 @@ class Bgp(ConfigBase):
         :returns: The result from module execution
         """
         result = {'changed': False}
-        warnings = list()
         commands = list()
 
         existing_bgp_facts = self.get_bgp_facts()
@@ -83,7 +82,6 @@ class Bgp(ConfigBase):
         if result['changed']:
             result['after'] = changed_bgp_facts
 
-        result['warnings'] = warnings
         return result
 
     def set_config(self, existing_bgp_facts):
@@ -158,8 +156,8 @@ class Bgp(ConfigBase):
         if want.get('networks'):
             network_commands = generate_network_commands(want['networks'], have.get('networks', []))
             commands.extend(network_commands)
-        if want.get('address_family'):
-            addrfam_commands = generate_addrfam_commands(want['address_family'], have.get('address_family', []))
+        if want.get('ipv4_address_family'):
+            addrfam_commands = generate_addrfam_commands(want['ipv4_address_family'], have.get('ipv4_address_family', []))
             commands.extend(addrfam_commands)
 
         if not have or commands:

@@ -86,8 +86,10 @@ class BgpFacts(object):
         if not conf:
             return
 
-        if 'address-family' in conf:
-            parse_addressfamily(config, conf)
+        if 'address-family ipv4' in conf:
+            parse_addressfamily_ipv4(config, conf)
+        elif 'address-family l2vpn evpn' in conf:
+            parse_addressfamily_l2vpn(config, conf)
         elif 'router bgp' in conf:
             parse_bgp(config, conf)
         return utils.remove_empties(config)
@@ -99,12 +101,26 @@ def parse_bgp(config, conf):
     if 'bgp log-neighbor-changes' in conf:
         config['log_neighbor_changes'] = True
 
+    if 'no bgp ebgp-requires-policy' in conf:
+        config['ebgp_requires_policy'] = False
+    elif 'bgp ebgp-requires-policy' in conf:
+        config['ebgp_requires_policy'] = True
+    else:
+        config['ebgp_requires_policy'] = False
+
+    if 'no bgp network import-check' in conf:
+        config['network_import_check'] = False
+    elif 'bgp network import-check' in conf:
+        config['network_import_check'] = True
+    else:
+        config['network_import_check'] = False
+
     lines = conf.split('\n')
     config['neighbors'] = get_neighbors(lines)
     config['networks'] = get_networks(conf)
 
 
-def parse_addressfamily(config, conf):
+def parse_addressfamily_ipv4(config, conf):
     addr_fam = {}
     addr_fam['vrf'] = utils.parse_conf_arg(conf, 'vrf')
     lines = conf.split('\n')
@@ -112,11 +128,24 @@ def parse_addressfamily(config, conf):
     addr_fam['neighbors'] = get_neighbors(lines)
     addr_fam['networks'] = get_networks(conf)
 
-    if config['address_family']:
-        config['address_family'].append(addr_fam)
+    if config['ipv4_address_family']:
+        config['ipv4_address_family'].append(addr_fam)
     else:
-        config['address_family'] = [addr_fam]
+        config['ipv4_address_family'] = [addr_fam]
 
+def parse_addressfamily_l2vpn(config, conf):
+    address_family_line = conf.splitlines()[0]
+    match = re.match(r'*address-family l2vpn evpn vrf (\S+)', address_family_line)
+    if match:
+        parse_addressfamily_l2vpn_vrf(config, conf)
+    else:
+        parse_addressfamily_l2vpn_other(config, conf)
+
+def parse_addressfamily_l2vpn_vrf(config, conf):
+    pass
+
+def parse_addressfamily_l2vpn_other(config, conf):
+    pass
 
 def get_redistribute(conf):
     redistributes = []

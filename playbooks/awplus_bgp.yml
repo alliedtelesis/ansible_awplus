@@ -4,9 +4,26 @@
   collections:
     - alliedtelesis.awplus
   tasks:
-    - name: Configure a simple ASN
+    - name: Configure bgp evpn address-family
       awplus_bgp:
-        asn: 100
-        vrf: default
-        router_id: 192.0.2.4
-        state: present
+        config:
+          neighbors:
+            - neighbor: 1.1.1.2
+              remote_as: 65000
+          l2vpn_address_family:
+            - vrf:
+                name: 1
+                adverise: True
+              neighbors:
+                - neighbor: 1.1.1.2
+              advertise_all_vni: True
+          ipv4_address_family:
+            - vrf: 1
+              redistribute:
+                - protocol: connected
+                - protocol: static
+          ebgp_requires_policy: False
+          network_import_check: False
+          router_id: 192.168.0.3
+          bgp_as: 123
+        state: replaced
