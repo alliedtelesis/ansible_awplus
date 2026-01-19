@@ -120,7 +120,7 @@ class Lacp(ConfigBase):
                   the current configuration
         """
         commands = []
-        commands.extend(self._set_config(want, have))
+        commands.extend(self._set_config(want.get("system"), have.get("system")))
         return commands
 
     @staticmethod
@@ -138,8 +138,6 @@ class Lacp(ConfigBase):
     def _set_config(self, want, have):
         # Set the interface config based on the want and have config
         commands = []
-        want, have = want.get("system"), have.get("system")
-
         priority = want.get('priority')
         if priority and have.get('priority', 32768) != want.get('priority'):
             if self.is_valid_priority(priority):
