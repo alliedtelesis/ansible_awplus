@@ -148,7 +148,7 @@ class Lacp(ConfigBase):
                 self._module.fail_json(msg='Invalid system priority')
             commands.append(cmd)
 
-        gpm = want.get('global_passive_mode')
+        gpm = w_sys.get('global_passive_mode')
         if gpm is not None and h_sys.get('global_passive_mode', False) != w_sys.get('global_passive_mode'):
             if gpm is True:
                 cmd = "lacp global-passive-mode enable"
