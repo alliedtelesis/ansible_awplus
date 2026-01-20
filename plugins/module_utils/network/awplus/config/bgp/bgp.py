@@ -94,9 +94,6 @@ class Bgp(ConfigBase):
         """
         want = self._module.params['config']
         have = existing_bgp_facts
-
-        self._module.fail_json(str(have))
-
         resp = self.set_state(want, have)
         return to_list(resp)
 
@@ -160,7 +157,10 @@ class Bgp(ConfigBase):
             network_commands = generate_network_commands(want['networks'], have.get('networks', []))
             commands.extend(network_commands)
         if want.get('ipv4_address_family'):
-            addrfam_commands = generate_addrfam_commands(want['ipv4_address_family'], have.get('ipv4_address_family', []))
+            addrfam_commands = generate_ipv4_addrfam_commands(want['ipv4_address_family'], have.get('ipv4_address_family', []))
+            commands.extend(addrfam_commands)
+        if want.get('l2vpn_address_family'):
+            addrfam_commands = generate_l2vpn_addrfam_commands(want['l2vpn_address_family'], have.get('l2vpn_address_family', []))
             commands.extend(addrfam_commands)
 
         if not have or commands:
@@ -243,7 +243,7 @@ def generate_neighbor_commands(want, have):
     return commands
 
 
-def generate_addrfam_commands(want, have):
+def generate_ipv4_addrfam_commands(want, have):
     commands = []
     want = param_list_to_dict(want, unique_key='vrf')
     if have:
@@ -272,6 +272,44 @@ def generate_addrfam_commands(want, have):
 
     return commands
 
+def generate_l2vpn_addrfam_commands(want, have):
+    commands = []
+    want = param_list_to_dict(want, unique_key='vrf')
+    if have:
+        have = param_list_to_dict(have, unique_key='vrf')
+    else:
+        have = dict()
+
+    neighbor_commands = generate_af_neighbor_commands(want.get('neighbors'), have.get('neighbors'))
+    
+    if want.get('advertise_all_vni') and not have.get('advertise_all_vni'):
+        neighbor_commands.append('advertise-all-vni')
+    elif not want.get('advertise_all_vni') and have.get('advertise_all_vni'):
+        neighbor_commands.append('no advertise-all-vni')
+
+    if neighbor_commands:
+        commands.insert(0, f"address-family l2vpn evpn")
+        commands.append('exit-address-family')
+
+    vrf_commands = generate_af_vrf_commands(want.get('vrfs'), have.get('vrfs'))
+
+    return commands
+
+def generate_af_vrf_commands(want, have):
+    commands = []
+
+    if want:
+        for w_vrf in want:
+            for h_vrf in have:
+                if w_vrf['name'] == h_vrf['name']:
+                    for w_ad in w_vrf['advertisements']:
+                        for h_ad in w_vrf['advertisements']:
+                            if w_ad['protocol'] == h_ad['protocol'] and \
+                                    w_ad.get("route_map") == h_ad.get("route_map"):
+                                
+                                
+
+    return commands
 
 def generate_redistribute_commands(want, have):
     commands = []

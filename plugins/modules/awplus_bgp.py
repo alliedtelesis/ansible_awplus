@@ -178,6 +178,7 @@ options:
               name:
                 description:
                 - The name of the VRF.
+                required: True
                 type: str
               advertise:
                 description:
@@ -187,6 +188,7 @@ options:
                 suboptions:
                   protocol:
                     description: The protocol to advertise for.
+                    required: True
                     type: str
                   route_map:
                     description: The route map for this VRF's advertising.

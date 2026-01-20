@@ -57,13 +57,14 @@ class BgpArgs(object):  # pylint: disable=R0903
                 'vrf': {'required': True, 'type': 'str'}}, 'type': 'list'},
             'l2vpn_address_family': {'options': {
                 'vrfs': {'elements': 'dict', 'options': {
-                    'name': {'type': 'str'},
+                    'name': {'required': True, 'type': 'str'},
                     'advertisements': {'elements': 'dict', 'options': {
-                        'protocol': {'type': 'str'},
+                        'protocol': {'required': True, 'type': 'str'},
                         'route-map': {'type': 'str'}
                     }, 'type': 'list'}}, 'type': 'list'},
                 'neighbors': {'elements': 'dict', 'options': {
-                    'neighbor': {'required': True, 'type': 'str'}}, 'type': 'list'},
+                    'neighbor': {'required': True, 'type': 'str'},
+                    'activate': {'type': 'bool'}}, 'type': 'list'},
                 'advertise_all_vni': {'type': 'bool'}, 'type': 'dict'}},
             'bgp_as': {'required': True, 'type': 'int'},
             'log_neighbor_changes': {'type': 'bool'},

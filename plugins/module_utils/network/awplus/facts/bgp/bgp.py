@@ -156,7 +156,6 @@ def parse_addressfamily_l2vpn(config, conf):
             config['l2vpn_address_family']['neighbors'] = neighbours
 
         flags = parse_af_l2vpn_flags(lines)
-        config['l2vpn_address_family']['flags'] = flags
         for arg, val in iteritems(flags):
             config['l2vpn_address_family'][arg] = val
 
@@ -195,7 +194,8 @@ def parse_addressfamily_l2vpn_neighbor(lines):
             continue
 
         if match.group(1):
-            neighbor['address'] = match.group(1)
+            neighbor['neighbour'] = match.group(1)
+            neighbor['activate'] = True
             neighbors.append(neighbor)
             neighbor = {}    
     return neighbors
