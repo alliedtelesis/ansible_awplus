@@ -15,6 +15,9 @@ from copy import deepcopy
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import (
     utils,
 )
+from ansible.module_utils.six import (
+    iteritems
+)
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.argspec.bgp.bgp import BgpArgs
 from ansible.module_utils.connection import ConnectionError
 
@@ -134,18 +137,77 @@ def parse_addressfamily_ipv4(config, conf):
         config['ipv4_address_family'] = [addr_fam]
 
 def parse_addressfamily_l2vpn(config, conf):
-    address_family_line = conf.splitlines()[0]
-    match = re.match(r'*address-family l2vpn evpn vrf (\S+)', address_family_line)
+    if not config['l2vpn_address_family']:
+        config['l2vpn_address_family'] = {}
+
+    lines = conf.split('\n')
+    match = re.match(r' *address-family l2vpn evpn vrf (\S+)', lines[0])
     if match:
-        parse_addressfamily_l2vpn_vrf(config, conf)
+        vrf_name = match.group(1)
+        advertisements = parse_addressfamily_l2vpn_vrf(lines)
+        vrf = dict(name=vrf_name, advertisements=advertisements)
+        if config['l2vpn_address_family'].get('vrfs'):
+            config['l2vpn_address_family']['vrfs'].append(vrf)
+        else:
+            config['l2vpn_address_family']['vrfs'] = [advertisements]
     else:
-        parse_addressfamily_l2vpn_other(config, conf)
+        neighbours = parse_addressfamily_l2vpn_neighbor(lines)
+        if neighbours:
+            config['l2vpn_address_family']['neighbors'] = neighbours
 
-def parse_addressfamily_l2vpn_vrf(config, conf):
-    pass
+        flags = parse_af_l2vpn_flags(lines)
+        config['l2vpn_address_family']['flags'] = flags
+        for arg, val in iteritems(flags):
+            config['l2vpn_address_family'][arg] = val
 
-def parse_addressfamily_l2vpn_other(config, conf):
-    pass
+
+def parse_addressfamily_l2vpn_vrf(lines):
+    advertisements = []
+    advertisement = {}
+    for line in lines:
+        match = re.match(r' *?advertise ?(\S+)? ?(\S+)? ?(\S+)? ?(\S+)?', line)
+        if not match:
+            continue
+
+        if match.group(1):
+            advertisement['protocol'] = match.group(1)
+        if match.group(2) != 'unicast':
+            advertisement = {}
+            continue        
+        if match.group(3) != 'route-map':
+            advertisements.append(advertisement)
+            advertisement = {}
+            continue
+        if match.group(4):
+            advertisement['route_map'] = match.group(4)
+            advertisements.append(advertisement)
+            advertisement = {}
+
+    return advertisements
+
+
+def parse_addressfamily_l2vpn_neighbor(lines):
+    neighbors = []
+    neighbor = {}
+    for line in lines:
+        match = re.match(r' *?neighbor ?(\S+)? activate', line)
+        if not match:
+            continue
+
+        if match.group(1):
+            neighbor['address'] = match.group(1)
+            neighbors.append(neighbor)
+            neighbor = {}    
+    return neighbors
+
+def parse_af_l2vpn_flags(lines):
+    flags = ['advertise-all-vni']
+    flag_dict = {}
+    for line in lines:
+        for flag in flags:
+            if line.strip() == flag:
+                flag_dict[flag.replace('-', '_')] = True
+    return flag_dict
 
 def get_redistribute(conf):
     redistributes = []

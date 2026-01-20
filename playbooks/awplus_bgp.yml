@@ -11,12 +11,13 @@
             - neighbor: 1.1.1.2
               remote_as: 65000
           l2vpn_address_family:
-            - vrf:
-                name: 1
-                adverise: True
-              neighbors:
-                - neighbor: 1.1.1.2
-              advertise_all_vni: True
+            vrfs:
+              name: 1
+              advertisements:
+                - protocol: ipv4
+            neighbors:
+              - neighbor: 1.1.1.2
+            advertise_all_vni: True
           ipv4_address_family:
             - vrf: 1
               redistribute:

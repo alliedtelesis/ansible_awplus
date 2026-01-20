@@ -94,6 +94,9 @@ class Bgp(ConfigBase):
         """
         want = self._module.params['config']
         have = existing_bgp_facts
+
+        self._module.fail_json(str(have))
+
         resp = self.set_state(want, have)
         return to_list(resp)
 

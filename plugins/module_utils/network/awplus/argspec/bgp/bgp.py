@@ -55,14 +55,16 @@ class BgpArgs(object):  # pylint: disable=R0903
                     'protocol': {'choices': ['connected', 'isis', 'ospf', 'rip', 'static'], 'required': True, 'type': 'str'},
                     'route_map': {'type': 'str'}}, 'type': 'list'},
                 'vrf': {'required': True, 'type': 'str'}}, 'type': 'list'},
-            'l2vpn_address_family': {'elements': 'dict', 'options': {
-                'vrf': {'elements': 'dict', 'options': {
+            'l2vpn_address_family': {'options': {
+                'vrfs': {'elements': 'dict', 'options': {
                     'name': {'type': 'str'},
-                    'advertise': {'type': 'bool'}}, 'type': 'dict'},
+                    'advertisements': {'elements': 'dict', 'options': {
+                        'protocol': {'type': 'str'},
+                        'route-map': {'type': 'str'}
+                    }, 'type': 'list'}}, 'type': 'list'},
                 'neighbors': {'elements': 'dict', 'options': {
-                    'neighbor': {'required': True, 'type': 'str'}}, 'type': 'dict'},
-                'advertise_all_vni': {'type': 'bool'},
-                'vni': {'type': 'int'}, 'type': 'list'}},
+                    'neighbor': {'required': True, 'type': 'str'}}, 'type': 'list'},
+                'advertise_all_vni': {'type': 'bool'}, 'type': 'dict'}},
             'bgp_as': {'required': True, 'type': 'int'},
             'log_neighbor_changes': {'type': 'bool'},
             'ebgp_requires_policy': {'type': 'bool'},

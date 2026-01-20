@@ -167,13 +167,13 @@ options:
       l2vpn_address_family:
         description:
         - Specifies BGP l2vpn address family related configurations.
-        type: list
-        elements: dict
+        type: dict
         suboptions:
-          vrf:
+          vrfs:
             description:
             - The config of the VRF for this address family.
-            type: dict
+            type: list
+            element: dict
             suboptions:
               name:
                 description:
@@ -182,7 +182,14 @@ options:
               advertise:
                 description:
                 - Flag to enable/disable VRF advertisement.
-                type: bool
+                type: list
+                elements: dict
+                suboptions:
+                  protocol:
+                    description: The protocol to advertise for.
+                    type: str
+                  route_map:
+                    description: The route map for this VRF's advertising.
           neighbors:
             description:
             - Specifies BGP neighbor related configurations in Address Family configuration
@@ -199,10 +206,6 @@ options:
             description: 
             - Flag to enable/disable VNI advertisement.
             type: bool
-          vni:
-            description:
-            - The VNI id of this device
-            type: int
       ipv4_address_family:
         description:
         - Specifies BGP ipv4 address family related configurations.
