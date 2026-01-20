@@ -1,0 +1,16 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_lacp reset config on connection={{ ansible_connection }}"
+
+- name: Delete the current config
+  alliedtelesis.awplus.awplus_lacp:
+    config:
+      system:
+        priority: 1
+        global_passive_mode: True
+    state: deleted
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_lacp reset config on connection={{ ansible_connection }}"
