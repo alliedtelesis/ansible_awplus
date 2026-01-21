@@ -103,7 +103,7 @@ class Lacp(ConfigBase):
         if want is None or (want.get("system").get("priority") is None and
                             want.get("system").get("global_passive_mode") is None):
             self._module.fail_json(msg=f"one of 'priority' or 'global_passive_mode' is required.")
-        if want.get("system").get("priority") is not None and 1 > want.get("system").get("priority") > 65535: 
+        if want.get("system").get("priority") is not None and not (1 <= want.get("system").get("priority") <= 65535): 
             self._module.fail_json(msg=f"Priority must be between 1 and 65535.")
 
         state = self._module.params['state']
