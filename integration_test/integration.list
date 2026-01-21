@@ -3,5 +3,6 @@ static_lag_interfaces
 user
 openflow
 lacp_interfaces
+lacp
 mlag
 vxlan

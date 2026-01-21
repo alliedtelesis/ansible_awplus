@@ -48,9 +48,14 @@ class TestAwplusLacpInterfacesModule(TestAwplusModule):
         self.edit_config = self.mock_edit_config.start()
 
         self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lacp.lacp.LacpFacts.get_device_data"
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lacp.lacp.LacpFacts.get_lacp_config"
         )
         self.execute_show_command = self.mock_execute_show_command.start()
+
+        self.mock_execute_show_run_command = patch(
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lacp.lacp.LacpFacts.get_running_config"
+        )
+        self.execute_show_run_command = self.mock_execute_show_run_command.start()
 
     def tearDown(self):
         super(TestAwplusLacpInterfacesModule, self).tearDown()
@@ -60,12 +65,17 @@ class TestAwplusLacpInterfacesModule(TestAwplusModule):
         self.mock_get_config.stop()
         self.mock_load_config.stop()
         self.mock_execute_show_command.stop()
+        self.mock_execute_show_run_command.stop()
 
     def load_fixtures(self, commands=None, transport="cli"):
-        def load_from_file(*args, **kwargs):
+        def load_lacp_from_file(*args, **kwargs):
             return load_fixture("awplus_lacp_config.cfg")
 
-        self.execute_show_command.side_effect = load_from_file
+        def load_running_config_from_file(*args, **kwargs):
+            return load_fixture("awplus_config_config.cfg")
+
+        self.execute_show_command.side_effect = load_lacp_from_file
+        self.execute_show_run_command.side_effect = load_running_config_from_file
 
     def test_awplus_lacp_default(self):
         set_module_args(dict(config=dict(system=dict(priority=50))))
@@ -77,15 +87,35 @@ class TestAwplusLacpInterfacesModule(TestAwplusModule):
         self.execute_module(changed=False, commands=[])
 
     def test_awplus_lacp_merged(self):
+        set_module_args(dict(config=dict(system=dict(priority=50, global_passive_mode=False)), state="merged"))
+        commands = ["lacp system-priority 50", "no lacp global-passive-mode enable"]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_lacp_only_priority_merged_idempotent(self):
         set_module_args(dict(config=dict(system=dict(priority=50)), state="merged"))
         commands = ["lacp system-priority 50"]
         self.execute_module(changed=True, commands=commands)
 
+    def test_awplus_lacp_only_gpm_merged_idempotent(self):
+        set_module_args(dict(config=dict(system=dict(global_passive_mode=False)), state="merged"))
+        commands = ["no lacp global-passive-mode enable"]
+        self.execute_module(changed=True, commands=commands)
+
     def test_awplus_lacp_merged_idempotent(self):
-        set_module_args(dict(config=dict(system=dict(priority=9)), state="merged"))
+        set_module_args(dict(config=dict(system=dict(priority=9, global_passive_mode=True)), state="merged"))
         self.execute_module(changed=False, commands=[])
 
-    def test_awplus_l3_interfaces_deleted(self):
-        set_module_args(dict(state="deleted"))
+    def test_awplus_lacp_deleted(self):
+        set_module_args(dict(config=dict(system=dict(priority=1, global_passive_mode=True)), state="deleted"))
+        commands = ["no lacp system-priority", "no lacp global-passive-mode enable"]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_lacp_only_priority_deleted(self):
+        set_module_args(dict(config=dict(system=dict(priority=1)), state="deleted"))
         commands = ["no lacp system-priority"]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_lacp_only_gpm_deleted(self):
+        set_module_args(dict(config=dict(system=dict(global_passive_mode=True)), state="deleted"))
+        commands = ["no lacp global-passive-mode enable"]
         self.execute_module(changed=True, commands=commands)

@@ -1,0 +1,148 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_mlag deleted integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    d1_expected:
+      commands:
+        - mlag domain 10
+        - no peer-link
+        - no peer-address
+        - no source-address
+        - no keepalive-interval
+        - no session-timeout
+    d2_expected:
+      commands:
+        - mlag domain 10
+        - no peer-link
+        - no peer-address
+    d3_expected:
+      commands:
+        - no mlag domain 10
+    d4_expected:
+      commands:
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete all params
+      alliedtelesis.awplus.awplus_mlag: &d1
+        config:
+          domains:
+            - domain_id: 10
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+              source_address: 1.1.1.2
+              keepalive_interval: 2
+              session_timeout: 60
+        state: deleted
+      register: result
+
+    - name: Assert all params deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete all params (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *d1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete some params
+      alliedtelesis.awplus.awplus_mlag: &d2
+        config:
+          domains:
+            - domain_id: 10
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+        state: deleted
+      register: result
+
+    - name: Assert some params deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete some params (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *d2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete domain
+      alliedtelesis.awplus.awplus_mlag: &d3
+        config:
+          domains:
+            - domain_id: 10
+        state: deleted
+      register: result
+
+    - name: Assert domain deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *d3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete all params for non-existing domain
+      alliedtelesis.awplus.awplus_mlag: &d4
+        config:
+          domains:
+            - domain_id: 11
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+              source_address: 1.1.1.2
+              keepalive_interval: 2
+              session_timeout: 60
+        state: deleted
+      register: result
+
+    - name: Assert all params deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Delete all params for non-existing domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *d4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_mlag deleted integration tests on connection={{ ansible_connection }}"
