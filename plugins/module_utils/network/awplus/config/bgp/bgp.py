@@ -108,17 +108,13 @@ class Bgp(ConfigBase):
         """
         state = self._module.params['state']
         if state == 'deleted':
-            kwargs = {'self': self, 'want': want, 'have': have}
-            commands = self._state_deleted(**kwargs)
+            commands = self._state_deleted(want, have)
         elif state == 'merged':
-            kwargs = {'self': self, 'want': want, 'have': have}
-            commands = self._state_merged(**kwargs)
+            commands = self._state_merged(want, have)
         elif state == 'replaced':
-            kwargs = {'self': self, 'want': want, 'have': have}
-            commands = self._state_replaced(**kwargs)
+            commands = self._state_replaced(want, have)
         return commands
 
-    @staticmethod
     def _state_replaced(self, want, have):
         """ The command generator when state is replaced
 
@@ -128,11 +124,10 @@ class Bgp(ConfigBase):
         """
         commands = []
         if have != want:
-            commands.extend(self._state_deleted(self, want, have))
-            commands.extend(self._state_merged(self, want, dict()))
+            commands.extend(self._state_deleted(want, have))
+            commands.extend(self._state_merged(want, dict()))
         return commands
 
-    @staticmethod
     def _state_merged(self, want, have):
         """ The command generator when state is merged
 
@@ -167,7 +162,6 @@ class Bgp(ConfigBase):
             commands.insert(0, f"router bgp {want['bgp_as']}")
         return commands
 
-    @staticmethod
     def _state_deleted(self, want, have):
         """ The command generator when state is deleted
 
@@ -187,7 +181,6 @@ def generate_network_commands(want, have):
     commands = []
 
     for w_network in want:
-
         masklen = w_network.get('masklen', 32)
         if is_netmask(masklen):
             masklen = to_masklen(masklen)
@@ -274,11 +267,6 @@ def generate_ipv4_addrfam_commands(want, have):
 
 def generate_l2vpn_addrfam_commands(want, have):
     commands = []
-    want = param_list_to_dict(want, unique_key='vrf')
-    if have:
-        have = param_list_to_dict(have, unique_key='vrf')
-    else:
-        have = dict()
 
     neighbor_commands = generate_af_neighbor_commands(want.get('neighbors'), have.get('neighbors'))
     
@@ -291,23 +279,74 @@ def generate_l2vpn_addrfam_commands(want, have):
         commands.insert(0, f"address-family l2vpn evpn")
         commands.append('exit-address-family')
 
-    vrf_commands = generate_af_vrf_commands(want.get('vrfs'), have.get('vrfs'))
+    commands.extend(generate_l2vpn_af_vrf_commands(want.get('vrfs'), have.get('vrfs')))
 
     return commands
 
-def generate_af_vrf_commands(want, have):
+def generate_l2vpn_af_vrf_commands(want, have):
     commands = []
 
     if want:
         for w_vrf in want:
+            vrf_commands = []
+            protocol_match = False
+            route_map_match = False
+            vrf_match = None
             for h_vrf in have:
-                if w_vrf['name'] == h_vrf['name']:
-                    for w_ad in w_vrf['advertisements']:
-                        for h_ad in w_vrf['advertisements']:
-                            if w_ad['protocol'] == h_ad['protocol'] and \
-                                    w_ad.get("route_map") == h_ad.get("route_map"):
-                                
-                                
+                if w_vrf['vrf'] == h_vrf['vrf']:
+                    vrf_match = h_vrf
+            
+            if vrf_match:
+                for w_ad in w_vrf['advertisements']:
+                    for h_ad in vrf_match['advertisements']:
+                        if w_ad['protocol'] == h_ad['protocol']:
+                            protocol_match = True
+                            if w_ad.get("route_map") == h_ad.get("route_map"):
+                                route_map_match = True
+                        if not protocol_match or (protocol_match and not route_map_match):
+                            command = f"advertise {w_ad['protocol']}" + \
+                                f" route-map {w_ad.get("route_map")}" if w_ad.get("route_map") else ""
+                            vrf_commands.append(command)
+            else:
+                for w_ad in w_vrf['advertisements']:
+                    command = f"advertise {w_ad['protocol']}" + \
+                        f" route-map {w_ad.get("route_map")}" if w_ad.get("route_map") else ""
+                    vrf_commands.append(command)
+        
+            if vrf_commands:
+                vrf_commands.insert(0, f"address-family l2vpn evpn vrf {w_vrf['vrf']}")
+                commands.extend(vrf_commands)
+
+    if have:
+        for h_vrf in have:
+            vrf_commands = []
+            protocol_match = False
+            route_map_match = False
+            vrf_match = None
+            for w_vrf in want:
+                if w_vrf['vrf'] == h_vrf['vrf']:
+                    vrf_match = w_vrf['vrf']
+            
+            if vrf_match is None:
+                command = f"no address-family l2vpn evpn vrf {w_vrf['vrf']}"
+                commands.append(command)
+                continue
+            else:
+                for h_ad in h_vrf['advertisements']:
+                    for w_ad in vrf_match:
+                        if w_ad['protocol'] == h_ad['protocol']:
+                            protocol_match = True
+                            if w_ad.get("route_map") == h_ad.get("route_map"):
+                                route_map_match = True
+                        
+                        if not protocol_match or (protocol_match and not route_map_match):
+                            command = f"no advertise {w_ad['protocol']}" + \
+                                f" route-map {w_ad.get("route_map")}" if w_ad.get("route_map") else ""
+                            vrf_commands.append(command)
+                
+                if vrf_commands:
+                    vrf_commands.insert(0, f"address-family l2vpn evpn vrf {w_vrf['vrf']}")
+                    commands.extend(vrf_commands)
 
     return commands
 

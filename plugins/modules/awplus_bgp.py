@@ -175,12 +175,12 @@ options:
             type: list
             element: dict
             suboptions:
-              name:
+              vrf:
                 description:
                 - The name of the VRF.
                 required: True
                 type: str
-              advertise:
+              advertisements:
                 description:
                 - Flag to enable/disable VRF advertisement.
                 type: list

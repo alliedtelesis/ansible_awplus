@@ -71,6 +71,7 @@ class BgpFacts(object):
         facts = {}
         if objs:
             params = utils.validate_config(self.argument_spec, {'config': objs})
+            params['config']['l2vpn_address_family'] = objs['l2vpn_address_family']
             facts['bgp'] = utils.remove_empties(params['config'])
 
         ansible_facts['ansible_network_resources'].update(facts)
@@ -149,16 +150,17 @@ def parse_addressfamily_l2vpn(config, conf):
         if config['l2vpn_address_family'].get('vrfs'):
             config['l2vpn_address_family']['vrfs'].append(vrf)
         else:
-            config['l2vpn_address_family']['vrfs'] = [advertisements]
+            config['l2vpn_address_family']['vrfs'] = [vrf]
     else:
         neighbours = parse_addressfamily_l2vpn_neighbor(lines)
-        if neighbours:
-            config['l2vpn_address_family']['neighbors'] = neighbours
+        if neighbours and config['l2vpn_address_family'].get('neighbours'):
+            config['l2vpn_address_family']['neighbours'].extend(neighbours)
+        elif neighbours:
+            config['l2vpn_address_family']['neighbours'] = neighbours
 
         flags = parse_af_l2vpn_flags(lines)
         for arg, val in iteritems(flags):
             config['l2vpn_address_family'][arg] = val
-
 
 def parse_addressfamily_l2vpn_vrf(lines):
     advertisements = []

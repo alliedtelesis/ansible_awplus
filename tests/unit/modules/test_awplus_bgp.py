@@ -106,7 +106,7 @@ class TestAwplusBgpModule(TestAwplusModule):
         self.execute_module(changed=True, commands=commands)
 
     def test_awplus_bgp_add_neighbor_to_af(self):
-        set_module_args(dict(config=dict(bgp_as=100, address_family=[dict(vrf='red', neighbors=[
+        set_module_args(dict(config=dict(bgp_as=100, ipv4_address_family=[dict(vrf='red', neighbors=[
             dict(neighbor='2.3.3.3', remote_as=4, remove_private_as=True)])]), state='merged'))
         commands = ['router bgp 100', 'address-family ipv4 vrf red',
                     'neighbor 2.3.3.3 remote-as 4', 'neighbor 2.3.3.3 remove-private-as',
@@ -126,8 +126,106 @@ class TestAwplusBgpModule(TestAwplusModule):
         set_module_args(dict(
             config=dict(bgp_as=100, router_id='1.2.3.4',
                         neighbors=[dict(neighbor='1.1.1.1', remote_as=3)],
-                        address_family=[dict(vrf='red',
+                        ipv4_address_family=[dict(vrf='red',
                                              networks=[dict(prefix='2.2.2.2', masklen=32, route_map='f')],
                                              neighbors=[dict(neighbor='6.6.6.6', remote_as=3)])]),
             state='merged'))
         self.execute_module(changed=False)
+
+    def test_awplus_bgp_l2vpn_merge_new(self):
+        set_module_args(dict(
+            config=dict(bgp_as=100,
+                        ebgp_requires_policy=False,
+                        network_import_check=False,
+                        l2vpn_address_family=dict(
+                            vrfs=[dict(vrf='blue', advertisements=[dict(protocol='ipv4')])],
+                            neighbors=[dict(neighbor="1.1.1.2", activate=True)],
+                            advertise_all_vni=True
+                        )), 
+            state='merged'))
+        commands = [
+            'router bgp 100', 
+            'no bgp ebgp-requires-policy',
+            'no bgp network import-check',
+            'address-family l2vpn evpn vrf blue', 
+            'advertise ipv4 unicast',
+            'exit-address-family'
+            'address-family l2vpn evpn',
+            'neighbor 1.1.1.2 activate',
+            'exit-address-family'
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_bgp_l2vpn_merge_existing(self):
+        set_module_args(dict(
+            config=dict(bgp_as=100,
+                        ebgp_requires_policy=False,
+                        network_import_check=False,
+                        l2vpn_address_family=dict(
+                            vrfs=[dict(vrf='red', advertisements=[dict(protocol='ipv6')])],
+                            advertise_all_vni=False
+                        )), 
+            state='merged'))
+        commands = [
+            'router bgp 100', 
+            'no bgp ebgp-requires-policy',
+            'no bgp network import-check',
+            'address-family l2vpn evpn vrf red', 
+            'advertise ipv6 unicast',
+            'exit-address-family'
+            'address-family l2vpn evpn',
+            'no advertise-all-vni',
+            'exit-address-family'
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_bgp_l2vpn_replace_new(self):
+        set_module_args(dict(
+            config=dict(bgp_as=100,
+                        ebgp_requires_policy=False,
+                        network_import_check=False,
+                        neighbors=[dict(neighbor="1.1.1.3", remote_as=65001)],
+                        l2vpn_address_family=dict(
+                            vrfs=[dict(vrf='blue', advertisements=[dict(protocol='ipv4')])],
+                            neighbors=[dict(neighbor="1.1.1.3", activate=True)],
+                            advertise_all_vni=True
+                        )), 
+            state='replaced'))
+        commands = [
+            'router bgp 100', 
+            'no bgp ebgp-requires-policy',
+            'no bgp network import-check',
+            'neighbor 1.1.1.3 remote-as 65001'
+            'address-family l2vpn evpn vrf blue', 
+            'advertise ipv4 unicast',
+            'exit-address-family'
+            'address-family l2vpn evpn',
+            'neighbor 1.1.1.3 activate',
+            'exit-address-family'
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_bgp_l2vpn_replace_existing(self):
+        set_module_args(dict(
+            config=dict(bgp_as=100,
+                        ebgp_requires_policy=False,
+                        network_import_check=False,
+                        l2vpn_address_family=dict(
+                            vrfs=[dict(vrf='red', advertisements=[dict(protocol='ipv6')])],
+                            advertise_all_vni=False
+                        )), 
+            state='replaced'))
+        commands = [
+            'router bgp 100', 
+            'no bgp ebgp-requires-policy',
+            'no bgp network import-check',
+            'address-family l2vpn evpn vrf red', 
+            'no advertise ipv4 unicast',
+            'advertise ipv6 unicast',
+            'exit-address-family'
+            'address-family l2vpn evpn',
+            'no neighbor 1.1.1.2 activate',
+            'no advertise-all-vni',
+            'exit-address-family'
+        ]
+        self.execute_module(changed=True, commands=commands)
