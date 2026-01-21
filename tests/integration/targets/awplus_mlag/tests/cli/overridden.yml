@@ -1,0 +1,259 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_mlag overridden integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    o1_expected:
+      commands:
+        - mlag domain 10
+        - peer-link port1.0.19
+        - peer-address 255.255.255.254
+        - source-address 1.1.1.2
+        - keepalive-interval 2
+        - session-timeout 60
+    o2_expected:
+      commands:
+        - mlag domain 10
+        - peer-link port1.0.19
+        - peer-address 255.255.255.254
+        - no source-address
+        - no keepalive-interval
+        - no session-timeout
+    o3_expected:
+      commands:
+        - no mlag domain 10
+        - mlag domain 11
+        - peer-link port1.0.19
+        - peer-address 255.255.255.254
+        - source-address 1.1.1.2
+        - keepalive-interval 2
+        - session-timeout 60
+    o4_expected:
+      commands:
+        - no mlag domain 10
+        - mlag domain 11
+        - peer-link port1.0.19
+        - peer-address 255.255.255.254
+    o5_expected:
+      commands:
+        - mlag domain 10
+        - no peer-link
+        - no peer-address
+        - no source-address
+        - no keepalive-interval
+        - no session-timeout
+    o6_expected:
+      commands:
+        - no mlag domain 10
+        - mlag domain 11
+    o7_expected:
+      commands:
+        - no mlag domain 10
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override all params of existing domain
+      alliedtelesis.awplus.awplus_mlag: &o1
+        config:
+          domains:
+            - domain_id: 10
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+              source_address: 1.1.1.2
+              keepalive_interval: 2
+              session_timeout: 60
+        state: overridden
+      register: result
+
+    - name: Assert all params overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override all params of existing domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *o1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override some params of existing domain
+      alliedtelesis.awplus.awplus_mlag: &o2
+        config:
+          domains:
+            - domain_id: 10
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+        state: overridden
+      register: result
+
+    - name: Assert some params overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override some params of existing domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *o2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override all params of new domain
+      alliedtelesis.awplus.awplus_mlag: &o3
+        config:
+          domains:
+            - domain_id: 11
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+              source_address: 1.1.1.2
+              keepalive_interval: 2
+              session_timeout: 60
+        state: overridden
+      register: result
+
+    - name: Assert all params overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override all params of new domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *o3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override some params of new domain
+      alliedtelesis.awplus.awplus_mlag: &o4
+        config:
+          domains:
+            - domain_id: 11
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+        state: overridden
+      register: result
+
+    - name: Assert some params overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override some params of new domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *o4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with defaults for existing domain
+      alliedtelesis.awplus.awplus_mlag: &o5
+        config:
+          domains:
+            - domain_id: 10
+              keepalive_interval: 1
+              session_timeout: 30
+        state: overridden
+      register: result
+
+    - name: Assert default params overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o5_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with defaults for existing domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *o5
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with defaults for new domain
+      alliedtelesis.awplus.awplus_mlag: &o6
+        config:
+          domains:
+            - domain_id: 11
+              keepalive_interval: 1
+              session_timeout: 30
+        state: overridden
+      register: result
+
+    - name: Assert default params ignored
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o6_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with defaults for new domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *o6
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with empty config
+      alliedtelesis.awplus.awplus_mlag: &o7
+        config:
+        state: overridden
+      register: result
+
+    - name: Assert everything removed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o7_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with empty config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *o7
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_mlag overridden integration tests on connection={{ ansible_connection }}"

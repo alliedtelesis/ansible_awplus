@@ -1,0 +1,222 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_mlag merged integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    m1_expected:
+      commands:
+        - mlag domain 10
+        - peer-link port1.0.19
+        - peer-address 255.255.255.254
+        - source-address 1.1.1.2
+        - keepalive-interval 2
+        - session-timeout 60
+    m2_expected:
+      commands:
+        - mlag domain 10
+        - peer-link port1.0.19
+        - peer-address 255.255.255.254
+    m3_expected:
+      commands:
+        - no mlag domain 10
+        - mlag domain 11
+        - peer-link port1.0.19
+        - peer-address 255.255.255.254
+        - source-address 1.1.1.2
+        - keepalive-interval 2
+        - session-timeout 60
+    m4_expected:
+      commands:
+        - no mlag domain 10
+        - mlag domain 11
+        - peer-link port1.0.19
+        - peer-address 255.255.255.254
+    m5_expected:
+      commands:
+    m6_expected:
+      commands:
+        - no mlag domain 10
+        - mlag domain 11
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge all params of existing domain
+      alliedtelesis.awplus.awplus_mlag: &m1
+        config:
+          domains:
+            - domain_id: 10
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+              source_address: 1.1.1.2
+              keepalive_interval: 2
+              session_timeout: 60
+        state: merged
+      register: result
+
+    - name: Assert all params merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge all params of existing domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *m1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge some params of existing domain
+      alliedtelesis.awplus.awplus_mlag: &m2
+        config:
+          domains:
+            - domain_id: 10
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+        state: merged
+      register: result
+
+    - name: Assert some params merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge some params of existing domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *m2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge all params of new domain
+      alliedtelesis.awplus.awplus_mlag: &m3
+        config:
+          domains:
+            - domain_id: 11
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+              source_address: 1.1.1.2
+              keepalive_interval: 2
+              session_timeout: 60
+        state: merged
+      register: result
+
+    - name: Assert all params merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge all params of new domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *m3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge some params of new domain
+      alliedtelesis.awplus.awplus_mlag: &m4
+        config:
+          domains:
+            - domain_id: 11
+              peer_link: port1.0.19
+              peer_address: 255.255.255.254
+        state: merged
+      register: result
+
+    - name: Assert some params merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge some params of new domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *m4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge with defaults for existing domain
+      alliedtelesis.awplus.awplus_mlag: &m5
+        config:
+          domains:
+            - domain_id: 10
+              keepalive_interval: 1
+              session_timeout: 30
+        state: merged
+      register: result
+
+    - name: Assert nothing happens
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Merge with defaults for existing domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *m5
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge with defaults for new domain
+      alliedtelesis.awplus.awplus_mlag: &m6
+        config:
+          domains:
+            - domain_id: 11
+              keepalive_interval: 1
+              session_timeout: 30
+        state: merged
+      register: result
+
+    - name: Assert default params removed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m6_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge with defaults for new domain (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag: *m6
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_mlag merged integration tests on connection={{ ansible_connection }}"

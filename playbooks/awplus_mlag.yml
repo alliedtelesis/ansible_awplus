@@ -1,0 +1,29 @@
+---
+- hosts: all
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: Testing mlag
+      awplus_mlag:
+        config:
+          domains:
+            - domain_id: 10
+              peer_address: 1.1.1.4
+        state: merged
+
+    - name: Testing mlag
+      awplus_mlag:
+        config:
+          domains:
+            - domain_id: 12
+              peer_address: 1.1.1.4
+        state: merged
+
+    - name: Testing mlag
+      awplus_mlag:
+        config:
+          domains:
+            - domain_id: 10
+              peer_address: 1.1.1.1
+        state: deleted
