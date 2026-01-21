@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 from junit_xml import TestSuite, TestCase
@@ -39,19 +40,20 @@ def parse_results():
     # parse the result file and make a list of blocks
     # where each block is a list of lines
     blocks = []
-    with open(ANSIBLE_FILE, 'r') as f:
-        lines = f.read().splitlines()
-        
-        current_block = None
-        for line in lines:
-            if len(line) != 0:
-                if line.startswith("TASK"):
-                    if current_block is not None:
-                        blocks.append(current_block)
-                    current_block = [line]
-                else:
-                    if current_block is not None:
-                        current_block.append(line)
+    for file in os.listdir(ANSIBLE_FILE):
+        with open(f"{ANSIBLE_FILE}/{file}", 'r') as f:
+            lines = f.read().splitlines()
+            
+            current_block = None
+            for line in lines:
+                if len(line) != 0:
+                    if line.startswith("TASK"):
+                        if current_block is not None:
+                            blocks.append(current_block)
+                        current_block = [line]
+                    else:
+                        if current_block is not None:
+                            current_block.append(line)
 
     # build up a list of junit test cases, and whether they pass/fail
     test_cases = []

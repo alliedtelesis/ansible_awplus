@@ -1,5 +1,5 @@
 ---
-# Ensure that the entire config is empty incase the device has 
+# Ensure that the entire config is empty incase the device has
 # already had configuration setup
 
 # lag interfaces
