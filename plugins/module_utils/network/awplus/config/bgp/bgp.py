@@ -140,6 +140,16 @@ class Bgp(ConfigBase):
         if want.get('router_id') and want.get('router_id') != have.get('router_id'):
             commands.append(f"bgp router-id {want['router_id']}")
 
+        if want.get('ebgp_requires_policy') is True and have.get('ebgp_requires_policy') is False:
+            commands.append("bgp ebgp-requires-policy")
+        if want.get('ebgp_requires_policy') is False and have.get('ebgp_requires_policy') is not False:
+            commands.append("no bgp evpn-requires-policy")
+
+        if want.get('network_import_check') is True and have.get('network_import_check') is False:
+            commands.append("bgp network import-check")
+        if want.get('network_import_check') is False and have.get('network_import_check') is not False:
+            commands.append("no bgp network import-check")
+
         if want.get('log_neighbor_changes') is True and not have.get('log_neighbor_changes'):
             commands.append('bgp log-neighbor-changes')
         elif want.get('log_neighbor_changes') is False and have.get('log_neighbor_changes'):
@@ -267,7 +277,14 @@ def generate_ipv4_addrfam_commands(want, have):
 
 def generate_l2vpn_addrfam_commands(want, have):
     commands = []
+    commands.extend(generate_l2vpn_af_global_commands(want, have))
+    commands.extend(generate_l2vpn_af_vrf_commands(want.get('vrfs'), have.get('vrfs')))
+    return commands
 
+def generate_l2vpn_af_global_commands(want, have):
+    commands = []
+
+    print([want, have])
     neighbor_commands = generate_af_neighbor_commands(want.get('neighbors'), have.get('neighbors'))
     
     if want.get('advertise_all_vni') and not have.get('advertise_all_vni'):
@@ -278,9 +295,7 @@ def generate_l2vpn_addrfam_commands(want, have):
     if neighbor_commands:
         commands.insert(0, f"address-family l2vpn evpn")
         commands.append('exit-address-family')
-
-    commands.extend(generate_l2vpn_af_vrf_commands(want.get('vrfs'), have.get('vrfs')))
-
+    
     return commands
 
 def generate_l2vpn_af_vrf_commands(want, have):

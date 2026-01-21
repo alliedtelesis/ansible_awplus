@@ -71,7 +71,6 @@ class BgpFacts(object):
         facts = {}
         if objs:
             params = utils.validate_config(self.argument_spec, {'config': objs})
-            params['config']['l2vpn_address_family'] = objs['l2vpn_address_family']
             facts['bgp'] = utils.remove_empties(params['config'])
 
         ansible_facts['ansible_network_resources'].update(facts)
@@ -153,10 +152,10 @@ def parse_addressfamily_l2vpn(config, conf):
             config['l2vpn_address_family']['vrfs'] = [vrf]
     else:
         neighbours = parse_addressfamily_l2vpn_neighbor(lines)
-        if neighbours and config['l2vpn_address_family'].get('neighbours'):
-            config['l2vpn_address_family']['neighbours'].extend(neighbours)
+        if neighbours and config['l2vpn_address_family'].get('neighbors'):
+            config['l2vpn_address_family']['neighbors'].extend(neighbours)
         elif neighbours:
-            config['l2vpn_address_family']['neighbours'] = neighbours
+            config['l2vpn_address_family']['neighbors'] = neighbours
 
         flags = parse_af_l2vpn_flags(lines)
         for arg, val in iteritems(flags):
@@ -196,7 +195,7 @@ def parse_addressfamily_l2vpn_neighbor(lines):
             continue
 
         if match.group(1):
-            neighbor['neighbour'] = match.group(1)
+            neighbor['neighbor'] = match.group(1)
             neighbor['activate'] = True
             neighbors.append(neighbor)
             neighbor = {}    
