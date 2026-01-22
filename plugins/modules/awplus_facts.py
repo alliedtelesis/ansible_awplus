@@ -51,32 +51,35 @@ options:
 """
 
 EXAMPLES = """
-# Gather all facts
-- awplus_facts:
+- name: Gather all facts
+  alliedtelesis.awplus.awplus_facts:
     gather_subset: all
     gather_network_resources: all
 
-# Collect only the lag_interfaces facts
-- awplus_facts:
+- name: Collect only the lag_interfaces facts
+  alliedtelesis.awplus.awplus_facts:
     gather_subset:
       - !all
       - !min
     gather_network_resources:
       - lag_interfaces
 
-# Do not collect lag_interfaces facts
-- awplus_facts:
+- name: Do not collect lag_interfaces facts
+  alliedtelesis.awplus.awplus_facts:
     gather_network_resources:
       - "!lag_interfaces"
 
-# Collect lag_interfaces and minimal default facts
-- awplus_facts:
+- name: Collect lag_interfaces and minimal default facts
+  alliedtelesis.awplus.awplus_facts:
     gather_subset: min
     gather_network_resources: lag_interfaces
 """
 
 RETURN = """
-description: See the respective resource module parameters for the tree.
+  facts:
+    description: See the respective resource module parameters for the tree.
+    returned: the current configuration information for the respective resource module.
+    type: dict
 """
 
 from ansible.module_utils.basic import AnsibleModule

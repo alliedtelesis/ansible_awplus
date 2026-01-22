@@ -29,7 +29,7 @@ description:
       configuration.
 deprecated:
     why: Out of date with current versions of AW+ and Ansible
-    removed_at_version: 1.2.4
+    removed_in: 2.20.0
 options:
     network:
         description:

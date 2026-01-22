@@ -94,7 +94,7 @@ options:
       import_map:
         description:
         - reference to a route map used to control import of routes into the VRF.
-        type:: str
+        type: str
       max_fib_routes:
         description:
         - the maximum number of routes allowed for this VRF.
