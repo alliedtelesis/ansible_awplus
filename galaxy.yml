@@ -6,6 +6,7 @@ authors:
     "Darryl Alang",
     "Tony van der Peet",
     "Ben Hoelker",
+    "Ryan Scofield",
   ]
 dependencies: {}
 description: "Modules to support configuration of AlliedWare Plus devices."
@@ -19,7 +20,7 @@ readme: README.md
 repository: "https://github.com/alliedtelesis/ansible_awplus"
 tags: ["networking"]
 build_ignore:
-- .vscode
-- .github
-- .gitignore
+  - .vscode
+  - .github
+  - .gitignore
 version: 1.2.2
