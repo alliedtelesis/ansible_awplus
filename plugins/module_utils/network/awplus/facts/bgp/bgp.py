@@ -106,16 +106,8 @@ def parse_bgp(config, conf):
 
     if 'no bgp ebgp-requires-policy' in conf:
         config['ebgp_requires_policy'] = False
-    elif 'bgp ebgp-requires-policy' in conf:
-        config['ebgp_requires_policy'] = True
-    else:
-        config['ebgp_requires_policy'] = False
 
     if 'no bgp network import-check' in conf:
-        config['network_import_check'] = False
-    elif 'bgp network import-check' in conf:
-        config['network_import_check'] = True
-    else:
         config['network_import_check'] = False
 
     lines = conf.split('\n')

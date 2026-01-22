@@ -137,9 +137,10 @@ class TestAwplusBgpModule(TestAwplusModule):
             config=dict(bgp_as=100,
                         ebgp_requires_policy=False,
                         network_import_check=False,
+                        neighbors=[dict(neighbor="1.1.1.3", remote_as=65001)],
                         l2vpn_address_family=dict(
                             vrfs=[dict(vrf='blue', advertisements=[dict(protocol='ipv4')])],
-                            neighbors=[dict(neighbor="1.1.1.2", activate=True)],
+                            neighbors=[dict(neighbor="1.1.1.3", activate=True)],
                             advertise_all_vni=True
                         )), 
             state='merged'))
@@ -147,11 +148,12 @@ class TestAwplusBgpModule(TestAwplusModule):
             'router bgp 100', 
             'no bgp ebgp-requires-policy',
             'no bgp network import-check',
+            'neighbor 1.1.1.3 remote-as 65001',
             'address-family l2vpn evpn vrf blue', 
             'advertise ipv4 unicast',
-            'exit-address-family'
+            'exit-address-family',
             'address-family l2vpn evpn',
-            'neighbor 1.1.1.2 activate',
+            'neighbor 1.1.1.3 activate',
             'exit-address-family'
         ]
         self.execute_module(changed=True, commands=commands)
@@ -172,7 +174,7 @@ class TestAwplusBgpModule(TestAwplusModule):
             'no bgp network import-check',
             'address-family l2vpn evpn vrf red', 
             'advertise ipv6 unicast',
-            'exit-address-family'
+            'exit-address-family',
             'address-family l2vpn evpn',
             'no advertise-all-vni',
             'exit-address-family'
@@ -192,13 +194,15 @@ class TestAwplusBgpModule(TestAwplusModule):
                         )), 
             state='replaced'))
         commands = [
+            'no router bgp 100',
             'router bgp 100', 
             'no bgp ebgp-requires-policy',
             'no bgp network import-check',
-            'neighbor 1.1.1.3 remote-as 65001'
+            'neighbor 1.1.1.3 remote-as 65001',
             'address-family l2vpn evpn vrf blue', 
             'advertise ipv4 unicast',
-            'exit-address-family'
+            'advertise-all-vni',
+            'exit-address-family',
             'address-family l2vpn evpn',
             'neighbor 1.1.1.3 activate',
             'exit-address-family'
@@ -216,16 +220,12 @@ class TestAwplusBgpModule(TestAwplusModule):
                         )), 
             state='replaced'))
         commands = [
-            'router bgp 100', 
+            'no router bgp 100',
+            'router bgp 100',
             'no bgp ebgp-requires-policy',
             'no bgp network import-check',
             'address-family l2vpn evpn vrf red', 
-            'no advertise ipv4 unicast',
             'advertise ipv6 unicast',
-            'exit-address-family'
-            'address-family l2vpn evpn',
-            'no neighbor 1.1.1.2 activate',
-            'no advertise-all-vni',
             'exit-address-family'
         ]
         self.execute_module(changed=True, commands=commands)
