@@ -24,7 +24,7 @@ Minor Changes
 - awplus awplus_static_lag_interfaces - Idempotency and behavioural changes.
 - awplus_lacp_interfaces - Idempotency and behavioural changes.
 - awplus_lacp - Idempotency and behavioural changes, added optional global-passive-mode parameter.
-
+- awplus_bgp - Added L2VPN EVPN address family support to the BGP resource module, but the module requires a rework.
 
 Deprecated Modules
 ------------------
