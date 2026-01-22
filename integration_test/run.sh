@@ -34,7 +34,7 @@ VENV_DIR="${SETUP_ENV_DIR}/.venv"
 TESTS_FILE="${SETUP_ENV_DIR}/integration.list"
 
 # Paths to go to the testbox
-ANSIBLE_OUTFILE="${TB_DIRECTORY}/ansible_logs.txt"
+ANSIBLE_OUTFILE="${TB_DIRECTORY}/ansible_logs"
 JUNIT_OUTFILE="${TB_DIRECTORY}/junit.xml"
 
 # Helper functions for colour-coded logging.
@@ -93,15 +93,17 @@ run_integration_tests() {
         log_error "Integration test list file not found."
     fi
 
-    if [ -f "${ANSIBLE_OUTFILE}" ]; then
-        rm ${ANSIBLE_OUTFILE}
+    if [ -d "${ANSIBLE_OUTFILE}" ]; then
+        rm -rf ${ANSIBLE_OUTFILE}
     fi
+
+    mkdir ${ANSIBLE_OUTFILE}
 
     log_info "Starting integration tests."
 
     while IFS= read -r module_name
     do
-        ansible-test network-integration "awplus_${module_name}" >> ${ANSIBLE_OUTFILE} \
+        ansible-test network-integration "awplus_${module_name}" >> ${ANSIBLE_OUTFILE}/${module_name}.txt \
             || log_error "Failed to run ansible network integration tests."
     done < "${TESTS_FILE}"
 

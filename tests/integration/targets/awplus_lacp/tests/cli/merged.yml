@@ -12,14 +12,14 @@
         - lacp system-priority 32768
     m3_expected:
       commands:
-        - lacp global-passive-mode enabled
+        - lacp global-passive-mode enable
     m4_expected:
       commands:
-        - no lacp global-passive-mode enabled
+        - no lacp global-passive-mode enable
     m5_expected:
       commands:
         - lacp system-priority 2
-        - no lacp global-passive-mode enabled
+        - no lacp global-passive-mode enable
 
 - block:
     - name: Initialise configuration
@@ -133,7 +133,7 @@
       alliedtelesis.awplus.awplus_lacp: &m5
         config:
           system:
-            priority: 1
+            priority: 2
             global_passive_mode: False
         state: merged
       register: result
