@@ -205,7 +205,7 @@ options:
                 required: true
                 type: str
           advertise_all_vni:
-            description: 
+            description:
             - Flag to enable/disable VNI advertisement.
             type: bool
       ipv4_address_family:

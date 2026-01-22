@@ -142,14 +142,14 @@ class TestAwplusBgpModule(TestAwplusModule):
                             vrfs=[dict(vrf='blue', advertisements=[dict(protocol='ipv4')])],
                             neighbors=[dict(neighbor="1.1.1.3", activate=True)],
                             advertise_all_vni=True
-                        )), 
+                        )),
             state='merged'))
         commands = [
-            'router bgp 100', 
+            'router bgp 100',
             'no bgp ebgp-requires-policy',
             'no bgp network import-check',
             'neighbor 1.1.1.3 remote-as 65001',
-            'address-family l2vpn evpn vrf blue', 
+            'address-family l2vpn evpn vrf blue',
             'advertise ipv4 unicast',
             'exit-address-family',
             'address-family l2vpn evpn',
@@ -166,13 +166,13 @@ class TestAwplusBgpModule(TestAwplusModule):
                         l2vpn_address_family=dict(
                             vrfs=[dict(vrf='red', advertisements=[dict(protocol='ipv6')])],
                             advertise_all_vni=False
-                        )), 
+                        )),
             state='merged'))
         commands = [
-            'router bgp 100', 
+            'router bgp 100',
             'no bgp ebgp-requires-policy',
             'no bgp network import-check',
-            'address-family l2vpn evpn vrf red', 
+            'address-family l2vpn evpn vrf red',
             'advertise ipv6 unicast',
             'exit-address-family',
             'address-family l2vpn evpn',
@@ -191,15 +191,15 @@ class TestAwplusBgpModule(TestAwplusModule):
                             vrfs=[dict(vrf='blue', advertisements=[dict(protocol='ipv4')])],
                             neighbors=[dict(neighbor="1.1.1.3", activate=True)],
                             advertise_all_vni=True
-                        )), 
+                        )),
             state='replaced'))
         commands = [
             'no router bgp 100',
-            'router bgp 100', 
+            'router bgp 100',
             'no bgp ebgp-requires-policy',
             'no bgp network import-check',
             'neighbor 1.1.1.3 remote-as 65001',
-            'address-family l2vpn evpn vrf blue', 
+            'address-family l2vpn evpn vrf blue',
             'advertise ipv4 unicast',
             'advertise-all-vni',
             'exit-address-family',
@@ -217,14 +217,14 @@ class TestAwplusBgpModule(TestAwplusModule):
                         l2vpn_address_family=dict(
                             vrfs=[dict(vrf='red', advertisements=[dict(protocol='ipv6')])],
                             advertise_all_vni=False
-                        )), 
+                        )),
             state='replaced'))
         commands = [
             'no router bgp 100',
             'router bgp 100',
             'no bgp ebgp-requires-policy',
             'no bgp network import-check',
-            'address-family l2vpn evpn vrf red', 
+            'address-family l2vpn evpn vrf red',
             'advertise ipv6 unicast',
             'exit-address-family'
         ]

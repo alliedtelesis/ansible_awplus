@@ -155,6 +155,7 @@ class Bgp(ConfigBase):
             commands.append(f"no router bgp {have['bgp_as']}")
         return commands
 
+
 def _set_state(want, have):
     commands = []
     if want.get('router_id') and want.get('router_id') != have.get('router_id'):
@@ -187,8 +188,9 @@ def _set_state(want, have):
     if want.get('l2vpn_address_family'):
         addrfam_commands = generate_l2vpn_addrfam_commands(want['l2vpn_address_family'], have.get('l2vpn_address_family', {}))
         commands.extend(addrfam_commands)
-    
+
     return commands
+
 
 def generate_network_commands(want, have):
     commands = []
@@ -278,18 +280,19 @@ def generate_ipv4_addrfam_commands(want, have):
 
     return commands
 
+
 def generate_l2vpn_addrfam_commands(want, have):
     commands = []
     commands.extend(generate_l2vpn_af_global_commands(want, have))
     commands.extend(generate_l2vpn_af_vrf_commands(want.get('vrfs'), have.get('vrfs')))
     return commands
 
+
 def generate_l2vpn_af_global_commands(want, have):
     commands = []
 
-    print(want, have)
     neighbor_commands = generate_l2vpn_af_neighbor_commands(want.get('neighbors'), have.get('neighbors'))
-    
+
     if want.get('advertise_all_vni') and not have.get('advertise_all_vni'):
         neighbor_commands.append('advertise-all-vni')
     elif not want.get('advertise_all_vni') and have.get('advertise_all_vni'):
@@ -299,8 +302,9 @@ def generate_l2vpn_af_global_commands(want, have):
         neighbor_commands.insert(0, f"address-family l2vpn evpn")
         neighbor_commands.append('exit-address-family')
         commands.extend(neighbor_commands)
-    
+
     return commands
+
 
 def generate_l2vpn_af_vrf_commands(want, have):
     commands = []
@@ -315,7 +319,7 @@ def generate_l2vpn_af_vrf_commands(want, have):
                 for h_vrf in have:
                     if w_vrf['vrf'] == h_vrf['vrf']:
                         vrf_match = h_vrf
-            
+
             if vrf_match:
                 for w_ad in w_vrf['advertisements']:
                     for h_ad in vrf_match['advertisements']:
@@ -348,7 +352,7 @@ def generate_l2vpn_af_vrf_commands(want, have):
             for w_vrf in want:
                 if w_vrf['vrf'] == h_vrf['vrf']:
                     vrf_match = w_vrf['vrf']
-            
+
             if vrf_match is None:
                 command = f"no address-family l2vpn evpn vrf {w_vrf['vrf']}"
                 commands.append(command)
@@ -360,18 +364,19 @@ def generate_l2vpn_af_vrf_commands(want, have):
                             protocol_match = True
                             if w_ad.get("route_map") == h_ad.get("route_map"):
                                 route_map_match = True
-                        
+
                         if not protocol_match or (protocol_match and not route_map_match):
                             command = f"no advertise {w_ad['protocol']} unicast" + \
                                 (f" route-map {w_ad.get("route_map")}" if w_ad.get("route_map") else "")
                             vrf_commands.append(command)
-                
+
                 if vrf_commands:
                     vrf_commands.insert(0, f"address-family l2vpn evpn vrf {w_vrf['vrf']}")
                     vrf_commands.append("exit-address-family")
                     commands.extend(vrf_commands)
 
     return commands
+
 
 def generate_redistribute_commands(want, have):
     commands = []
@@ -424,6 +429,7 @@ def generate_af_neighbor_commands(want, have):
                     commands.append('no neighbor {} {}'.format(w_neighbor, key.replace('_', '-'), value))
 
     return commands
+
 
 def generate_l2vpn_af_neighbor_commands(want, have):
     commands = []

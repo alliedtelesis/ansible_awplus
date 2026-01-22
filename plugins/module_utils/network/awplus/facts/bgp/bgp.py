@@ -128,6 +128,7 @@ def parse_addressfamily_ipv4(config, conf):
     else:
         config['ipv4_address_family'] = [addr_fam]
 
+
 def parse_addressfamily_l2vpn(config, conf):
     if not config['l2vpn_address_family']:
         config['l2vpn_address_family'] = {}
@@ -153,6 +154,7 @@ def parse_addressfamily_l2vpn(config, conf):
         for arg, val in iteritems(flags):
             config['l2vpn_address_family'][arg] = val
 
+
 def parse_addressfamily_l2vpn_vrf(lines):
     advertisements = []
     advertisement = {}
@@ -165,7 +167,7 @@ def parse_addressfamily_l2vpn_vrf(lines):
             advertisement['protocol'] = match.group(1)
         if match.group(2) != 'unicast':
             advertisement = {}
-            continue        
+            continue
         if match.group(3) != 'route-map':
             advertisements.append(advertisement)
             advertisement = {}
@@ -190,8 +192,9 @@ def parse_addressfamily_l2vpn_neighbor(lines):
             neighbor['neighbor'] = match.group(1)
             neighbor['activate'] = True
             neighbors.append(neighbor)
-            neighbor = {}    
+            neighbor = {}
     return neighbors
+
 
 def parse_af_l2vpn_flags(lines):
     flags = ['advertise-all-vni']
@@ -201,6 +204,7 @@ def parse_af_l2vpn_flags(lines):
             if line.strip() == flag:
                 flag_dict[flag.replace('-', '_')] = True
     return flag_dict
+
 
 def get_redistribute(conf):
     redistributes = []
