@@ -164,11 +164,10 @@ class TestAwplusBgpModule(TestAwplusModule):
                         ebgp_requires_policy=False,
                         network_import_check=False,
                         l2vpn_address_family=dict(
-                            vrfs=[dict(vrf='red', 
+                            vrfs=[dict(vrf='red',
                                        advertisements=[
-                                           dict(protocol='ipv6'), 
-                                           dict(protocol='ipv4', route_map='test')
-                                ])],
+                                           dict(protocol='ipv6'),
+                                           dict(protocol='ipv4', route_map='test')])],
                             advertise_all_vni=False
                         )),
             state='merged'))
