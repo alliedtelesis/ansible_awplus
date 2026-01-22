@@ -158,13 +158,17 @@ class TestAwplusBgpModule(TestAwplusModule):
         ]
         self.execute_module(changed=True, commands=commands)
 
-    def test_awplus_bgp_l2vpn_merge_existing(self):
+    def test_awplus_bgp_l2vpn_merge_existing_advertisement(self):
         set_module_args(dict(
             config=dict(bgp_as=100,
                         ebgp_requires_policy=False,
                         network_import_check=False,
                         l2vpn_address_family=dict(
-                            vrfs=[dict(vrf='red', advertisements=[dict(protocol='ipv6')])],
+                            vrfs=[dict(vrf='red', 
+                                       advertisements=[
+                                           dict(protocol='ipv6'), 
+                                           dict(protocol='ipv4', route_map='test')
+                                ])],
                             advertise_all_vni=False
                         )),
             state='merged'))
@@ -174,6 +178,7 @@ class TestAwplusBgpModule(TestAwplusModule):
             'no bgp network import-check',
             'address-family l2vpn evpn vrf red',
             'advertise ipv6 unicast',
+            'advertise ipv4 unicast route-map test',
             'exit-address-family',
             'address-family l2vpn evpn',
             'no advertise-all-vni',

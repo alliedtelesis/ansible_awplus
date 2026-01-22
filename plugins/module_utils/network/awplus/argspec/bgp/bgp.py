@@ -60,7 +60,7 @@ class BgpArgs(object):  # pylint: disable=R0903
                     'vrf': {'required': True, 'type': 'str'},
                     'advertisements': {'elements': 'dict', 'options': {
                         'protocol': {'required': True, 'type': 'str'},
-                        'route-map': {'type': 'str'}
+                        'route_map': {'type': 'str'}
                     }, 'type': 'list'}}, 'type': 'list'},
                 'neighbors': {'elements': 'dict', 'options': {
                     'neighbor': {'required': True, 'type': 'str'},
