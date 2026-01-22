@@ -38,7 +38,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 ---
 module: awplus_vxlan
-version_added: 2.19
+version_added: 1.3.0
 short_description: Manage the vxlan attributes on AlliedWare Plus devices
 description:
     - This module provides declarative management of dynamic vxlan
