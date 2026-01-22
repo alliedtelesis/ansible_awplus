@@ -36,7 +36,7 @@ class BgpArgs(object):  # pylint: disable=R0903
 
     argument_spec = {
         'config': {'options': {
-            'address_family': {'elements': 'dict', 'options': {
+            'ipv4_address_family': {'elements': 'dict', 'options': {
                 'neighbors': {'elements': 'dict', 'options': {
                     'activate': {'type': 'bool'},
                     'maximum_prefix': {'type': 'int'},
@@ -55,8 +55,21 @@ class BgpArgs(object):  # pylint: disable=R0903
                     'protocol': {'choices': ['connected', 'isis', 'ospf', 'rip', 'static'], 'required': True, 'type': 'str'},
                     'route_map': {'type': 'str'}}, 'type': 'list'},
                 'vrf': {'required': True, 'type': 'str'}}, 'type': 'list'},
+            'l2vpn_address_family': {'options': {
+                'vrfs': {'elements': 'dict', 'options': {
+                    'vrf': {'required': True, 'type': 'str'},
+                    'advertisements': {'elements': 'dict', 'options': {
+                        'protocol': {'required': True, 'type': 'str'},
+                        'route_map': {'type': 'str'}
+                    }, 'type': 'list'}}, 'type': 'list'},
+                'neighbors': {'elements': 'dict', 'options': {
+                    'neighbor': {'required': True, 'type': 'str'},
+                    'activate': {'type': 'bool'}}, 'type': 'list'},
+                'advertise_all_vni': {'type': 'bool'}}, 'type': 'dict'},
             'bgp_as': {'required': True, 'type': 'int'},
             'log_neighbor_changes': {'type': 'bool'},
+            'ebgp_requires_policy': {'type': 'bool'},
+            'network_import_check': {'type': 'bool'},
             'neighbors': {'elements': 'dict', 'options': {
                 'description': {'type': 'str'},
                 'ebgp_multihop': {'type': 'int'},

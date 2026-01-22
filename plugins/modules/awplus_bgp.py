@@ -60,6 +60,14 @@ options:
         description:
         - Enable/disable logging neighbor up/down and reset reason.
         type: bool
+      ebgp_requires_policy:
+        description:
+        - Enable/disable the ebgp-requires-policy configuration.
+        type: bool
+      network_import_check:
+        description:
+        - Enable/disable the network import-check configuration.
+        type: bool
       neighbors:
         description:
         - Specifies BGP neighbor related configurations.
@@ -156,9 +164,53 @@ options:
             description:
               - Specifies a BGP backdoor route.
             type: bool
-      address_family:
+      l2vpn_address_family:
         description:
-        - Specifies BGP address family related configurations.
+        - Specifies BGP l2vpn address family related configurations.
+        type: dict
+        suboptions:
+          vrfs:
+            description:
+            - The config of the VRF for this address family.
+            type: list
+            element: dict
+            suboptions:
+              vrf:
+                description:
+                - The name of the VRF.
+                required: True
+                type: str
+              advertisements:
+                description:
+                - Flag to enable/disable VRF advertisement.
+                type: list
+                elements: dict
+                suboptions:
+                  protocol:
+                    description: The protocol to advertise for.
+                    required: True
+                    type: str
+                  route_map:
+                    description: The route map for this VRF's advertising.
+          neighbors:
+            description:
+            - Specifies BGP neighbor related configurations in Address Family configuration
+              mode.
+            type: list
+            elements: dict
+            suboptions:
+              neighbor:
+                description:
+                - Neighbor router address. Can either be an IPv4 or IPv6 address or a neighbor tag.
+                required: true
+                type: str
+          advertise_all_vni:
+            description:
+            - Flag to enable/disable VNI advertisement.
+            type: bool
+      ipv4_address_family:
+        description:
+        - Specifies BGP ipv4 address family related configurations.
         type: list
         elements: dict
         suboptions:
