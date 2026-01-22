@@ -40,7 +40,7 @@ DOCUMENTATION = """
 module: awplus_ntp
 short_description: 'Manages NTP configuration of AlliedWare Plus devices'
 description: 'This module manages attributes of AlliedWare Plus devices NTP configuration.'
-version_added: 2.10.4
+version_added: 1.1.0
 author: Darryl Alang
 notes:
   - 'Tested against AlliedWare Plus AT-x930-28GTX'

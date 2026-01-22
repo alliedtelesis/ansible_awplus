@@ -40,7 +40,7 @@ DOCUMENTATION = """
 module: awplus_logging
 short_description: 'Manages the attributes of AlliedWare Plus logging'
 description: 'This module manages logging configuration of AlliedWare Plus devices.'
-version_added: 2.10.4
+version_added: 1.1.0
 author: Darryl Alang
 notes:
   - 'Tested against AlliedWare Plus AT-x930-28GTX'

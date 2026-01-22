@@ -17,7 +17,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 ---
 module: awplus_vrf
-version_added: "2.9"
+version_added: 1.0.0
 author:
     - Jeremy Toth (@jtsource)
     - Isaac Daly (@dalyIsaac)

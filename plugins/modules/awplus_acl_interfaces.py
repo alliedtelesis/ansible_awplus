@@ -38,7 +38,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 ---
 module: awplus_acl_interfaces
-version_added: 2.13.6
+version_added: 1.2.2
 short_description: 'Manages the configuration of ACL interfaces'
 description: 'This module manages the configuration of ACL interfaces on Alliedware Plus devices.'
 author:

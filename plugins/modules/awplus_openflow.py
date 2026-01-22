@@ -38,7 +38,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 ---
 module: awplus_openflow
-version_added: 2.9
+version_added: 1.2.0
 short_description: Manage OpenFlow configuration on Allied Telesis AlliedWare Plus devices.
 description: This module manages properties of the OpenFlow feature on Allied Telesis AlliedWare Plus devices.
 author: Tony van der Peet

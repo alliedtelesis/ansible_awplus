@@ -40,7 +40,7 @@ DOCUMENTATION = """
 module: awplus_lldp_global
 short_description: 'Manages attributes of AlliedWare Plus Link Layer Discovery Protocol (LLDP)'
 description: 'Manages attributes of AlliedWare Link Layer Discovery Protocol (LLDP).'
-version_added: 2.10.4
+version_added: 1.1.0
 author: Darryl Anne Alang
 notes:
   - 'Tested against AlliedWare Plus AT-x930-28GTX'

@@ -38,7 +38,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 ---
 module: awplus_vrfs
-version_added: 2.9
+version_added: 1.0.0
 short_description: Manage VRF definition on Allied Telesis devices.
 description: This module manages properties of VRFs on Allied Telesis AlliedWare Plus devices, allowing the
              creation, deletion and modification of VRFs. These are referenced by the VRF name by other

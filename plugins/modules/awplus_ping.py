@@ -17,7 +17,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 ---
 module: awplus_ping
-version_added: "2.9"
+version_added: 1.0.0
 short_description: Tests reachability using ping from AlliedWare Plus network devices
 description:
     - Tests reachability using ping from switch to a remote destination.

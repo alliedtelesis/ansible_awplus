@@ -40,7 +40,7 @@ DOCUMENTATION = """
 module: awplus_l3_interfaces
 short_description: 'Manages attributes of AlliedWare Plus Layer 3 interfaces.'
 description: 'Manages attributes of AlliedWare Plus Layer 3 interfaces'
-version_added: 2.10.4
+version_added: 1.1.0
 author: Ansible Network Engineer
 notes:
   - 'Tested against AlliedWare Plus main-20210107-1'

@@ -38,7 +38,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 ---
 module: awplus_static_route
-version_added: 2.13.6
+version_added: 1.3.0
 short_description: Manage static routes on Allied Telesis AlliedWare Plus devices.
 description: This module manages the properties of static routes on Allied Telesis AlliedWare Plus devices.
 author: Ben Hoelker
