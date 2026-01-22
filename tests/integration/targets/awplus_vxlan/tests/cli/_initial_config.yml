@@ -1,0 +1,24 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_vxlan initialise config on connection={{ ansible_connection }}"
+
+- name: Set loopback address for source interface
+  alliedtelesis.awplus.awplus_config:
+    lines:
+      - ip address 10.37.86.75/32
+    parents: interface lo
+
+- name: Initialise configuration
+  alliedtelesis.awplus.awplus_vxlan:
+    config:
+      l2_vnis:
+        - vlan: 2
+          vni: 2000
+        - vlan: 3
+          vni: 3000
+    state: overridden
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_vxlan initialise config on connection={{ ansible_connection }}"

@@ -1,0 +1,290 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_vxlan merged integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    m1_expected:
+      commands:
+        - nvo vxlan
+        - map-acces vlan 4 vni 4000
+    m2_expected:
+      commands:
+        - nvo vxlan
+        - map-access vlan 4 nvi 4000
+        - map-access vlan 5 nvi 5000
+    m3_expected:
+      commands:
+        - nvo vxlan
+        - no map-access vlan 2
+        - map-access vlan 2 nvi 10000
+    m4_expected:
+      commands:
+        - nvo vxlan
+        - no map-access vlan 2
+        - map-access vlan 2 nvi 3000
+        - no map-access vlan 3
+        - map-access vlan 3 nvi 2000
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge a single mapping
+      alliedtelesis.awplus.awplus_vxlan: &m1
+        config:
+          l2_vnis:
+            - vlan: 4
+              vni: 4000
+        state: merged
+      register: result
+
+    - name: Assert single mapping merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+
+    - name: Merge a single mapping (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_vxlan: *m1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge multiple mappings
+      alliedtelesis.awplus.awplus_vxlan: &m2
+        config:
+          l2_vnis:
+            - vlan: 4
+              vni: 4000
+            - vlan: 5
+              vni: 5000
+        state: merged
+      register: result
+
+    - name: Assert single mapping merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+
+    - name: Merge multiple mappings (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_vxlan: *m2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge with existing mapping
+      alliedtelesis.awplus.awplus_vxlan: &m3
+        config:
+          l2_vnis:
+            - vlan: 2
+              vni: 10000
+        state: merged
+      register: result
+
+    - name: Assert mapping merged with existing
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+
+    - name: Merge with existing mapping (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_vxlan: *m3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge to swap VNIs
+      alliedtelesis.awplus.awplus_vxlan: &m4
+        config:
+          l2_vnis:
+            - vlan: 2
+              vni: 3000
+            - vlan: 3
+              vni: 2000
+        state: merged
+      register: result
+
+    - name: Assert VNIs swapped
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+
+    - name: Merge to swap VNIs (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_vxlan: *m4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge without config fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+      register: result
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge VLAN below range fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 0
+              vni: 100
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge VLAN above range fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 4095
+              vni: 20000
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge VNI below range fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 2
+              vni: 0
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge VNI above range fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 2
+              vni: 16777216
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge with existing VNI fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 3
+              vni: 2000
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge duplicate VLAN fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 4
+              vni: 10000
+            - vlan: 4
+              vni: 11000
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge duplicate VNI fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 4
+              vni: 10000
+            - vlan: 5
+              vni: 10000
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_vxlan merged integration tests on connection={{ ansible_connection }}"

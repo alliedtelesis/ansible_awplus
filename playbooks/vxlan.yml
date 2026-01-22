@@ -1,0 +1,13 @@
+---
+- hosts: all
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: Replace with existing VNI fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 4
+              vni: 2000
+        state: replaced

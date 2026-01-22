@@ -1,0 +1,263 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_vxlan overridden integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    o1_expected:
+      commands:
+        - nvo vxlan
+        - no map-access vlan 2
+        - no map-access vlan 3
+    o2_expected:
+      commands:
+        - nvo vxlan
+        - no map-access vlan 2
+        - map-access vlan 2 vni 20000
+        - no map-access vlan 3
+        - map-access vlan 3 vni 30000
+    o3_expected:
+      commands:
+        - nvo vxlan
+        - no map-access vlan 2
+        - no map-access vlan 3
+        - map-access vlan 4 vni 4000
+        - map-access vlan 5 vni 5000
+    o4_expected:
+      commands:
+        - nvo vxlan
+        - no map-access vlan 2
+        - map-access vlan 2 vni 3000
+        - no map-access vlan 3
+        - map-access vlan 3 vni 2000
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with empty config
+      alliedtelesis.awplus.awplus_vxlan: &o1
+        config:
+        state: overridden
+      register: result
+
+    - name: Assert everything is removed
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with empty config (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_vxlan: *o1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override existing mappings
+      alliedtelesis.awplus.awplus_vxlan: &o2
+        config:
+          l2_vnis:
+            - vlan: 2
+              vni: 20000
+            - vlan: 3
+              vni: 30000
+        state: overridden
+      register: result
+
+    - name: Assert existing mapping is overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override existing mapping (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_vxlan: *o2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override new mappings
+      alliedtelesis.awplus.awplus_vxlan: &o3
+        config:
+          l2_vnis:
+            - vlan: 4
+              vni: 4000
+            - vlan: 5
+              vni: 5000
+        state: overridden
+      register: result
+
+    - name: Assert new mapping is overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override new mapping (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_vxlan: *o3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override and swap VNIs
+      alliedtelesis.awplus.awplus_vxlan: &o4
+        config:
+          l2_vnis:
+            - vlan: 2
+              vni: 3000
+            - vlan: 3
+              vni: 2000
+        state: overridden
+      register: result
+
+    - name: Assert VNIs swapped
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+
+    - name: Override and swap VNIs (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_vxlan: *o4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override VLAN below range fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 0
+              vni: 100
+        state: overridden
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override VLAN above range fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 4095
+              vni: 20000
+        state: overridden
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override VNI below range fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 2
+              vni: 0
+        state: overridden
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override VNI above range fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 2
+              vni: 16777216
+        state: overridden
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override duplicate VLAN fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 4
+              vni: 10000
+            - vlan: 4
+              vni: 11000
+        state: overridden
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override duplicate VNI fails
+      alliedtelesis.awplus.awplus_vxlan:
+        config:
+          l2_vnis:
+            - vlan: 4
+              vni: 10000
+            - vlan: 5
+              vni: 10000
+        state: overridden
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_vxlan overridden integration tests on connection={{ ansible_connection }}"

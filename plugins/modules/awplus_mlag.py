@@ -38,7 +38,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 ---
 module: awplus_mlag
-version_added: 2.19
+version_added: 1.3.0
 short_description: Manage the mlag attributes on AlliedWare Plus devices
 description:
     - This module provides declarative management of mlag attributes
