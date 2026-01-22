@@ -135,7 +135,37 @@ class Bgp(ConfigBase):
                   the current configuration
         """
         commands = []
-        commands = _set_state(want, have)
+
+        if want.get('router_id') and want.get('router_id') != have.get('router_id'):
+            commands.append(f"bgp router-id {want['router_id']}")
+
+        if want.get('ebgp_requires_policy') is True and have.get('ebgp_requires_policy') is False:
+            commands.append("bgp ebgp-requires-policy")
+        if want.get('ebgp_requires_policy') is False and have.get('ebgp_requires_policy') is not False:
+            commands.append("no bgp ebgp-requires-policy")
+
+        if want.get('network_import_check') is True and have.get('network_import_check') is False:
+            commands.append("bgp network import-check")
+        if want.get('network_import_check') is False and have.get('network_import_check') is not False:
+            commands.append("no bgp network import-check")
+
+        if want.get('log_neighbor_changes') is True and not have.get('log_neighbor_changes'):
+            commands.append('bgp log-neighbor-changes')
+        elif want.get('log_neighbor_changes') is False and have.get('log_neighbor_changes'):
+            commands.append('no bgp log-neighbor-changes')
+
+        if want.get('neighbors'):
+            neighbor_commands = generate_neighbor_commands(want['neighbors'], have.get('neighbors', []))
+            commands.extend(neighbor_commands)
+        if want.get('networks'):
+            network_commands = generate_network_commands(want['networks'], have.get('networks', []))
+            commands.extend(network_commands)
+        if want.get('ipv4_address_family'):
+            addrfam_commands = generate_ipv4_addrfam_commands(want['ipv4_address_family'], have.get('ipv4_address_family', []))
+            commands.extend(addrfam_commands)
+        if want.get('l2vpn_address_family'):
+            addrfam_commands = generate_l2vpn_addrfam_commands(want['l2vpn_address_family'], have.get('l2vpn_address_family', {}))
+            commands.extend(addrfam_commands)
 
         if not have or commands:
             commands.insert(0, f"router bgp {want['bgp_as']}")
@@ -154,42 +184,6 @@ class Bgp(ConfigBase):
         elif have:
             commands.append(f"no router bgp {have['bgp_as']}")
         return commands
-
-
-def _set_state(want, have):
-    commands = []
-    if want.get('router_id') and want.get('router_id') != have.get('router_id'):
-        commands.append(f"bgp router-id {want['router_id']}")
-
-    if want.get('ebgp_requires_policy') is True and have.get('ebgp_requires_policy') is False:
-        commands.append("bgp ebgp-requires-policy")
-    if want.get('ebgp_requires_policy') is False and have.get('ebgp_requires_policy') is not False:
-        commands.append("no bgp ebgp-requires-policy")
-
-    if want.get('network_import_check') is True and have.get('network_import_check') is False:
-        commands.append("bgp network import-check")
-    if want.get('network_import_check') is False and have.get('network_import_check') is not False:
-        commands.append("no bgp network import-check")
-
-    if want.get('log_neighbor_changes') is True and not have.get('log_neighbor_changes'):
-        commands.append('bgp log-neighbor-changes')
-    elif want.get('log_neighbor_changes') is False and have.get('log_neighbor_changes'):
-        commands.append('no bgp log-neighbor-changes')
-
-    if want.get('neighbors'):
-        neighbor_commands = generate_neighbor_commands(want['neighbors'], have.get('neighbors', []))
-        commands.extend(neighbor_commands)
-    if want.get('networks'):
-        network_commands = generate_network_commands(want['networks'], have.get('networks', []))
-        commands.extend(network_commands)
-    if want.get('ipv4_address_family'):
-        addrfam_commands = generate_ipv4_addrfam_commands(want['ipv4_address_family'], have.get('ipv4_address_family', []))
-        commands.extend(addrfam_commands)
-    if want.get('l2vpn_address_family'):
-        addrfam_commands = generate_l2vpn_addrfam_commands(want['l2vpn_address_family'], have.get('l2vpn_address_family', {}))
-        commands.extend(addrfam_commands)
-
-    return commands
 
 
 def generate_network_commands(want, have):
