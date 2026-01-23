@@ -29,7 +29,7 @@ Minor Changes
 Deprecated Modules
 ------------------
 
-- awplus_rip - Deprecated and to be deleted in the following version.
+- awplus_rip - Deprecated and to be deleted in a following version.
 
 Deleted Modules
 ---------------
