@@ -23,4 +23,9 @@ build_ignore:
   - .vscode
   - .github
   - .gitignore
+  - .env
+  - .pytest_cache
+  - backup
+  - integration_test
+  - docker
 version: 1.3.0
