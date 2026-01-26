@@ -24,6 +24,7 @@ build_ignore:
   - .github
   - .gitignore
   - .pytest_cache
+  - backup
   - integration_test
   - docker
   - "*.env"
