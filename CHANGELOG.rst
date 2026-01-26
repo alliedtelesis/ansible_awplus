@@ -13,7 +13,7 @@ Major Changes
 - Updated project to use Python >= 3.12.
 - Updated project to use Ansible-core >= 2.19.4.
 - Added idempotency integration tests and fixes for multiple modules.
-- Strictened the behaviour of each state for multiple modules.
+- Improved the consistency of handling states for multiple modules.
 
 Minor Changes
 -------------
