@@ -23,6 +23,9 @@ build_ignore:
   - .vscode
   - .github
   - .gitignore
+  - .pytest_cache
+  - integration_test
+  - docker
   - "*.env"
   - "*.venv"
 version: 1.3.0
