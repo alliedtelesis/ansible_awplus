@@ -38,7 +38,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 ---
 module: awplus_acl
-version_added: '2.13.6'
+version_added: 1.2.2
 short_description: 'Manages the ACL configuration'
 description: 'This module manages the ACL configuration of Alliedware Plus devices.'
 author: "Ben Hoelker"

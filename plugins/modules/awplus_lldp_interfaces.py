@@ -40,7 +40,7 @@ DOCUMENTATION = """
 module: awplus_lldp_interfaces
 short_description: 'Manages link layer discovery protocol (LLDP) attributes of AlliedWare Plus interfaces'
 description: 'This module manages link layer discovery protocol (LLDP) attributes of interfaces on AlliedWare Plus devices.'
-version_added: 2.10.4
+version_added: 1.1.0
 author: Darryl Alang
 notes:
   - 'Tested against AlliedWare Plus AT-x930-28GTX'

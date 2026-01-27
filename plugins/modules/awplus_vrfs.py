@@ -38,7 +38,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 ---
 module: awplus_vrfs
-version_added: 2.9
+version_added: 1.0.0
 short_description: Manage VRF definition on Allied Telesis devices.
 description: This module manages properties of VRFs on Allied Telesis AlliedWare Plus devices, allowing the
              creation, deletion and modification of VRFs. These are referenced by the VRF name by other
@@ -94,7 +94,7 @@ options:
       import_map:
         description:
         - reference to a route map used to control import of routes into the VRF.
-        type:: str
+        type: str
       max_fib_routes:
         description:
         - the maximum number of routes allowed for this VRF.

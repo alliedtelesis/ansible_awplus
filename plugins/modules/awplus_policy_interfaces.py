@@ -38,7 +38,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 ---
 module: awplus_policy_interfaces
-version_added: 2.13.6
+version_added: 1.3.0
 short_description: 'Manages the configuration of policies on interfaces'
 description: 'This module manages the configuration of interfaces on Alliedware Plus devices with respect to QoS policies.'
 author:

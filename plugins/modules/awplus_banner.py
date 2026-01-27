@@ -40,7 +40,7 @@ DOCUMENTATION = """
 module: awplus_banner
 short_description: 'Manages banner configuration of AlliedWare Plus devices'
 description: 'This module configures the banners of AlliedWare Plus devices.'
-version_added: 2.10.4
+version_added: 1.1.0
 author: Darryl Alang
 notes:
   - 'Tested against AlliedWare Plus AT-x930-28GTX'

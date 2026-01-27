@@ -20,7 +20,7 @@ description:
     before returning or timing out if the condition is not met.
   - This module does not support running commands in configuration mode.
     Please use M(alliedtelesis.awplus.awplus_config) to configure AlliedWare Plus devices.
-version_added: "2.9"
+version_added: 1.0.0
 options:
   commands:
     description:

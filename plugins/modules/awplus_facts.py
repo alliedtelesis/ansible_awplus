@@ -17,7 +17,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = """
 ---
 module: awplus_facts
-version_added: 2.9
+version_added: 1.0.0
 short_description: Get facts about awplus devices.
 description:
   - Collects facts from network devices running the AlliedWare Plus operating
@@ -37,7 +37,7 @@ options:
         not be collected.
     required: false
     default: 'all'
-    version_added: "2.2"
+    version_added: 1.0.0
   gather_network_resources:
     description:
       - When supplied, this argument will restrict the facts collected
@@ -47,36 +47,39 @@ options:
         can also be used with an initial C(M(!)) to specify that a
         specific subset should not be collected.
     required: false
-    version_added: "2.9"
+    version_added: 1.1.0
 """
 
 EXAMPLES = """
-# Gather all facts
-- awplus_facts:
+- name: Gather all facts
+  alliedtelesis.awplus.awplus_facts:
     gather_subset: all
     gather_network_resources: all
 
-# Collect only the lag_interfaces facts
-- awplus_facts:
+- name: Collect only the lag_interfaces facts
+  alliedtelesis.awplus.awplus_facts:
     gather_subset:
       - !all
       - !min
     gather_network_resources:
       - lag_interfaces
 
-# Do not collect lag_interfaces facts
-- awplus_facts:
+- name: Do not collect lag_interfaces facts
+  alliedtelesis.awplus.awplus_facts:
     gather_network_resources:
       - "!lag_interfaces"
 
-# Collect lag_interfaces and minimal default facts
-- awplus_facts:
+- name: Collect lag_interfaces and minimal default facts
+  alliedtelesis.awplus.awplus_facts:
     gather_subset: min
     gather_network_resources: lag_interfaces
 """
 
 RETURN = """
-description: See the respective resource module parameters for the tree.
+  facts:
+    description: See the respective resource module parameters for the tree.
+    returned: the current configuration information for the respective resource module.
+    type: dict
 """
 
 from ansible.module_utils.basic import AnsibleModule

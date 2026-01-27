@@ -22,7 +22,7 @@ short_description: Manage link aggregation groups on AlliedWare Plus network dev
 description:
   - This module provides declarative management of link aggregation groups
     on AlliedWare Plus network devices.
-version_added: "2.9"
+version_added: 1.0.0
 options:
   group:
     description:

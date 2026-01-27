@@ -19,7 +19,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 ---
 module: awplus_ospf
-version_added: "2.9"
+version_added: 1.0.0
 short_description: Manages OSPF configuration.
 description:
     - Manages OSPF configurations on AlliedWare Plus switches.
@@ -87,8 +87,8 @@ options:
                             - The name of a prefix list.
                     direction:
                         description:
-                            - In: Filter routes from the other areas to this area.
-                            - Out: Filter routes from this area to other areas.
+                            - In = Filter routes from the other areas to this area.
+                              Out = Filter routes from this area to other areas.
             nssa:
                 description:
                     - This option configures an area as a Not-So-Stubby-Area (NSSA). By
@@ -135,10 +135,6 @@ options:
                 description:
                     - This option is used to summarize OSPF routes at an area boundary,
                         configuring an IPv4 address range which consolidates OSPF routes.
-                state:
-                    description:
-                        - C(state=absent) removes the OSPF routes summarization.
-                    choices: ['present', 'absent']
                 suboptions:
                     ip_addr:
                         description:
@@ -148,6 +144,10 @@ options:
                         description:
                             - Advertise this range as a summary route into other areas.
                         type: bool
+                    state:
+                        description:
+                            - C(state=absent) removes the OSPF routes summarization.
+                        choices: ['present', 'absent']
             stub:
                 description:
                     - This option defines an OSPF area as a stub area.

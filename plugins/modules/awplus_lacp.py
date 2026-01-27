@@ -40,7 +40,7 @@ DOCUMENTATION = """
 module: awplus_lacp
 short_description: 'Manage Global Link Aggregation Control Protocol (LACP) on AlliedWare Plus devices.'
 description: 'Manages the global attributes of AlliedWare Plus Link Aggregation Control Protocol (LACP)'
-version_added: 2.10.4
+version_added: 1.1.0
 author: Ansible Network Engineer
 notes:
   - 'Tested against AlliedWare Plus x930 main-20210107-1'

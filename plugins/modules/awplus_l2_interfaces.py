@@ -40,7 +40,7 @@ DOCUMENTATION = """
 module: awplus_l2_interfaces
 short_description: 'Manages Layer 2 interfaces configuration of AlliedWare Plus devices'
 description: 'This module manages Layer 2 interfaces configuration of AlliedWare Plus devices.'
-version_added: 2.10.4
+version_added: 1.3.0
 author: Darryl Alang
 notes:
   - 'Tested against AlliedWare Plus AT-x930-28GTX'

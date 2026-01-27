@@ -6,6 +6,8 @@ The Ansible Allied Telesis AW+ collection includes a variety of Ansible content 
 
 This collection has been tested against AW+ 5.5.2.
 
+This collection has been tested against Python version: **>=3.12**.
+
 This collection has been tested against Ansible version: **>=2.19.4**.
 
 <!--
@@ -53,6 +55,7 @@ alliedtelesis.awplus.awplus_lag_interfaces|LAG interfaces resource module
 alliedtelesis.awplus.awplus_lldp_global|LLDP resource module
 alliedtelesis.awplus.awplus_lldp_interfaces|LLDP interfaces resource module
 alliedtelesis.awplus.awplus_logging|Manage logging on Allied Telesis AW+ devices
+alliedtelesis.awplus.awplus_mlag|MLAG resource module
 alliedtelesis.awplus.awplus_ntp|Network Time Protocol resource module
 alliedtelesis.awplus.awplus_openflow|Manage OpenFlow on network devices
 alliedtelesis.awplus.awplus_ospf|OSPFv2 resource module
@@ -64,6 +67,7 @@ alliedtelesis.awplus.awplus_system|Manage the system attributes on Allied Telesi
 alliedtelesis.awplus.awplus_user|Manage the collection of local users on Allied Telesis AW+ devices
 alliedtelesis.awplus.awplus_vlans|VLANs resource module
 alliedtelesis.awplus.awplus_vrfs|VRF resource module
+alliedtelesis.awplus.awplus_vxlan|VXLAN resource module
 
 ### Inventory plugins
 Name | Description

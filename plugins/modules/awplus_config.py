@@ -18,7 +18,7 @@ description:
     for segmenting configuration into sections. This module provides
     an implementation for working with AlliedWare Plus configuration sections in
     a deterministic way.
-version_added: "2.9"
+version_added: 1.0.0
 options:
   lines:
     description:

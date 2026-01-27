@@ -40,7 +40,7 @@ DOCUMENTATION = """
 module: awplus_interfaces
 short_description: 'Manages the attributes of AlliedWare Plus interfaces'
 description: 'This module manages interfaces configuration of AlliedWare Plus devices.'
-version_added: 2.10.4
+version_added: 1.1.0
 author: Darryl Alang
 notes:
   - 'Tested against AlliedWare Plus AT-x930-28GTX'

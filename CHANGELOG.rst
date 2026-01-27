@@ -4,6 +4,47 @@ Allied Telesis Alliedware Plus (AW+) Collection Release Notes
 
 .. contents:: Topics
 
+v1.3.0
+======
+
+Major Changes
+-------------
+
+- Updated project to use Python >= 3.12.
+- Updated project to use Ansible-core >= 2.19.4.
+- Added idempotency integration tests and fixes for multiple modules.
+- Improved the consistency of handling states for multiple modules.
+
+Minor Changes
+-------------
+
+- Fixed info messages causing an error when running commands through Ansible.
+- awplus_openflow - Idempotency fixes.
+- awplus_user - Idempotency fixes, defaults to SHA512 hashing, small fixes.
+- awplus awplus_static_lag_interfaces - Idempotency and behavioural changes.
+- awplus_lacp_interfaces - Idempotency and behavioural changes.
+- awplus_lacp - Idempotency and behavioural changes, added optional global-passive-mode parameter.
+- awplus_bgp - Added L2VPN EVPN address family support to the BGP resource module, but the module requires a rework.
+
+Deprecated Modules
+------------------
+
+- awplus_rip - Deprecated and to be deleted in the following version.
+
+Deleted Modules
+---------------
+
+New Modules
+-----------
+
+- awplus_policy_maps - Resource module for configuring policy maps.
+- awplus_premark_dscps - Resource module for configuring premark DSCP maps.
+- awplus_policy_interfaces - Resource module for configuring QoS policies for interfaces.
+- awplus_l2_interfaces - Resource module for the L2 configuation of interfaces.
+- awplus_static_route - Resource module for configuring static routes.
+- awplus_mlag - Resource module for configuring MLAG.
+- awplus_vxlan - Resource module for configuring VXLAN.
+
 v1.2.2
 ======
 
