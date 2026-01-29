@@ -329,7 +329,6 @@ def generate_l2vpn_af_vrf_commands(want, have):
                 for w_ad in w_vrf['advertisements']:
                     command = f"advertise {w_ad['protocol']} unicast" + \
                         (f" route-map {w_ad.get("route_map")}" if w_ad.get("route_map") else "")
-                    print(command)
                     vrf_commands.append(command)
 
             if vrf_commands:
