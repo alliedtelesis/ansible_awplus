@@ -289,7 +289,7 @@ def generate_l2vpn_af_global_commands(want, have):
 
     if want.get('advertise_all_vni') and not have.get('advertise_all_vni'):
         neighbor_commands.append('advertise-all-vni')
-    elif not want.get('advertise_all_vni') and have.get('advertise_all_vni'):
+    elif want.get('advertise_all_vni') is False and have.get('advertise_all_vni'):
         neighbor_commands.append('no advertise-all-vni')
 
     if neighbor_commands:
