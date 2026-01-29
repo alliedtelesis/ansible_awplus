@@ -1,0 +1,117 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_l3_interfaces merged integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    m1_expected:
+      commands:
+        - interface vlan2
+        - ip address 192.168.5.200/24
+    m2_expected:
+      commands:
+        - interface vlan2
+        - no ip vrf forwarding VRF2
+        - ip vrf forwarding VRF3
+    m3_expected:
+      commands:
+        - interface vlan3
+        - ip vrf forwarding VRF3
+        - ip address 192.168.5.200/24
+        - ipv6 address 20::200/32
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge to change existing VLAN
+      alliedtelesis.awplus.awplus_l3_interfaces: &m1
+        config:
+          - name: vlan2
+            ipv4:
+              - address: 192.168.5.200/24
+        state: merged
+      register: result
+
+    - name: Assert existing VLAN merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to change existing VLAN (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *m1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge to change existing VRF
+      alliedtelesis.awplus.awplus_l3_interfaces: &m2
+        config:
+          - name: vlan2
+            vrf: VRF3
+        state: merged
+      register: result
+
+    - name: Print the full result for debugging
+      ansible.builtin.debug:
+        var: result
+
+    - name: Assert existing VRF merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to change existing VRF (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *m2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge to add new VLAN and VRF
+      alliedtelesis.awplus.awplus_l3_interfaces: &m3
+        config:
+          - name: vlan3
+            vrf: VRF3
+            ipv4:
+              - address: 192.168.5.200/24
+            ipv6:
+              - address: 20::200/32
+        state: merged
+      register: result
+
+    - name: Assert new VLAN and VRF merged
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge to add new VLAN and VRF (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *m3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_l3_interfaces merged integration tests on connection={{ ansible_connection }}"

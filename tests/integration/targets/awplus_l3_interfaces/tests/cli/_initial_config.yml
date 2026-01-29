@@ -1,0 +1,28 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_l3_interfaces initialise config on connection={{ ansible_connection }}"
+
+- name: Create VRF
+  alliedtelesis.awplus.awplus_vrfs:
+    config:
+      - name: VRF2
+        id: 2
+      - name: VRF3
+        id: 3
+    state: merged
+
+- name: Initialise configuration
+  alliedtelesis.awplus.awplus_l3_interfaces:
+    config:
+      - name: vlan2
+        vrf: VRF2
+        ipv4:
+          - address: 192.168.5.1/24
+        ipv6:
+          - address: 2001:db8::1/48
+    state: replaced
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_l3_interfaces initialise config on connection={{ ansible_connection }}"

@@ -1,0 +1,42 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_l3_interfaces replaced integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    r1_expected:
+      commands:
+        - placeholder
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Replaced <task>
+      alliedtelesis.awplus.awplus_l3_interfaces: &r1
+        config:
+        state: replaced
+      register: result
+
+    - name: Assert <task>
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ r1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Replaced <task> (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *r1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_l3_interfaces replaced integration tests on connection={{ ansible_connection }}"
