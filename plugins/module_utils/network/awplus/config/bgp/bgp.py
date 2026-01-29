@@ -289,7 +289,7 @@ def generate_l2vpn_af_global_commands(want, have):
 
     if want.get('advertise_all_vni') and not have.get('advertise_all_vni'):
         neighbor_commands.append('advertise-all-vni')
-    elif not want.get('advertise_all_vni') and have.get('advertise_all_vni'):
+    elif want.get('advertise_all_vni') is False and have.get('advertise_all_vni'):
         neighbor_commands.append('no advertise-all-vni')
 
     if neighbor_commands:
@@ -329,7 +329,6 @@ def generate_l2vpn_af_vrf_commands(want, have):
                 for w_ad in w_vrf['advertisements']:
                     command = f"advertise {w_ad['protocol']} unicast" + \
                         (f" route-map {w_ad.get("route_map")}" if w_ad.get("route_map") else "")
-                    print(command)
                     vrf_commands.append(command)
 
             if vrf_commands:

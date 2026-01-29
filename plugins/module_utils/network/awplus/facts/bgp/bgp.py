@@ -269,23 +269,28 @@ def get_neighbors(lines):
 
 
 def get_networks(conf):
-    nets = re.findall('network (.+)', conf)
+    lines = conf.split('\n')
+    nets = []
+    for line in lines:
+        net_match = re.match(r' *network (\S+) ?route-map (\S+)?', line)
+        if net_match:
+            nets.append(line)
     networks = []
+
     if not nets:
         return networks
 
     for net in nets:
         network = {}
         if 'route-map' in net:
-            match = re.match(r'(\S+) route-map (\S+)', net)
+            match = re.match(r' *network (\S+) route-map (\S+)', net)
             network['route_map'] = match.group(2)
         else:
-            match = re.match(r'([\d./]+)', net)
+            match = re.match(r' *network (\S+)', net)
         prefix, masklen = match.group(1).split('/')
         network['prefix'] = prefix
         network['masklen'] = masklen
         if 'backdoor' in net:
             network['backdoor'] = True
         networks.append(network)
-
     return networks
