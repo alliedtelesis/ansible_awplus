@@ -50,6 +50,7 @@ class L3_interfacesArgs(object):  # pylint: disable=R0903
                     'elements': 'dict',
                     'options': {'address': {'required': True, 'type': 'str'}},
                     'type': 'list'},
+                'vrf': {'type': 'str'},
                 'name': {'required': True, 'type': 'str'}},
             'type': 'list'},
         'state': {
