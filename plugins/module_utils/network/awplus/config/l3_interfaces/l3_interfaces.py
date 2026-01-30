@@ -104,10 +104,9 @@ class L3_interfaces(ConfigBase):
         other_changes = 0
         for interface in want:
             if interface['vrf']:
-                vrf_change += 1
+                vrf_changes += 1
             if interface['ipv4'] or interface['ipv6']:
                 other_changes += 1
-
 
         resp = self.set_state(want, have)
         return to_list(resp)

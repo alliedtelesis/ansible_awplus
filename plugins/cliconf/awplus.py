@@ -154,11 +154,13 @@ class Cliconf(CliconfBase):
         return diff
 
     def is_info_message(self, msg):
-        known_info_msgs = (
-            "% This access-list is attached to an interface",
+        known_info_msg_patterns = (
+            r"^% This access-list is attached to an interface$",
+            r"^% All IP addresses configured on interface (\S+) have been removed$"
         )
-        for m in known_info_msgs:
-            if msg.startswith(m):
+        for pattern in known_info_msg_patterns:
+            match = re.fullmatch(pattern, msg)
+            if match:
                 return True
         return False
 
