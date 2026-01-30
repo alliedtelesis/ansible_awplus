@@ -154,6 +154,9 @@ class Bgp(ConfigBase):
         elif want.get('log_neighbor_changes') is False and have.get('log_neighbor_changes'):
             commands.append('no bgp log-neighbor-changes')
 
+        if want.get('redistribute'):
+            redistribute_commands = generate_redistribute_commands(want['redistribute'], have.get('redistribute', []))
+            commands.extend(redistribute_commands)
         if want.get('neighbors'):
             neighbor_commands = generate_neighbor_commands(want['neighbors'], have.get('neighbors', []))
             commands.extend(neighbor_commands)

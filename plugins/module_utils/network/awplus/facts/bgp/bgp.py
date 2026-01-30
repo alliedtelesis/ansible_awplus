@@ -111,6 +111,7 @@ def parse_bgp(config, conf):
         config['network_import_check'] = False
 
     lines = conf.split('\n')
+    config['redistribute'] = get_redistribute(conf)
     config['neighbors'] = get_neighbors(lines)
     config['networks'] = get_networks(conf)
 

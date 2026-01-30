@@ -305,6 +305,27 @@ options:
                 description:
                 - Remove the private AS number from outbound updates.
                 type: bool
+      redistribute:
+        description:
+        - Specifies the redistribute information from another routing protocol globally for this BGP instance.
+        type: list
+        elements: dict
+        suboptions:
+          protocol:
+            description:
+            - Specifies the protocol for configuring redistribute information.
+            choices:
+            - connected
+            - isis
+            - ospf
+            - rip
+            - static
+            required: true
+            type: str
+          route_map:
+            description:
+            - Specifies the route map reference.
+            type: str
   state:
     description:
     - The state the configuration should be left in
