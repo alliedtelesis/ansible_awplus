@@ -6,3 +6,4 @@ lacp_interfaces
 lacp
 mlag
 vxlan
+l3_interfaces
