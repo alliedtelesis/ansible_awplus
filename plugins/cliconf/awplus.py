@@ -17,7 +17,6 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 #
 from __future__ import absolute_import, division, print_function
-import q
 
 __metaclass__ = type
 

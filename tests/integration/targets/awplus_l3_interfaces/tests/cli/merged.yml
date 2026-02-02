@@ -104,6 +104,81 @@
         that:
           - result.changed == False
 
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge invalid format IPv4 address
+      alliedtelesis.awplus.awplus_l3_interfaces:
+        config:
+          - name: vlan3
+            ipv4:
+              - address: 192.168.5.200
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge invalid value IPv4 address
+      alliedtelesis.awplus.awplus_l3_interfaces:
+        config:
+          - name: vlan3
+            ipv4:
+              - address: 192.168.5.355/24
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge DHCP params with IPv4 address
+      alliedtelesis.awplus.awplus_l3_interfaces:
+        config:
+          - name: vlan3
+            ipv4:
+              - address: 192.168.5.355/24
+                dhcp_client: 100
+                dhcp_hostname: test
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge secondary params with DHCP
+      alliedtelesis.awplus.awplus_l3_interfaces:
+        config:
+          - name: vlan3
+            ipv4:
+              - address: dhcp
+                secondary: True
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
   always:
     - name: Reset configuration
       ansible.builtin.include_tasks: _reset_config.yml
