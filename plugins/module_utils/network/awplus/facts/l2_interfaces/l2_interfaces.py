@@ -95,8 +95,9 @@ class L2_interfacesFacts(object):
 
         interfaces = int_range_to_list(intfs, int_list) if '-' in intfs else [intfs]
 
-        for interface in interfaces:
-            conf_list.append(self.parse_config(conf, interface))
+        if interfaces:
+            for interface in interfaces:
+                conf_list.append(self.parse_config(conf, interface))
 
         return conf_list
 
