@@ -271,3 +271,28 @@ class TestAwplusL3InterfacesModule(TestAwplusModule):
             "no ip vrf forwarding VRF1"
         ]
         self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_l3_interfaces_override_initial(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(name="vlan1", ipv4=[dict(address="10.37.86.38/27")]),
+                    dict(name="vlan2", ipv4=[dict(address="192.168.5.1/24")], ipv6=[dict(address="2001:db8::1/48")], vrf="VRF2"),
+                    dict(name="vlan3", ipv4=[dict(address="dhcp")])
+                ],
+                state="overridden",
+            )
+        )
+        commands = [
+            "interface vlan1",
+            "ip address 10.37.86.38/27",
+            "interface vlan2",
+            "no ip vrf forwarding VRF1",
+            "ip vrf forwarding VRF2",
+            "ip address 192.168.5.1/24",
+            "ipv6 address 2001:db8::1/48",
+            "interface vlan3",
+            "no ip address",
+            "ip address dhcp"
+        ]
+        self.execute_module(changed=True, commands=commands)

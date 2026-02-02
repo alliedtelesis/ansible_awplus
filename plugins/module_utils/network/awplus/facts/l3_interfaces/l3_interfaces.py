@@ -59,7 +59,6 @@ class L3_interfacesFacts(object):
                 if obj:
                     objs.append(obj)
 
-        print('object: ', obj)
         ansible_facts['ansible_network_resources'].pop('l3_interfaces', None)
         facts = {}
         if objs:

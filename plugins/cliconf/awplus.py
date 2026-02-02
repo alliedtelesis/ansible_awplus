@@ -17,6 +17,7 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 #
 from __future__ import absolute_import, division, print_function
+import q
 
 __metaclass__ = type
 
@@ -156,7 +157,8 @@ class Cliconf(CliconfBase):
     def is_info_message(self, msg):
         known_info_msg_patterns = (
             r"^% This access-list is attached to an interface$",
-            r"^% All IP addresses configured on interface (\S+) have been removed$"
+            r"^% All IP addresses configured on interface (\S+) have been removed$",
+            r"^% All IP addresses configured on interfaces in VRF (\S+) have been removed$"
         )
         for pattern in known_info_msg_patterns:
             match = re.fullmatch(pattern, msg)

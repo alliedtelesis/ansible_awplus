@@ -15,13 +15,19 @@
 - name: Initialise configuration
   alliedtelesis.awplus.awplus_l3_interfaces:
     config:
+      - name: vlan1
+        ipv4:
+          - address: "{{ ansible_host }}/27"
       - name: vlan2
         vrf: VRF2
         ipv4:
           - address: 192.168.5.1/24
         ipv6:
           - address: 2001:db8::1/48
-    state: replaced
+      - name: vlan3
+        ipv4:
+          - address: dhcp
+    state: overridden
 
 - name: Debug task
   ansible.builtin.debug:

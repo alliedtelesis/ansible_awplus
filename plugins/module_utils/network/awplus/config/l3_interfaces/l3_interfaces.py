@@ -10,7 +10,6 @@ is compared to the provided configuration (as dict) and the command set
 necessary to bring the current configuration to it's desired end-state is
 created
 """
-import re
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.cfg.base import (
     ConfigBase,
 )
@@ -27,6 +26,7 @@ from ansible.module_utils.six import (
 from ansible.module_utils.common.network import is_masklen
 
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.facts import Facts
+
 
 class L3_interfaces(ConfigBase):
     """
@@ -64,19 +64,13 @@ class L3_interfaces(ConfigBase):
         :returns: The result from module execution
         """
         result = {'changed': False}
-        warnings = list()
         commands = list()
 
         existing_l3_interfaces_facts = self.get_l3_interfaces_facts()
         commands.extend(self.set_config(existing_l3_interfaces_facts))
         if commands:
             if not self._module.check_mode:
-                try:
-                    self._connection.edit_config(commands)
-                except Exception as e:
-                    error_match = re.match(r"% All IP addresses configured on interface (\S+) have been removed", e)
-                    if not error_match:
-                        self._module.fail_json(e)
+                self._connection.edit_config(commands)
             result['changed'] = True
         result['commands'] = commands
 
@@ -86,7 +80,6 @@ class L3_interfaces(ConfigBase):
         if result['changed']:
             result['after'] = changed_l3_interfaces_facts
 
-        result['warnings'] = warnings
         return result
 
     def set_config(self, existing_l3_interfaces_facts):
@@ -173,7 +166,7 @@ class L3_interfaces(ConfigBase):
                     if interface == h_interface['name']:
                         have[i]['ipv4'] = []
         add = self._generate_add('merged', want, have)
-        self._module.warn(str(add, remove))
+
         interfaces = add.keys() | remove.keys()
         for interface in interfaces:
             interface_commands = []
@@ -234,6 +227,8 @@ class L3_interfaces(ConfigBase):
                     if 'vrf' not in ignore and h_interface.get('vrf') and \
                             (w_interface.get('vrf') == h_interface.get('vrf')):
                         remove['vrf'] = h_interface.get('vrf')
+                        h_interface['ipv4'] = []
+                        h_interface['ipv6'] = []
 
                     if 'ipv4' not in ignore:
                         w_ipv4s = w_interface.get('ipv4') if w_interface.get('ipv4') else []
@@ -280,6 +275,7 @@ class L3_interfaces(ConfigBase):
                         add['vrf'] = w_interface.get('vrf')
                         # set have ipv4 to empty because adding/removing VRFs removes all addresses
                         h_interface['ipv4'] = []
+                        h_interface['ipv6'] = []
 
                     w_ipv4s = w_interface.get('ipv4') if w_interface.get('ipv4') else []
                     for w_ip4 in w_ipv4s:
@@ -345,7 +341,6 @@ class L3_interfaces(ConfigBase):
                             if w_ip6['address'] == h_ip6['address']:
                                 matching_address = True
 
-                        self._module.warn(str(matching_address))
                         if not matching_address:
                             a_ip6 = {'address': w_ip6['address']}
                             if add.get('ipv6'):
@@ -368,6 +363,8 @@ class L3_interfaces(ConfigBase):
                     matching_interface = True
                     if h_interface.get('vrf') and (w_interface.get('vrf') != h_interface.get('vrf')):
                         remove['vrf'] = h_interface.get('vrf')
+                        h_interface['ipv4'] = []
+                        h_interface['ipv6'] = []
 
                     matching_address = False
                     dhcp_client = None
@@ -400,7 +397,7 @@ class L3_interfaces(ConfigBase):
                             if w_ip6['address'] == h_ip6['address']:
                                 matching_address = True
                         if not matching_address:
-                            r_ip6 = {'address': w_ip6['address']}
+                            r_ip6 = {'address': h_ip6['address']}
                             if remove.get('ipv6'):
                                 remove['ipv6'] += r_ip6
                             else:
@@ -432,7 +429,6 @@ class L3_interfaces(ConfigBase):
                     cmd += f" hostname {waddr.get('dhcp_hostname')}"
                 commands.append(cmd)
 
-        self._module.warn(str(want.get('ipv6')))
         if want.get('ipv6'):
             for waddr in want.get('ipv6'):
                 commands.append(f"ipv6 address {waddr['address']}")

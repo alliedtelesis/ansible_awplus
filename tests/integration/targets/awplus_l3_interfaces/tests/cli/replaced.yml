@@ -1,19 +1,19 @@
 ---
 - name: Debug task
   ansible.builtin.debug:
-    msg: "START awplus_l3_interfaces merged integration tests on connection={{ ansible_connection }}"
+    msg: "START awplus_l3_interfaces replaced integration tests on connection={{ ansible_connection }}"
 
 - ansible.builtin.set_fact:
-    m1_expected:
+    r1_expected:
       commands:
         - interface vlan2
         - ip address 192.168.5.200/24
-    m2_expected:
+    r2_expected:
       commands:
         - interface vlan2
         - no ip vrf forwarding VRF2
         - ip vrf forwarding VRF3
-    m3_expected:
+    r3_expected:
       commands:
         - interface vlan3
         - ip vrf forwarding VRF3
@@ -24,23 +24,23 @@
     - name: Initialise configuration
       ansible.builtin.include_tasks: _initial_config.yml
 
-    - name: Merge to change existing VLAN
-      alliedtelesis.awplus.awplus_l3_interfaces: &m1
+    - name: Replace to change existing VLAN
+      alliedtelesis.awplus.awplus_l3_interfaces: &r1
         config:
           - name: vlan2
             ipv4:
               - address: 192.168.5.200/24
-        state: merged
+        state: replaced
       register: result
 
-    - name: Assert existing VLAN merged
+    - name: Assert existing VLAN replaced
       ansible.builtin.assert:
         that:
           - result.changed == True
-          - "{{ m1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+          - "{{ r1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Merge to change existing VLAN (IDEMPOTENT)
-      alliedtelesis.awplus.awplus_l3_interfaces: *m1
+    - name: Replce to change existing VLAN (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *r1
       register: result
 
     - name: Assert idempotency
@@ -51,22 +51,22 @@
     - name: Initialise configuration
       ansible.builtin.include_tasks: _initial_config.yml
 
-    - name: Merge to change existing VRF
-      alliedtelesis.awplus.awplus_l3_interfaces: &m2
+    - name: Replace to change existing VRF
+      alliedtelesis.awplus.awplus_l3_interfaces: &r2
         config:
           - name: vlan2
             vrf: VRF3
-        state: merged
+        state: replaced
       register: result
 
-    - name: Assert existing VRF merged
+    - name: Assert existing VRF replaced
       ansible.builtin.assert:
         that:
           - result.changed == True
-          - "{{ m2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+          - "{{ r2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Merge to change existing VRF (IDEMPOTENT)
-      alliedtelesis.awplus.awplus_l3_interfaces: *m2
+    - name: Replace to change existing VRF (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *r2
       register: result
 
     - name: Assert idempotency
@@ -77,8 +77,8 @@
     - name: Initialise configuration
       ansible.builtin.include_tasks: _initial_config.yml
 
-    - name: Merge to add new VLAN and VRF
-      alliedtelesis.awplus.awplus_l3_interfaces: &m3
+    - name: Replace to add new VLAN and VRF
+      alliedtelesis.awplus.awplus_l3_interfaces: &r3
         config:
           - name: vlan3
             vrf: VRF3
@@ -86,17 +86,17 @@
               - address: 192.168.5.200/24
             ipv6:
               - address: 20::200/32
-        state: merged
+        state: replaced
       register: result
 
-    - name: Assert new VLAN and VRF merged
+    - name: Assert new VLAN and VRF replaced
       ansible.builtin.assert:
         that:
           - result.changed == True
-          - "{{ m3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+          - "{{ r3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
 
-    - name: Merge to add new VLAN and VRF (IDEMPOTENT)
-      alliedtelesis.awplus.awplus_l3_interfaces: *m3
+    - name: Replace to add new VLAN and VRF (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *r3
       register: result
 
     - name: Assert idempotency
@@ -110,4 +110,4 @@
 
 - name: Debug task
   ansible.builtin.debug:
-    msg: "END awplus_l3_interfaces merged integration tests on connection={{ ansible_connection }}"
+    msg: "END awplus_l3_interfaces replaced integration tests on connection={{ ansible_connection }}"
