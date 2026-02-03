@@ -233,3 +233,33 @@ class TestAwplusBgpModule(TestAwplusModule):
             'exit-address-family'
         ]
         self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_bgp_l2vpn_merge_advertisement(self):
+        set_module_args(dict(
+            config=dict(bgp_as=100,
+                        redistribute=[
+                            dict(protocol="connected", route_map=None),
+                            dict(protocol="static", route_map=None)
+                        ]),
+            state='merged'))
+        commands = [
+            'router bgp 100',
+            'redistribute static'
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_bgp_l2vpn_replace_advertisement(self):
+        set_module_args(dict(
+            config=dict(bgp_as=100,
+                        redistribute=[
+                            dict(protocol="connected", route_map=None),
+                            dict(protocol="static", route_map=None)
+                        ]),
+            state='replaced'))
+        commands = [
+            'no router bgp 100',
+            'router bgp 100',
+            'redistribute connected',
+            'redistribute static'
+        ]
+        self.execute_module(changed=True, commands=commands)

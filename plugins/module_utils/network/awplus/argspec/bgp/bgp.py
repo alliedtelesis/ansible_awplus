@@ -89,5 +89,8 @@ class BgpArgs(object):  # pylint: disable=R0903
                 'masklen': {'default': 32, 'type': 'int'},
                 'prefix': {'required': True, 'type': 'str'},
                 'route_map': {'type': 'str'}}, 'type': 'list'},
+            'redistribute': {'elements': 'dict', 'options': {
+                'protocol': {'choices': ['connected', 'isis', 'ospf', 'rip', 'static'], 'required': True, 'type': 'str'},
+                'route_map': {'type': 'str'}}, 'type': 'list'},
             'router_id': {'type': 'str'}}, 'type': 'dict'},
         'state': {'choices': ['merged', 'replaced', 'deleted'], 'default': 'merged', 'type': 'str'}}  # pylint: disable=C0301
