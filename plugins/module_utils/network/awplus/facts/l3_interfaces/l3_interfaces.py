@@ -37,7 +37,7 @@ class L3_interfacesFacts(object):
         self.generated_spec = utils.generate_dict(facts_argument_spec)
 
     def get_device_data(self, connection):
-        return connection.get('show interface')
+        return connection.get('show running-config')
 
     def populate_facts(self, connection, ansible_facts, data=None):
         """ Populate the facts for l3_interfaces
@@ -50,7 +50,7 @@ class L3_interfacesFacts(object):
         if not data:
             data = self.get_device_data(connection)
 
-        resources = data.split("Interface ")
+        resources = data.split("!")
 
         objs = []
         for resource in resources:
@@ -82,35 +82,41 @@ class L3_interfacesFacts(object):
         """
         config = deepcopy(spec)
         lines = conf.split('\n')
+        lines = [line for line in lines if line]
 
-        if lines[0].startswith('vlan'):
-            config['name'] = lines[0]
+        if lines and lines[0].startswith('interface vlan'):
+            config['name'] = re.match(r'interface (\S+)', lines[0]).group(1)
             ipv4 = list()
             ipv6 = list()
-            for line in lines:
+            vrf = None
+            for line in lines[1:]:
                 # populate ipv4 facts
                 each_ipv4 = dict()
-                ipv4_addr = utils.parse_conf_arg(line, 'IPv4 address')
-                if ipv4_addr:
-                    each_ipv4['address'] = re.search(r'(\S+)', ipv4_addr).group(1)
-                    if 'secondary' in ipv4_addr:
+                ipv4_match = re.match(r' *ip address (\S+) ?(\S+)?', line)
+                if ipv4_match:
+                    each_ipv4['address'] = ipv4_match.group(1)
+                    if ipv4_match.group(2) == 'secondary':
                         each_ipv4['secondary'] = True
-                dhcp = utils.parse_conf_arg(line, 'DHCP client enabled on interface')
-                if dhcp:
-                    dhcp_facts = re.search(r'\<client\-id\=vlan(\d+)\,hostname\=(\S+)*\>', line)
+                dhcp_match = re.match(r' *ip dhcp ?client-id (\S+)? ?hostname (\S+)?', line)
+                if dhcp_match:
                     each_ipv4['address'] = 'dhcp'
-                    each_ipv4['dhcp_client'] = dhcp_facts.group(1)
-                    each_ipv4['dhcp_hostname'] = dhcp_facts.group(2)
+                    each_ipv4['dhcp_client'] = dhcp_match.group(1)
+                    each_ipv4['dhcp_hostname'] = dhcp_match.group(2)
                 if each_ipv4:
                     ipv4.append(each_ipv4)
+
                 # populate ipv6 facts
                 each_ipv6 = dict()
-                ipv6_addr = utils.parse_conf_arg(line, 'IPv6 address')
-                if ipv6_addr:
-                    each_ipv6['address'] = re.search(r'(\S+)', ipv6_addr).group(1)
+                ipv6_match = re.match(r' *ipv6 address (\S+)', line)
+                if ipv6_match:
+                    each_ipv6['address'] = ipv6_match.group(1)
                 if each_ipv6:
                     ipv6.append(each_ipv6)
+
+                vrf_match = re.match(r' *ip vrf forwarding (\S+)', line)
+                if vrf_match:
+                    vrf = vrf_match.group(1)
             config['ipv4'] = ipv4
             config['ipv6'] = ipv6
-
+            config['vrf'] = vrf
         return utils.remove_empties(config)

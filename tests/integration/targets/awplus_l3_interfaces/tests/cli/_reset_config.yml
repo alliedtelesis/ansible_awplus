@@ -1,0 +1,16 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_l3_interfaces reset config on connection={{ ansible_connection }}"
+  
+- name: Delete the current config
+  alliedtelesis.awplus.awplus_l3_interfaces:
+    config:
+      - name: vlan1
+        ipv4:
+          - address: "{{ ansible_host }}/27"
+    state: overridden
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_l3_interfaces reset config on connection={{ ansible_connection }}"

@@ -90,6 +90,10 @@ options:
               - Configures the IPv6 address for interface
             type: str
             required: true
+      vrf:
+        description:
+          - VRF to assign to this interface.
+        type: str
   state:
     description:
     - The state the configuration should be left in

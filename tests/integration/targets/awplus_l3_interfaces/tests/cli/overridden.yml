@@ -1,0 +1,125 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_l3_interfaces overridden integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    o1_expected:
+      commands:
+        - interface vlan2
+        - no ip vrf forwarding VRF2
+        - ip vrf forwarding VRF3
+        - interface vlan3
+        - no ip address
+    o2_expected:
+      commands:
+        - interface vlan2
+        - no ip vrf forwarding VRF2
+        - ip address 192.168.5.200/24
+        - interface vlan3
+        - no ip address
+    o3_expected:
+      commands:
+        - interface vlan2
+        - no ip vrf forwarding VRF2
+        - ipv6 address 20::200/32
+        - interface vlan3
+        - no ip address
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override new VRF
+      alliedtelesis.awplus.awplus_l3_interfaces: &o1
+        config:
+          - name: vlan1
+            ipv4:
+              - address: "{{ ansible_host }}/27"
+          - name: vlan2
+            vrf: VRF3
+        state: overridden
+      register: result
+
+    - name: Assert VRF overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override new VRF (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *o1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override new IPv4
+      alliedtelesis.awplus.awplus_l3_interfaces: &o2
+        config:
+          - name: vlan1
+            ipv4:
+              - address: "{{ ansible_host }}/27"
+          - name: vlan2
+            ipv4:
+              - address: 192.168.5.200/24
+        state: overridden
+      register: result
+
+    - name: Assert IPv4 overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override new IPv4 (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *o2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override new IPv6
+      alliedtelesis.awplus.awplus_l3_interfaces: &o3
+        config:
+          - name: vlan1
+            ipv4:
+              - address: "{{ ansible_host }}/27"
+          - name: vlan2
+            ipv6:
+              - address: 20::200/32
+        state: overridden
+      register: result
+
+    - name: Assert IPv6 overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override new IPv6 (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *o3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_l3_interfaces overridden integration tests on connection={{ ansible_connection }}"

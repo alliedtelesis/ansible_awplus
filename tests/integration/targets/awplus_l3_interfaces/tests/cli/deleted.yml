@@ -1,0 +1,138 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_l3_interfaces deleted integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    d1_expected:
+      commands:
+        - interface vlan2
+        - no ip vrf forwarding VRF2
+    d2_expected:
+      commands:
+        - interface vlan2
+        - no ip address
+    d3_expected:
+      commands:
+        - interface vlan3
+        - no ip address
+    d4_expected:
+      commands:
+        - interface vlan2
+        - no ipv6 address 2001:db8::1/48
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete VRF
+      alliedtelesis.awplus.awplus_l3_interfaces: &d1
+        config:
+          - name: vlan2
+            vrf: VRF2
+        state: deleted
+      register: result
+
+    - name: Assert VRF is deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete VRF (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *d1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete IPv4
+      alliedtelesis.awplus.awplus_l3_interfaces: &d2
+        config:
+          - name: vlan2
+            ipv4: 
+              - address: 192.168.5.1/24
+        state: deleted
+      register: result
+
+    - name: Assert IPv4 deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete IPv4 (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *d2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete DHCP
+      alliedtelesis.awplus.awplus_l3_interfaces: &d3
+        config:
+          - name: vlan3
+            ipv4: 
+              - address: dhcp
+        state: deleted
+      register: result
+
+    - name: Assert DHCP deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d3_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete DHCP (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *d3
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Delete IPv6
+      alliedtelesis.awplus.awplus_l3_interfaces: &d4
+        config:
+          - name: vlan2
+            ipv6: 
+              - address: 2001:db8::1/48
+        state: deleted
+      register: result
+
+    - name: Assert IPv6 deleted
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ d4_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Delete IPv6 (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_l3_interfaces: *d4
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_l3_interfaces deleted integration tests on connection={{ ansible_connection }}"

@@ -143,18 +143,34 @@ class TestAwplusL3InterfacesModule(TestAwplusModule):
         set_module_args(
             dict(
                 config=[
-                    dict(
-                        name="vlan1",
-                        ipv4=[dict(address="192.168.5.77/24")],
-                    ),
+                    dict(name="vlan1", ipv4=[dict(address="192.168.5.77/24")]),
                     dict(name="vlan2", ipv4=[dict(address="192.168.4.5/24")]),
                 ],
                 state="overridden",
             )
         )
         commands = [
+            "interface vlan1",
+            "no ip vrf forwarding VRF1",
+            "ip address 192.168.5.77/24",
             "interface vlan2",
+            "no ip address",
             "ip address 192.168.4.5/24",
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_l3_interfaces_override_empty(self):
+        set_module_args(
+            dict(
+                config=[],
+                state="overridden",
+            )
+        )
+        commands = [
+            "interface vlan1",
+            "no ip vrf forwarding VRF1",
+            "interface vlan2",
+            "no ip address"
         ]
         self.execute_module(changed=True, commands=commands)
 
@@ -162,11 +178,8 @@ class TestAwplusL3InterfacesModule(TestAwplusModule):
         set_module_args(
             dict(
                 config=[
-                    dict(
-                        name="vlan1",
-                        ipv4=[dict(address="192.168.5.77/24")],
-                    ),
-                    dict(name="vlan2", ipv4=[dict(address="192.168.4.4/24")],),
+                    dict(name="vlan1", ipv4=[dict(address="192.168.5.77/24")], vrf="VRF1"),
+                    dict(name="vlan2", ipv4=[dict(address="192.168.4.4/24")]),
                 ],
                 state="overridden",
             )
@@ -174,6 +187,112 @@ class TestAwplusL3InterfacesModule(TestAwplusModule):
         self.execute_module(changed=False, commands=[])
 
     def test_awplus_l3_interfaces_deleted(self):
-        set_module_args(dict(config=[dict(name="vlan2",)], state="deleted"))
+        set_module_args(dict(config=[dict(name="vlan2", ipv4=[dict(address="192.168.4.4/24")])], state="deleted"))
         commands = ["interface vlan2", "no ip address"]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_l3_interfaces_merge_vrf_new(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(name="vlan2", ipv4=[dict(address="182.56.3.1/24")], vrf="VRF2")
+                ],
+                state="merged",
+            )
+        )
+        commands = [
+            "interface vlan2",
+            "ip address 182.56.3.1/24",
+            "ip vrf forwarding VRF2"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_l3_interfaces_merge_vrf_existing(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(name="vlan1", ipv4=[dict(address="182.56.3.1/24")], vrf="VRF2")
+                ],
+                state="merged",
+            )
+        )
+        commands = [
+            "interface vlan1",
+            "ip address 182.56.3.1/24",
+            "no ip vrf forwarding VRF1",
+            "ip vrf forwarding VRF2"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_l3_interfaces_replace_vrf_new(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(name="vlan2", ipv4=[dict(address="182.56.3.1/24")], vrf="VRF2")
+                ],
+                state="merged",
+            )
+        )
+        commands = [
+            "interface vlan2",
+            "ip address 182.56.3.1/24",
+            "ip vrf forwarding VRF2"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_l3_interfaces_replace_vrf_existing(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(name="vlan1", ipv4=[dict(address="182.56.3.1/24")], vrf="VRF2")
+                ],
+                state="replaced",
+            )
+        )
+        commands = [
+            "interface vlan1",
+            "ip address 182.56.3.1/24",
+            "no ip vrf forwarding VRF1",
+            "ip vrf forwarding VRF2"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_l3_interfaces_delete_vrf(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(name="vlan1", ipv4=[dict(address="182.56.3.1/24")], vrf="VRF1")
+                ],
+                state="deleted",
+            )
+        )
+        commands = [
+            "interface vlan1",
+            "no ip vrf forwarding VRF1"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_l3_interfaces_override_initial(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(name="vlan1", ipv4=[dict(address="10.37.86.38/27")]),
+                    dict(name="vlan2", ipv4=[dict(address="192.168.5.1/24")], ipv6=[dict(address="2001:db8::1/48")], vrf="VRF2"),
+                    dict(name="vlan3", ipv4=[dict(address="dhcp")])
+                ],
+                state="overridden",
+            )
+        )
+        commands = [
+            "interface vlan1",
+            "ip address 10.37.86.38/27",
+            "interface vlan2",
+            "no ip vrf forwarding VRF1",
+            "ip vrf forwarding VRF2",
+            "ip address 192.168.5.1/24",
+            "ipv6 address 2001:db8::1/48",
+            "interface vlan3",
+            "no ip address",
+            "ip address dhcp"
+        ]
         self.execute_module(changed=True, commands=commands)
