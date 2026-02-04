@@ -36,7 +36,7 @@ class Mlag_interfacesArgs(object):  # pylint: disable=R0903
 
     argument_spec = {'config': {'elements': 'dict',
             'options': {'domain_id': {'type': 'int'},
-                        'name': {'elements': 'str', 'required': True}},
+                        'name': {'type': 'str', 'required': True}},
             'type': 'list'},
  'state': {'choices': ['merged', 'overridden', 'deleted'],
            'default': 'merged',

@@ -59,7 +59,7 @@ class TestAwplusMlagInterfacesModule(TestAwplusModule):
         self.edit_config = self.mock_edit_config.start()
 
         self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.mlag.mlag.MlagFacts.get_run_mlag_interfaces"
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.mlag_interfaces.mlag_interfaces.Mlag_interfacesFacts.get_run_mlag_interfaces"
         )
         self.execute_show_command = self.mock_execute_show_command.start()
 
@@ -74,14 +74,117 @@ class TestAwplusMlagInterfacesModule(TestAwplusModule):
 
     def load_fixtures(self, commands=None):
         def load_from_file(*args, **kwargs):
-            return load_fixture("awplus_config_config.cfg")
+            return load_fixture("awplus_mlag_interfaces_config.cfg")
 
         self.execute_show_command.side_effect = load_from_file
 
     def test_awplus_mlag_merge_new(self):
-        set_module_args(dict(config=[dict(name="po4", domain_id=10)]), state="merged")
+        set_module_args(dict(config=[dict(name="po4", domain_id=10)], state="merged"))
         commands = [
             "interface po4",
             "mlag 10"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_mlag_merge_existing(self):
+        set_module_args(dict(config=[dict(name="po6", domain_id=12)], state="merged"))
+        commands = [
+            "interface po6",
+            "no mlag 10",
+            "mlag 12"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_mlag_merge_multiple_new(self):
+        set_module_args(dict(
+            config=[dict(name="po4", domain_id=10), dict(name="po5", domain_id=10)], 
+            state="merged")
+        )
+        commands = [
+            "interface po4",
+            "mlag 10",
+            "interface po5",
+            "mlag 10"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_mlag_override_new(self):
+        set_module_args(dict(config=[dict(name="po4", domain_id=10)], state="overridden"))
+        commands = [
+            "interface po4",
+            "mlag 10",
+            "interface po6",
+            "no mlag 10",
+            "interface po7",
+            "no mlag 10",
+            "interface po8",
+            "no mlag 10"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_mlag_override_existing(self):
+        set_module_args(dict(config=[dict(name="po6", domain_id=12)], state="overridden"))
+        commands = [
+            "interface po6",
+            "no mlag 10",
+            "mlag 12",
+            "interface po7",
+            "no mlag 10",
+            "interface po8",
+            "no mlag 10"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_mlag_override_multiple_new(self):
+        set_module_args(dict(
+            config=[dict(name="po4", domain_id=10), dict(name="po5", domain_id=10)], 
+            state="overridden")
+        )
+        commands = [
+            "interface po4",
+            "mlag 10",
+            "interface po5",
+            "mlag 10",
+            "interface po6",
+            "no mlag 10",
+            "interface po7",
+            "no mlag 10",
+            "interface po8",
+            "no mlag 10"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_mlag_override_empty(self):
+        set_module_args(dict(config=None, state="overridden"))
+        commands = [
+            "interface po6",
+            "no mlag 10",
+            "interface po7",
+            "no mlag 10",
+            "interface po8",
+            "no mlag 10"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_mlag_delete_existing(self):
+        set_module_args(dict(config=[dict(name="po6", domain_id=10)], state="deleted"))
+        commands = [
+            "interface po6",
+            "no mlag 10"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
+    def test_awplus_mlag_delete_non_existing(self):
+        set_module_args(dict(config=[dict(name="po4", domain_id=12)], state="deleted"))
+        commands = []
+        self.execute_module(changed=False, commands=commands)
+
+    def test_awplus_mlag_delete_mutliple(self):
+        set_module_args(dict(config=[dict(name="po6"), dict(name="po7")], state="deleted"))
+        commands = [
+            "interface po6",
+            "no mlag 10",
+            "interface po7",
+            "no mlag 10"
         ]
         self.execute_module(changed=True, commands=commands)

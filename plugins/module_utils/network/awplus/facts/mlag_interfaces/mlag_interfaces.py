@@ -57,17 +57,17 @@ class Mlag_interfacesFacts(object):
 
         resources = data.split('!')
 
-        obj = {}
+        objs = []
         for resource in resources:
             if resource:
                 obj = self.render_config(self.generated_spec, resource)
-        if not obj:
-            obj = dict(domains=[])
+                if obj:
+                    objs.extend(obj)
 
         ansible_facts['ansible_network_resources'].pop('mlag_interfaces', None)
         facts = {}
-        if obj:
-            params = utils.validate_config(self.argument_spec, {'config': obj})
+        if objs:
+            params = utils.validate_config(self.argument_spec, {'config': objs})
             facts['mlag_interfaces'] = params['config']
 
         ansible_facts['ansible_network_resources'].update(facts)
@@ -83,24 +83,28 @@ class Mlag_interfacesFacts(object):
         :rtype: dictionary
         :returns: The generated config
         """
-        print(spec)
         interfaces = []
-        interface_match = re.match(r'interface po(\d+)(?:-(\d+))?', conf[0])
+        # get a list of non-empty lines
+        lines = [line for line in conf.splitlines() if line]
+        interface_match = re.match(r'interface po(\d+)(?:-(\d+))?', lines[0])
         if not interface_match:
             return 
 
         aggregate_ports = []
         if interface_match[2]:
-            aggregate_ports = range(interface_match[1], interface_match[2])
+            aggregate_ports = range(int(interface_match[1]), int(interface_match[2]) + 1)
         else:
             aggregate_ports = [interface_match[1]]
-        for line in conf[1:]:
-            match = re.search(r'mlag (\d+)', line)
+        
+        domain = None
+        for line in lines[1:]:
+            match = re.match(r' *mlag (\d+)', line)
             if match:
                 domain = match.group(1)
-                for aggregate_port in aggregate_ports:
-                    interface = dict(port=f"po{aggregate_port}", domain=domain)
-                    interfaces.append(interface)
-
-        print(interfaces)
+        
+        for aggregate_port in aggregate_ports:
+            config = deepcopy(spec)
+            config['name'] = f"po{aggregate_port}"
+            config['domain_id'] = domain
+            interfaces.append(config)
         return interfaces

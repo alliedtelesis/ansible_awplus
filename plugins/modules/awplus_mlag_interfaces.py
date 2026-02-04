@@ -59,7 +59,7 @@ options:
         description:
           - An aggregate port to configure MLAG domains for.
         required: True
-        elements: str
+        type: str
       domain_id: 
         description:
           - The id of the MLAG domain.
