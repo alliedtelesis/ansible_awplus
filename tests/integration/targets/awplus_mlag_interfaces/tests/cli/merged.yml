@@ -1,0 +1,83 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_mlag_interfaces merged integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    m1_expected:
+      commands:
+        - interface po5
+        - mlag 10
+        - interface po6
+        - mlag 10
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge with multiple ports
+      alliedtelesis.awplus.awplus_mlag_interfaces: &m1
+        config:
+          - name: po5
+            domain_id: 10
+          - name: po6
+            domain_id: 10
+        state: merged
+      register: result
+
+    - name: Assert multiple ports have MLAG
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ m1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Merge with multiple ports (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag_interfaces: *m1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge non-existing aggregate port
+      alliedtelesis.awplus.awplus_mlag_interfaces:
+        config:
+          - name: po11
+            domain_id: 10
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Merge non-aggregate port
+      alliedtelesis.awplus.awplus_mlag_interfaces:
+        config:
+          - name: port1.0.11
+            domain_id: 10
+        state: merged
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_mlag_interfaces merged integration tests on connection={{ ansible_connection }}"

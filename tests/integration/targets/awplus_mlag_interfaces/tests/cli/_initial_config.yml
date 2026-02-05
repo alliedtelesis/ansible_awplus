@@ -1,0 +1,45 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_mlag_interfaces initialise config on connection={{ ansible_connection }}"
+      
+- name: Add MLAG domain
+  alliedtelesis.awplus.awplus_mlag:
+    config:
+      domains:
+        - domain_id: 10
+    state: overridden
+
+- name: Add aggregate ports
+  alliedtelesis.awplus.awplus_lag_interfaces:
+    config:
+      - name: 4
+        members:
+          - member: port1.0.4
+            mode: "active"
+      - name: 5
+        members:
+          - member: port1.0.5
+            mode: "active"
+      - name: 6
+        members:
+          - member: port1.0.6
+            mode: "active"
+      - name: 7
+        members:
+          - member: port1.0.7
+            mode: "active"
+    state: overridden
+
+- name: Initialise configuration
+  alliedtelesis.awplus.awplus_mlag_interfaces:
+    config:
+      - name: po4
+        domain_id: 10
+      - name: po7
+        domain_id: 10
+    state: overridden
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_mlag_interfaces initialise config on connection={{ ansible_connection }}"

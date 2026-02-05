@@ -1,0 +1,117 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_mlag_interfaces overridden integration tests on connection={{ ansible_connection }}"
+
+- ansible.builtin.set_fact:
+    o1_expected:
+      commands:
+        - interface po4
+        - no mlag 10
+        - interface po7
+        - no mlag 10
+    o2_expected:
+      commands:
+        - interface po4
+        - no mlag 10
+        - interface po7
+        - no mlag 10
+        - interface po5
+        - mlag 10
+        - interface po6
+        - mlag 10
+
+- block:
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override empty config
+      alliedtelesis.awplus.awplus_mlag_interfaces: &o1
+        config:
+        state: overridden
+      register: result
+
+    - name: Assert multiple ports overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o1_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with multiple ports (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag_interfaces: *o1
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override with multiple ports
+      alliedtelesis.awplus.awplus_mlag_interfaces: &o2
+        config:
+          - name: po5
+            domain_id: 10
+          - name: po6
+            domain_id: 10
+        state: overridden
+      register: result
+
+    - name: Assert multiple ports overridden
+      ansible.builtin.assert:
+        that:
+          - result.changed == True
+          - "{{ o2_expected.commands | symmetric_difference(result['commands']) | length == 0 }}"
+
+    - name: Override with multiple ports (IDEMPOTENT)
+      alliedtelesis.awplus.awplus_mlag_interfaces: *o2
+      register: result
+
+    - name: Assert idempotency
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override non-existing aggregate port
+      alliedtelesis.awplus.awplus_mlag_interfaces:
+        config:
+          - name: po11
+            domain_id: 10
+        state: overridden
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+    - name: Initialise configuration
+      ansible.builtin.include_tasks: _initial_config.yml
+
+    - name: Override non-aggregate port
+      alliedtelesis.awplus.awplus_mlag_interfaces:
+        config:
+          - name: port1.0.11
+            domain_id: 10
+        state: overridden
+      register: result
+
+    - name: Assert failure
+      ansible.builtin.assert:
+        that:
+          - result.changed == False
+          - result.failed == True
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _reset_config.yml
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_mlag_interfaces overridden integration tests on connection={{ ansible_connection }}"
