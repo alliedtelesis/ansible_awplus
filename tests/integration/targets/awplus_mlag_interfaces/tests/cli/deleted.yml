@@ -6,7 +6,14 @@
 - ansible.builtin.set_fact:
     d1_expected:
       commands:
-        - placeholder
+        - interface po4
+        - no mlag 10
+    d2_expected:
+      commands:
+        - interface po4
+        - no mlag 10
+        - interface po7
+        - no mlag 10
 
 - block:
     - name: Initialise configuration

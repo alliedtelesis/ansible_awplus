@@ -292,6 +292,15 @@ class TestAwplusMlagModule(TestAwplusModule):
         ]
         self.execute_module(changed=True, commands=commands)
 
+    def test_awplus_mlag_override_all_new_empty(self):
+        set_module_args(dict(config=dict(
+            domains=[dict(domain_id=11)]), state="overridden"))
+        commands = [
+            "no mlag domain 10",
+            "mlag domain 11"
+        ]
+        self.execute_module(changed=True, commands=commands)
+
     def test_awplus_mlag_override_partial_existing(self):
         set_module_args(dict(config=dict(
             domains=[dict(

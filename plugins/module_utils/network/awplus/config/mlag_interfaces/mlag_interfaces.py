@@ -85,7 +85,6 @@ class Mlag_interfaces(ConfigBase):
         want = self._module.params['config']
         have = existing_mlag_interfaces_facts
         resp = self.set_state(want, have)
-        self._module.fail_json(str(resp))
         return to_list(resp)
 
     def set_state(self, want, have):
