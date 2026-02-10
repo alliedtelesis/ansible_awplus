@@ -291,5 +291,5 @@ class Mlag(ConfigBase):
                 commands.append(f"{command} {value}")
 
         if commands or self.domain_deleted or self.domain_new:
-            commands.insert(0, f"mlag domain {domain_id}")    
+            commands.insert(0, f"mlag domain {domain_id}")
         return commands
