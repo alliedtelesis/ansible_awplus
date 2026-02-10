@@ -88,20 +88,20 @@ class Mlag_interfacesFacts(object):
         lines = [line for line in conf.splitlines() if line]
         interface_match = re.match(r'interface po(\d+)(?:-(\d+))?', lines[0])
         if not interface_match:
-            return 
+            return
 
         aggregate_ports = []
         if interface_match[2]:
             aggregate_ports = range(int(interface_match[1]), int(interface_match[2]) + 1)
         else:
             aggregate_ports = [interface_match[1]]
-        
+
         domain = None
         for line in lines[1:]:
             match = re.match(r' *mlag (\d+)', line)
             if match:
                 domain = match.group(1)
-        
+
         for aggregate_port in aggregate_ports:
             config = deepcopy(spec)
             config['name'] = f"po{aggregate_port}"

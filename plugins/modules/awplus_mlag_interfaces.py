@@ -42,9 +42,9 @@ version_added: 1.4.0
 short_description: Manage the mlag attributes for interfaces on AlliedWare Plus devices
 description:
     - This module provides declarative management of mlag attributes
-      for interfaces awplus devices. It provides options to configure 
-      host system parameters or remove those parameters from the 
-      device's active configuration.
+    for interfaces awplus devices. It provides options to configure
+    host system parameters or remove those parameters from the
+    device's active configuration.
 author:
   - Ryan Scofield
 notes:
@@ -60,7 +60,7 @@ options:
           - An aggregate port to configure MLAG domains for.
         required: True
         type: str
-      domain_id: 
+      domain_id:
         description:
           - The id of the MLAG domain.
         type: int

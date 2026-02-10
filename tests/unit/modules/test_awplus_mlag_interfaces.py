@@ -59,7 +59,8 @@ class TestAwplusMlagInterfacesModule(TestAwplusModule):
         self.edit_config = self.mock_edit_config.start()
 
         self.mock_execute_show_command = patch(
-            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.mlag_interfaces.mlag_interfaces.Mlag_interfacesFacts.get_run_mlag_interfaces"
+            "ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.mlag_interfaces"
+            ".mlag_interfaces.Mlag_interfacesFacts.get_run_mlag_interfaces"
         )
         self.execute_show_command = self.mock_execute_show_command.start()
 
@@ -97,7 +98,7 @@ class TestAwplusMlagInterfacesModule(TestAwplusModule):
 
     def test_awplus_mlag_merge_multiple_new(self):
         set_module_args(dict(
-            config=[dict(name="po4", domain_id=10), dict(name="po5", domain_id=10)], 
+            config=[dict(name="po4", domain_id=10), dict(name="po5", domain_id=10)],
             state="merged")
         )
         commands = [
@@ -137,7 +138,7 @@ class TestAwplusMlagInterfacesModule(TestAwplusModule):
 
     def test_awplus_mlag_override_multiple_new(self):
         set_module_args(dict(
-            config=[dict(name="po4", domain_id=10), dict(name="po5", domain_id=10)], 
+            config=[dict(name="po4", domain_id=10), dict(name="po5", domain_id=10)],
             state="overridden")
         )
         commands = [
