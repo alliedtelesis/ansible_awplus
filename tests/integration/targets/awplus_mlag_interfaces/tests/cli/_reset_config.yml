@@ -1,0 +1,23 @@
+---
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "START awplus_mlag_interfaces reset config on connection={{ ansible_connection }}"
+
+- name: Remove MLAG domain
+  alliedtelesis.awplus.awplus_mlag:
+    config:
+    state: overridden
+
+- name: Remove aggregate ports
+  alliedtelesis.awplus.awplus_lag_interfaces:
+    config:
+    state: overridden
+
+- name: Remove MLAG from interfaces
+  alliedtelesis.awplus.awplus_mlag_interfaces:
+    config:
+    state: overridden
+
+- name: Debug task
+  ansible.builtin.debug:
+    msg: "END awplus_mlag_interfaces reset config on connection={{ ansible_connection }}"

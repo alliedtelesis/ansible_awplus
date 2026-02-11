@@ -1,0 +1,15 @@
+---
+- hosts: all
+  connection: network_cli
+  collections:
+    - alliedtelesis.awplus
+  tasks:
+    - name: Update time
+      awplus_command:
+        commands:
+          - "clock set {{ now(fmt='%H:%M:%S %d %b %Y') }}"
+
+    - name: Turn fans down
+      awplus_command:
+        commands:
+          - activate shh.sh

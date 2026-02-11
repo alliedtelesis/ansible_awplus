@@ -26,6 +26,8 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplu
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lldp_global.lldp_global import Lldp_globalFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.lldp_interfaces.lldp_interfaces import Lldp_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.logging.logging import LoggingFacts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.mlag.mlag import MlagFacts
+from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.mlag_interfaces.mlag_interfaces import Mlag_interfacesFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.ntp.ntp import NtpFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.openflow.openflow import OpenflowFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.policy_interfaces.policy_interfaces import Policy_interfacesFacts
@@ -39,7 +41,6 @@ from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplu
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.vlans.vlans import VlansFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.vrfs.vrfs import VrfsFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.vxlan.vxlan import VxlanFacts
-from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.mlag.mlag import MlagFacts
 from ansible_collections.alliedtelesis.awplus.plugins.module_utils.network.awplus.facts.legacy.base import Default, Hardware, Config, Interfaces
 
 
@@ -64,6 +65,8 @@ FACT_RESOURCE_SUBSETS = dict(
     lldp_global=Lldp_globalFacts,
     lldp_interfaces=Lldp_interfacesFacts,
     logging=LoggingFacts,
+    mlag=MlagFacts,
+    mlag_interfaces=Mlag_interfacesFacts,
     ntp=NtpFacts,
     openflow=OpenflowFacts,
     policy_interfaces=Policy_interfacesFacts,
@@ -74,8 +77,7 @@ FACT_RESOURCE_SUBSETS = dict(
     user=UserFacts,
     vlans=VlansFacts,
     vrfs=VrfsFacts,
-    vxlan=VxlanFacts,
-    mlag=MlagFacts,
+    vxlan=VxlanFacts
 )
 
 

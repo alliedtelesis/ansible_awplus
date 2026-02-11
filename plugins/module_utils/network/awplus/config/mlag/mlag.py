@@ -51,6 +51,7 @@ class Mlag(ConfigBase):
     def __init__(self, module):
         super(Mlag, self).__init__(module)
         self.domain_deleted = False
+        self.domain_new = False
 
     def get_mlag_facts(self):
         """ Get the 'facts' (the current configuration)
@@ -181,6 +182,9 @@ class Mlag(ConfigBase):
         add_dict = {}
         remove_dict = {}
 
+        if want and not have:
+            self.domain_new = True
+
         for key, val in iteritems(want):
             if key == "domain_id":
                 continue
@@ -286,6 +290,6 @@ class Mlag(ConfigBase):
                 command = parm_to_keyword[key]
                 commands.append(f"{command} {value}")
 
-        if commands or self.domain_deleted:
+        if commands or self.domain_deleted or self.domain_new:
             commands.insert(0, f"mlag domain {domain_id}")
         return commands
