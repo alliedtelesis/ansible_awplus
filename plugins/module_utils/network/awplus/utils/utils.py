@@ -185,7 +185,7 @@ def int_range_to_list(range_string, int_list):
         if not match:
             return None
     match1 = re.match(r"(\d+).(\d+).(\d+)", ints[1], re.I)
-    if match:
+    if match1:
         if n_inst != 3:
             return None
     else:
