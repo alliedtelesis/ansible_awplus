@@ -64,17 +64,6 @@ class TerminalModule(TerminalBase):
         except AnsibleConnectionFailure:
             raise AnsibleConnectionFailure("unable to set terminal parameters")
 
-        try:
-            self._exec_cli_command(b"terminal width 512")
-            try:
-                self.exec_cli_command(b"terminal width 0")
-            except AnsibleConnectionFailure:
-                pass
-        except AnsibleConnectionFailure:
-            display.display(
-                "WARNING: Unable to set terminal width, command responses may be truncated"
-            )
-
     def on_become(self, passwd=None):
         if self._get_prompt().endswith(b"#"):
             return
