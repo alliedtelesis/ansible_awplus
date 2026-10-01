@@ -310,7 +310,7 @@ def save_config(module, result):
         run_commands(module, "copy running-config startup-config\r")
     else:
         module.warn(
-            "Skipping command `copy running-config startup-config`"
+            "Skipping command `copy running-config startup-config` "
             "due to check mode. Configuration not copied to "
             "non-volatile storage"
         )
